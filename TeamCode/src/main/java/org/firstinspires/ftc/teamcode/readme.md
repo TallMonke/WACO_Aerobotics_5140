@@ -1,3 +1,7 @@
+## WACO Aerobotics #5140 Team Code
+Put documentation for the TeamCode here. This includes notes on the code design and functions of each
+module/file.
+
 ## TeamCode Module
 
 Welcome!
