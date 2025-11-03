@@ -69,35 +69,26 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor LeftFrontDrive = null;
-    private DcMotor LeftBackDrive = null;
-    private DcMotor RightFrontDrive = null;
-    private DcMotor RightBackDrive = null;
+    private DcMotor leftFront = null;
+    private DcMotor leftBack = null;
+    private DcMotor rightFront = null;
+    private DcMotor rightBack = null;
 
     @Override
     public void runOpMode() {
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
-        LeftFrontDrive = hardwareMap.get(DcMotor.class, "LeftFrontDrive");
-        LeftBackDrive = hardwareMap.get(DcMotor.class, "LeftBackDrive");
-        RightFrontDrive = hardwareMap.get(DcMotor.class, "RightFrontDrive");
-        RightBackDrive = hardwareMap.get(DcMotor.class, "RightBackDrive");
+        leftFront = hardwareMap.get(DcMotor.class, "leftFront");
+        leftBack = hardwareMap.get(DcMotor.class, "leftBack");
+        rightFront = hardwareMap.get(DcMotor.class, "rightFront");
+        rightBack = hardwareMap.get(DcMotor.class, "rightBack");
 
-        // ########################################################################################
-        // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
-        // ########################################################################################
-        // Most robots need the motors on one side to be reversed to drive forward.
-        // The motor reversals shown here are for a "direct drive" robot (the wheels turn the same direction as the motor shaft)
-        // If your robot has additional gear reductions or uses a right-angled drive, it's important to ensure
-        // that your motors are turning in the correct direction.  So, start out with the reversals here, BUT
-        // when you first test your robot, push the left joystick forward and observe the direction the wheels turn.
-        // Reverse the direction (flip FORWARD <-> REVERSE ) of any wheel that runs backward
-        // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
-        LeftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        LeftBackDrive.setDirection(DcMotor.Direction.REVERSE);
-        RightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        RightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        // set wheel motor direction.
+        leftFront.setDirection(DcMotor.Direction.REVERSE);
+        leftBack.setDirection(DcMotor.Direction.REVERSE);
+        rightFront.setDirection(DcMotor.Direction.FORWARD);
+        rightBack.setDirection(DcMotor.Direction.FORWARD);
 
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
@@ -147,10 +138,10 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             }
 
             // Send calculated power to wheels
-            LeftFrontDrive.setPower(frontLeftPower);
-            RightFrontDrive.setPower(frontRightPower);
-            LeftBackDrive.setPower(backLeftPower);
-            RightBackDrive.setPower(backRightPower);
+            leftFront.setPower(frontLeftPower);
+            rightFront.setPower(frontRightPower);
+            leftBack.setPower(backLeftPower);
+            rightBack.setPower(backRightPower);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
