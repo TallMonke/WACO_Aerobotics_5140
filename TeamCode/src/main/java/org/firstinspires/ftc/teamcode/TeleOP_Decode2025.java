@@ -69,7 +69,6 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor leftFront = null;
     private DcMotor leftBack = null;
     private DcMotor rightFront = null;
     private DcMotor rightBack = null;
@@ -79,7 +78,7 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
-        leftFront = hardwareMap.get(DcMotor.class, "leftFront");
+        DcMotor leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         leftBack = hardwareMap.get(DcMotor.class, "leftBack");
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
         rightBack = hardwareMap.get(DcMotor.class, "rightBack");
@@ -112,7 +111,7 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             }
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-            double axial   =  gamepad1.left_stick_y;
+            double axial   = -gamepad1.left_stick_y;
             double lateral =  gamepad1.left_stick_x;
             double yaw     =  gamepad1.right_stick_x;
 
