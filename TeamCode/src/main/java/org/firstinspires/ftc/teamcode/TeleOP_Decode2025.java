@@ -73,6 +73,16 @@ public class TeleOP_Decode2025 extends LinearOpMode {
     private DcMotor rightFront = null;
     private DcMotor rightBack = null;
 
+    //Wheel Gun Varable
+    private DcMotor leftWheelDCMotor = null;
+    private DcMotor rightWheelDCMotor = null;
+    private double wheelPower  = 1.0;
+    private final double wheelPowerStep = 0.0001;
+
+    // Sweeper Variables
+    private DcMotor sweeperMotor = null;
+    private double sweeperPower = 0.0;
+
     @Override
     public void runOpMode() {
 
@@ -88,6 +98,16 @@ public class TeleOP_Decode2025 extends LinearOpMode {
         leftBack.setDirection(DcMotor.Direction.REVERSE);
         rightFront.setDirection(DcMotor.Direction.FORWARD);
         rightBack.setDirection(DcMotor.Direction.FORWARD);
+
+        //Wheel Gun Varibles
+        leftWheelDCMotor = hardwareMap.get(DcMotor.class, "par1");
+        rightWheelDCMotor = hardwareMap.get(DcMotor.class, "perp");
+
+        leftWheelDCMotor.setDirection(DcMotor.Direction.REVERSE);
+        rightWheelDCMotor.setDirection(DcMotor.Direction.FORWARD);
+
+        // Sweeper component initialization
+        sweeperMotor = hardwareMap.get(DcMotor.class, "sweep");
 
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
@@ -142,10 +162,39 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             leftBack.setPower(backLeftPower);
             rightBack.setPower(backRightPower);
 
+            sweeperMotor.setPower(sweeperPower);
+
+            //Wheel Gun Test
+            if(gamepad2.left_bumper){
+                leftWheelDCMotor.setPower(wheelPower);
+                rightWheelDCMotor.setPower(wheelPower);
+            }
+            else{
+                leftWheelDCMotor.setPower(0);
+                rightWheelDCMotor.setPower(0);
+            }
+
+            // open hand at push of A-button
+            if(gamepad2.a && wheelPower <= 1.0){
+                wheelPower += wheelPowerStep;
+            }
+
+            //close hand at push of A-button
+            if(gamepad2.b && wheelPower >= 0.0){
+                wheelPower -= wheelPowerStep;
+            }
+
+            if(gamepad2.right_bumper)
+            {
+                sweeperPower = 1.0;
+            }
+
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Front left/Right", "%4.2f, %4.2f", frontLeftPower, frontRightPower);
-            telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower);
+            telemetry.addData("Wheel Power: ", wheelPower );
+            telemetry.addData("Sweeper Power", sweeperMotor.getPower());
+            telemetry.addData("Front L/R Motor", "%4.2f, %4.2f", frontLeftPower, frontRightPower);
+            telemetry.addData("Back L/R Motor", "%4.2f, %4.2f", backLeftPower, backRightPower);
             telemetry.update();
         }
     }}
