@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
@@ -82,6 +83,16 @@ public class TeleOP_Decode2025 extends LinearOpMode {
     // Sweeper Variables
     private DcMotor sweeperMotor = null;
     private double sweeperPower = 0.0;
+    private double sweeperSpeed = 1.0;
+
+    //BallFeed servo
+    private Servo ballFeedServo = null;
+    private double ballFeedPush = 1.0;
+    private double ballFeedRelease = 0.6;
+
+    //revolver
+    private DcMotor revolverDrive = null;
+    private double revolverDrivePower = 0.25;
 
     @Override
     public void runOpMode() {
@@ -108,6 +119,10 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
         // Sweeper component initialization
         sweeperMotor = hardwareMap.get(DcMotor.class, "sweep");
+        ballFeedServo = hardwareMap.get(Servo.class, "BallFeed");
+
+        //revolver DCmotor
+        revolverDrive = hardwareMap.get(DcMotor.class, "par0");
 
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
@@ -128,6 +143,16 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             else if(gamepad1.right_trigger > 0)
             {
                 SpeedReduction = 1.0;
+            }
+
+            //BallFeed servo "x" push ball out
+            if(gamepad2.x)
+            {
+                ballFeedServo.setPosition( ballFeedPush );
+            }
+            else
+            {
+                ballFeedServo.setPosition( ballFeedRelease );
             }
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
@@ -184,9 +209,28 @@ public class TeleOP_Decode2025 extends LinearOpMode {
                 wheelPower -= wheelPowerStep;
             }
 
+            //sweeper run
             if(gamepad2.right_bumper)
             {
-                sweeperPower = 1.0;
+                sweeperPower = sweeperSpeed;
+            }
+            else
+            {
+                sweeperPower = 0.0;
+            }
+
+            //revolver run "up arrow" & "Down Arrow"
+            if(gamepad2.dpad_up)
+            {
+                revolverDrive.setPower( revolverDrivePower );
+            }
+            else if (gamepad2.dpad_down)
+            {
+                revolverDrive.setPower( -revolverDrivePower );
+            }
+            else
+            {
+                revolverDrive.setPower( 0.0 );
             }
 
             // Show the elapsed game time and wheel power.
