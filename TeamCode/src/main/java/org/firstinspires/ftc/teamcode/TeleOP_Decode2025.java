@@ -77,7 +77,7 @@ public class TeleOP_Decode2025 extends LinearOpMode {
     //Wheel Gun Varable
     private DcMotor leftWheelDCMotor = null;
     private DcMotor rightWheelDCMotor = null;
-    private double wheelPower  = 1.0;
+    private double wheelPower  = 0.35;
     private final double wheelPowerStep = 0.0001;
 
     // Sweeper Variables
@@ -92,7 +92,7 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
     //revolver
     private DcMotor revolverDrive = null;
-    private double revolverDrivePower = 0.25;
+    private double revolverDrivePower = 0.50;
 
     @Override
     public void runOpMode() {
@@ -119,6 +119,7 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
         // Sweeper component initialization
         sweeperMotor = hardwareMap.get(DcMotor.class, "sweep");
+        sweeperMotor.setDirection(DcMotor.Direction.REVERSE);
         ballFeedServo = hardwareMap.get(Servo.class, "BallFeed");
 
         //revolver DCmotor
@@ -199,12 +200,12 @@ public class TeleOP_Decode2025 extends LinearOpMode {
                 rightWheelDCMotor.setPower(0);
             }
 
-            // open hand at push of A-button
+            // A-Button Increases Shooter Power
             if(gamepad2.a && wheelPower <= 1.0){
                 wheelPower += wheelPowerStep;
             }
 
-            //close hand at push of A-button
+            // B button DECREASES shooter power
             if(gamepad2.b && wheelPower >= 0.0){
                 wheelPower -= wheelPowerStep;
             }
@@ -235,10 +236,12 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Wheel Power: ", wheelPower );
-            telemetry.addData("Sweeper Power", sweeperMotor.getPower());
-            telemetry.addData("Front L/R Motor", "%4.2f, %4.2f", frontLeftPower, frontRightPower);
-            telemetry.addData("Back L/R Motor", "%4.2f, %4.2f", backLeftPower, backRightPower);
+            telemetry.addData("Shooter (Left Bumper, A+/B-): ", wheelPower );
+            telemetry.addData("Sweeper (Right Bumper): ", sweeperMotor.getPower());
+            telemetry.addData("Ball Feeder (X Button): ", ballFeedServo.getPosition());
+            telemetry.addData("Sorter (D-Pad Up/Down): ", revolverDrive.getPower());
+            telemetry.addData("Front Drive L/R Motor: ", "%4.2f, %4.2f", frontLeftPower, frontRightPower);
+            telemetry.addData("Back L/R Motor: ", "%4.2f, %4.2f", backLeftPower, backRightPower);
             telemetry.update();
         }
     }}
