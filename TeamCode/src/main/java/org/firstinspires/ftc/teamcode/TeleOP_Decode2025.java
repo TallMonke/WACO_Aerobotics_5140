@@ -29,12 +29,16 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import android.provider.CalendarContract;
+import android.graphics.Color;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.teamcode.mechanisms.BallColorSensor;
 
 /*
  * This file contains an example of a Linear "OpMode".
@@ -92,7 +96,11 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
     //revolver
     private DcMotor revolverDrive = null;
-    private double revolverDrivePower = 0.50;
+    private double revolverDrivePower = 1.0;
+
+    //colorSensor
+    private BallColorSensor colorSensor = null;
+
 
     @Override
     public void runOpMode() {
@@ -124,6 +132,10 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
         //revolver DCmotor
         revolverDrive = hardwareMap.get(DcMotor.class, "par0");
+
+        // ColorSensor Init
+        colorSensor = new BallColorSensor();
+        colorSensor.init(hardwareMap);
 
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
@@ -242,6 +254,8 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             telemetry.addData("Sorter (D-Pad Up/Down): ", revolverDrive.getPower());
             telemetry.addData("Front Drive L/R Motor: ", "%4.2f, %4.2f", frontLeftPower, frontRightPower);
             telemetry.addData("Back L/R Motor: ", "%4.2f, %4.2f", backLeftPower, backRightPower);
+            BallColorSensor.DetectedColor color = colorSensor.getColor(telemetry);
             telemetry.update();
         }
-    }}
+    }
+}
