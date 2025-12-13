@@ -1,72 +1,16 @@
-/* Copyright (c) 2021 FIRST. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted (subject to the limitations in the disclaimer below) provided that
- * the following conditions are met:
- *
- * Redistributions of source code must retain the above copyright notice, this list
- * of conditions and the following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright notice, this
- * list of conditions and the following disclaimer in the documentation and/or
- * other materials provided with the distribution.
- *
- * Neither the name of FIRST nor the names of its contributors may be used to endorse or
- * promote products derived from this software without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
- * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 package org.firstinspires.ftc.teamcode;
-
 import android.provider.CalendarContract;
 import android.graphics.Color;
+
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.mechanisms.BallColorSensor;
-
-/*
- * This file contains an example of a Linear "OpMode".
- * An OpMode is a 'program' that runs in either the autonomous or the teleop period of an FTC match.
- * The names of OpModes appear on the menu of the FTC Driver Station.
- * When a selection is made from the menu, the corresponding OpMode is executed.
- *
- * This particular OpMode illustrates driving a 4-motor Omni-Directional (or Holonomic) robot.
- * This code will work with either a Mecanum-Drive or an X-Drive train.
- * Both of these drives are illustrated at https://gm0.org/en/latest/docs/robot-design/drivetrains/holonomic.html
- * Note that a Mecanum drive must display an X roller-pattern when viewed from above.
- *
- * Also note that it is critical to set the correct rotation direction for each motor.  See details below.
- *
- * Holonomic drives provide the ability for the robot to move in three axes (directions) simultaneously.
- * Each motion axis is controlled by one Joystick axis.
- *
- * 1) Axial:    Driving forward and backward               Left-joystick Forward/Backward
- * 2) Lateral:  Strafing right and left                     Left-joystick Right and Left
- * 3) Yaw:      Rotating Clockwise and counter clockwise    Right-joystick Right and Left
- *
- * This code is written assuming that the right-side motors need to be reversed for the robot to drive forward.
- * When you first test your robot, if it moves backward when you push the left stick forward, then you must flip
- * the direction of all 4 motors (see code below).
- *
- * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
- */
 
 @TeleOp(name="TeleOP_Decode2025", group="Linear OpMode")
 
@@ -75,14 +19,20 @@ public class TeleOP_Decode2025 extends LinearOpMode {
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftBack = null;
+    private DcMotor leftFront = null;
     private DcMotor rightFront = null;
     private DcMotor rightBack = null;
 
     //Wheel Gun Varable
     private DcMotor leftWheelDCMotor = null;
     private DcMotor rightWheelDCMotor = null;
-    private double wheelPower  = 0.35;
-    private final double wheelPowerStep = 0.0001;
+    private DcMotorEx leftWheelEncoder = null;
+    private DcMotorEx rightWheelEncoder = null;
+
+    //power for each distance of shot far and near
+    private final double nearWheelPower = 0.27;
+    private final double farWheelPower = 0.30;
+    private double wheelPower  = 0.0;
 
     // Sweeper Variables
     private DcMotor sweeperMotor = null;
@@ -96,7 +46,7 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
     //revolver
     private DcMotor revolverDrive = null;
-    private double revolverDrivePower = 1.0;
+    private double revolverDrivePower = 0.5;
 
     //colorSensor
     private BallColorSensor colorSensor = null;
@@ -107,7 +57,7 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
-        DcMotor leftFront = hardwareMap.get(DcMotor.class, "leftFront");
+        leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         leftBack = hardwareMap.get(DcMotor.class, "leftBack");
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
         rightBack = hardwareMap.get(DcMotor.class, "rightBack");
@@ -118,10 +68,21 @@ public class TeleOP_Decode2025 extends LinearOpMode {
         rightFront.setDirection(DcMotor.Direction.FORWARD);
         rightBack.setDirection(DcMotor.Direction.FORWARD);
 
-        //Wheel Gun Varibles
+        //Wheel Gun Variables
         leftWheelDCMotor = hardwareMap.get(DcMotor.class, "par1");
         rightWheelDCMotor = hardwareMap.get(DcMotor.class, "perp");
 
+        //Calling upon shooter motor encoder ports
+        leftWheelEncoder = hardwareMap.get(DcMotorEx.class,"rightFront");
+        rightWheelEncoder = hardwareMap.get(DcMotorEx.class,"sweep");
+
+        //Resetting then enabling shooter encoders
+        leftWheelEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftWheelEncoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightWheelEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightWheelEncoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        //Wheel Gun Motor Direction
         leftWheelDCMotor.setDirection(DcMotor.Direction.REVERSE);
         rightWheelDCMotor.setDirection(DcMotor.Direction.FORWARD);
 
@@ -203,23 +164,17 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             sweeperMotor.setPower(sweeperPower);
 
             //Wheel Gun Test
-            if(gamepad2.left_bumper){
-                leftWheelDCMotor.setPower(wheelPower);
-                rightWheelDCMotor.setPower(wheelPower);
-            }
-            else{
-                leftWheelDCMotor.setPower(0);
-                rightWheelDCMotor.setPower(0);
+            leftWheelDCMotor.setPower(wheelPower);
+            rightWheelDCMotor.setPower(wheelPower);
+
+            // A-Button set far Shooter Power
+            if(gamepad2.a){
+                wheelPower = farWheelPower;
             }
 
-            // A-Button Increases Shooter Power
-            if(gamepad2.a && wheelPower <= 1.0){
-                wheelPower += wheelPowerStep;
-            }
-
-            // B button DECREASES shooter power
-            if(gamepad2.b && wheelPower >= 0.0){
-                wheelPower -= wheelPowerStep;
+            // B button sets close shooter power
+            if(gamepad2.b){
+                wheelPower = nearWheelPower;
             }
 
             //sweeper run
@@ -233,11 +188,11 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             }
 
             //revolver run "up arrow" & "Down Arrow"
-            if(gamepad2.dpad_up)
+            if(gamepad2.dpad_left)
             {
                 revolverDrive.setPower( revolverDrivePower );
             }
-            else if (gamepad2.dpad_down)
+            else if (gamepad2.dpad_right)
             {
                 revolverDrive.setPower( -revolverDrivePower );
             }
@@ -248,10 +203,12 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Shooter (Left Bumper, A+/B-): ", wheelPower );
+            telemetry.addData("Shooter A=Long / B=Short: ", wheelPower);
+            telemetry.addData("Left Shooter (A=600, B=520): ", leftWheelEncoder.getVelocity());
+            telemetry.addData("Right Shooter (A=600, B=520): ", rightWheelEncoder.getVelocity());
             telemetry.addData("Sweeper (Right Bumper): ", sweeperMotor.getPower());
             telemetry.addData("Ball Feeder (X Button): ", ballFeedServo.getPosition());
-            telemetry.addData("Sorter (D-Pad Up/Down): ", revolverDrive.getPower());
+            telemetry.addData("Sorter (D-Pad Left/Right): ", revolverDrive.getPower());
             telemetry.addData("Front Drive L/R Motor: ", "%4.2f, %4.2f", frontLeftPower, frontRightPower);
             telemetry.addData("Back L/R Motor: ", "%4.2f, %4.2f", backLeftPower, backRightPower);
             BallColorSensor.DetectedColor color = colorSensor.getColor(telemetry);
