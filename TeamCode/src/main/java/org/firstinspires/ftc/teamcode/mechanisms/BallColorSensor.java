@@ -5,29 +5,45 @@ import android.graphics.Color;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class BallColorSensor {
-    //private NormalizedColorSensor colorSensor = null;
-    ColorSensor colorSensor = null;
+    private NormalizedColorSensor colorSensor = null;
 
     public enum DetectedColor {
-        GREEN,
-        PURPLE,
-        BLACK,
-        UNKNOWN
-    }
-    public void init(HardwareMap hwMap){
-        colorSensor = hwMap.get(ColorSensor.class, "colorSensor");
-        //colorSensor = hwMap.get(NormalizedColorSensor.class, "colorSensor");
-        //colorSensor.setGain(0.5f);
+        GREEN(Color.parseColor("#00FF00")),
+        PURPLE(Color.parseColor("#800080")),
+        BLACK(Color.parseColor("#000000")),
+        UNKNOWN(Color.parseColor("#FFFFFF"));
+
+        private int color = Color.parseColor("#FFFFFF");
+
+        DetectedColor(int colorHexValue){
+            color = colorHexValue;
+        }
+
+        int getColor(){ return color; }
     }
 
-    public DetectedColor getColor(Telemetry telemetry){
-        float hsvValues[] = {0f,0f,0f};
-/*
+    Telemetry tm = null;
+
+    public BallColorSensor(HardwareMap hardwareMap, Telemetry telemetry){
+        if(telemetry == null) {
+            return;
+        }
+
+        if(hardwareMap == null) {
+            telemetry.addData("Error", "Hardware map is null");
+            return;
+        }
+
+        tm = telemetry;
+        colorSensor = hardwareMap.get(NormalizedColorSensor.class, "colorSensor");
+        colorSensor.setGain(0.5f);
+    }
+
+    public DetectedColor getColor(){
         NormalizedRGBA colors = colorSensor.getNormalizedColors();
 
         float normRed,
@@ -37,13 +53,26 @@ public class BallColorSensor {
         normRed = colors.red / colors.alpha;
         normGreen = colors.green / colors.alpha;
         normBlue = colors.blue / colors.alpha;
-*/
-        Color.RGBToHSV(colorSensor.red()*8, colorSensor.green()*8, colorSensor.blue() * 8, hsvValues );
-        telemetry.addData("Revolvor colorSensor: ", "%d, %d, %d",
-                colorSensor.red(),
-                colorSensor.green(),
-                colorSensor.blue());
-        telemetry.addData("Revolvor hsvValues: ", hsvValues[0] );
+
+        tm.addData("Normalized Colors: ", "%d, %d, %d",
+                normRed,
+                normGreen,
+                normBlue);
+        tm.addData("Normalized Color (Hex): ", colors.toString());
+
+        // TODO: Base the color detection on a threshold value (%) around the color
+        if(colors.toColor() == DetectedColor.GREEN.getColor()) {
+            tm.addData("Color Detected", "Green" );
+            return DetectedColor.GREEN;
+        }
+        else if(colors.toColor() == DetectedColor.PURPLE.getColor()) {
+            tm.addData("Color Detected", "Purple" );
+            return DetectedColor.PURPLE;
+        }
+        else if(colors.toColor() == DetectedColor.BLACK.getColor()) {
+            tm.addData("Color Detected", "BLACK" );
+            return DetectedColor.BLACK;
+        }
 
         return DetectedColor.UNKNOWN;
     }

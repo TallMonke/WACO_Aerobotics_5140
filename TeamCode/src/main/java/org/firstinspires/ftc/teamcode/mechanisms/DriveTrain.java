@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
-
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -18,7 +15,21 @@ public class DriveTrain {
 
     double SpeedReduction = 0.5;
 
-    public void init(HardwareMap hardwareMap, Telemetry telemetry){
+    /**
+     * Initializes the drive base mechanisms for the given hardware map.
+     * @param hardwareMap Robot hardware to utilize for this mechanism
+     * @param telemetry Logging object for this Op Mode
+     */
+    public DriveTrain(HardwareMap hardwareMap, Telemetry telemetry){
+        if(telemetry == null) {
+            return;
+        }
+
+        if(hardwareMap == null) {
+            telemetry.addData("Error", "Hardware map is null");
+            return;
+        }
+
         tm = telemetry;
 
         // Initialize the hardware variables. Note that the strings used here must correspond
@@ -40,7 +51,7 @@ public class DriveTrain {
     }
 
     public void run(double axial, double lateral, double yaw){
-        double max;
+        double max = 0.0;
 
         // Combine the joystick requests for each axis-motion to determine each wheel's power.
         // Set up a variable for each drive wheel to save the power level for telemetry.

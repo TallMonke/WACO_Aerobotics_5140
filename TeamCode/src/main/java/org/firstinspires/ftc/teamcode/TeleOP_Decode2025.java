@@ -1,16 +1,7 @@
 package org.firstinspires.ftc.teamcode;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad2;
 
-import android.provider.CalendarContract;
-import android.graphics.Color;
-
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.mechanisms.BallColorSensor;
@@ -20,8 +11,6 @@ import org.firstinspires.ftc.teamcode.mechanisms.Revolver;
 import org.firstinspires.ftc.teamcode.mechanisms.Sweeper;
 
 @TeleOp(name="TeleOP_Decode2025", group="Linear OpMode")
-
-
 public class TeleOP_Decode2025 extends LinearOpMode {
 
     // Declare OpMode members for each of the 4 motors.
@@ -35,19 +24,14 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-
-        driveTrain = new DriveTrain();
-        driveTrain.init(hardwareMap, telemetry);
-        revolver = new Revolver();
-        revolver.init(hardwareMap, telemetry);
-        sweeper = new Sweeper();
-        sweeper.init(hardwareMap, telemetry);
-        launcher = new Launcher();
-        launcher.init(hardwareMap, telemetry);
+        // Initialize the drive base
+        driveTrain = new DriveTrain(hardwareMap, telemetry);
+        revolver = new Revolver(hardwareMap, telemetry);
+        sweeper = new Sweeper(hardwareMap, telemetry);
+        launcher = new Launcher(hardwareMap, telemetry);
 
         // ColorSensor Init
-        colorSensor = new BallColorSensor();
-        colorSensor.init(hardwareMap);
+        colorSensor = new BallColorSensor(hardwareMap, telemetry);
 
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
@@ -71,14 +55,18 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
             driveTrain.run(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
-            //BallFeed servo "x" push ball out
-            if(gamepad2.x)
+            //revolver run "up arrow" & "Down Arrow"
+            if(gamepad2.dpad_up)
             {
-                revolver.push();
+                revolver.setSweepDirection(Revolver.RevolverDirection.FORWARD);
+            }
+            else if (gamepad2.dpad_down)
+            {
+                revolver.setSweepDirection(Revolver.RevolverDirection.BACKWARD);
             }
             else
             {
-                revolver.release();
+                revolver.setSweepDirection(Revolver.RevolverDirection.STOP);
             }
             revolver.run();
 
@@ -87,7 +75,7 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
             // A-Button set far Shooter Power
             if(gamepad2.a){
-                launcher.setWheelPower(Launcher.WHEEL_POWER.FAR_POWER);
+                launcher.setWheelPower( Launcher.WHEEL_POWER.FAR_POWER );
             }
 
             // B button sets close shooter power
@@ -95,11 +83,21 @@ public class TeleOP_Decode2025 extends LinearOpMode {
                 launcher.setWheelPower( Launcher.WHEEL_POWER.NEAR_POWER );
             }
 
+            //BallFeed servo "x" push ball out
+            if(gamepad2.x)
+            {
+                launcher.push();
+            }
+            else
+            {
+                launcher.release();
+            }
+
             launcher.run();
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            BallColorSensor.DetectedColor color = colorSensor.getColor(telemetry);
+            BallColorSensor.DetectedColor color = colorSensor.getColor();
             telemetry.update();
         }
     }
