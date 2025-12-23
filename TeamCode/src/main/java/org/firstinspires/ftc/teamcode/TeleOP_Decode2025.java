@@ -75,12 +75,12 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
             // A-Button set far Shooter Power
             if(gamepad2.a){
-                launcher.setWheelPower( Launcher.WHEEL_POWER.FAR_POWER );
+                launcher.setWheelVelocity( Launcher.WHEEL_VELOCITY.FAR_VELOCITY );
             }
 
             // B button sets close shooter power
             if(gamepad2.b){
-                launcher.setWheelPower( Launcher.WHEEL_POWER.NEAR_POWER );
+                launcher.setWheelVelocity( Launcher.WHEEL_VELOCITY.NEAR_VELOCITY );
             }
 
             //BallFeed servo "x" push ball out

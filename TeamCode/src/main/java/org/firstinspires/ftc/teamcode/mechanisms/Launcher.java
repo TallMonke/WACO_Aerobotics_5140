@@ -11,18 +11,18 @@ public class Launcher {
     Telemetry tm;
 
     //Wheel Gun Variable
-    private DcMotor leftWheelDCMotor = null;
-    private DcMotor rightWheelDCMotor = null;
+    private DcMotorEx leftWheelDCMotor = null;
+    private DcMotorEx rightWheelDCMotor = null;
     private DcMotorEx leftWheelEncoder = null;
     private DcMotorEx rightWheelEncoder = null;
 
-    public enum WHEEL_POWER {
-        NEAR_POWER,
-        FAR_POWER,
+    public enum WHEEL_VELOCITY {
+        NEAR_VELOCITY,
+        FAR_VELOCITY,
         NONE
     }
 
-    private double wheelPower = 0.0;
+    private double wheelVelocity = 0.0;
 
     // Ball Feed servo
     private Servo ballFeedServo = null;
@@ -43,46 +43,46 @@ public class Launcher {
         tm = telemetry;
 
         //Wheel Gun Variables
-        leftWheelDCMotor = hardwareMap.get(DcMotor.class, "par1");
-        rightWheelDCMotor = hardwareMap.get(DcMotor.class, "perp");
+        leftWheelDCMotor = hardwareMap.get(DcMotorEx.class, "par1");
+        rightWheelDCMotor = hardwareMap.get(DcMotorEx.class, "perp");
 
         //Calling upon shooter motor encoder ports
         leftWheelEncoder = hardwareMap.get(DcMotorEx.class,"rightFront");
         rightWheelEncoder = hardwareMap.get(DcMotorEx.class,"sweep");
 
         //Resetting then enabling shooter encoders
-        leftWheelEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftWheelEncoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightWheelEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightWheelEncoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftWheelEncoder.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        leftWheelEncoder.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        rightWheelEncoder.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        rightWheelEncoder.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
         //Wheel Gun Motor Direction
-        leftWheelDCMotor.setDirection(DcMotor.Direction.REVERSE);
-        rightWheelDCMotor.setDirection(DcMotor.Direction.FORWARD);
+        leftWheelDCMotor.setDirection(DcMotorEx.Direction.REVERSE);
+        rightWheelDCMotor.setDirection(DcMotorEx.Direction.FORWARD);
 
         // initialize the ball feeder
         ballFeedServo = hardwareMap.get(Servo.class, "BallFeed");
     }
 
     /**
-     * Sets the power of the shooter wheels to NEAR_POWER or FAR_POWER
+     * Sets the VELOCITY of the shooter wheels to NEAR_VELOCITY or FAR_VELOCITY
      *
-     * @param power NEAR_POWER or FAR_POWER or NONE (off)
+     * @param velocity NEAR_VELOCITY or FAR_VELOCITY or NONE (off)
      */
-    public void setWheelPower(WHEEL_POWER power){
-        //power for each distance of shot far and near
-        final double nearWheelPower = 0.26;
-        final double farWheelPower = 0.275;
+    public void setWheelVelocity(WHEEL_VELOCITY velocity){
+        //VELOCITY for each distance of shot far and near
+        final double nearWheelVelocity = 775.0;
+        final double farWheelVelocity = 1000.0;
 
-        if(power==WHEEL_POWER.NEAR_POWER){
-            wheelPower = nearWheelPower;
+        if(velocity==WHEEL_VELOCITY.NEAR_VELOCITY){
+            wheelVelocity = nearWheelVelocity;
         }
-        else if(power == WHEEL_POWER.FAR_POWER)
+        else if(velocity == WHEEL_VELOCITY.FAR_VELOCITY)
         {
-            wheelPower = farWheelPower;
+            wheelVelocity = farWheelVelocity;
         }
         else{
-            wheelPower = 0.0;
+            wheelVelocity = 0.0;
         }
     }
 
@@ -103,11 +103,11 @@ public class Launcher {
     }
 
     public void run(){
-        leftWheelDCMotor.setPower(wheelPower);
-        rightWheelDCMotor.setPower(wheelPower);
+        leftWheelDCMotor.setVelocity(wheelVelocity);
+        rightWheelDCMotor.setVelocity(wheelVelocity);
         ballFeedServo.setPosition(feedPosition);
 
-        tm.addData("Shooter A=Long / B=Short: ", wheelPower);
+        tm.addData("Shooter A=Long / B=Short: ", wheelVelocity);
         tm.addData("Left Shooter (A=600, B=520): ", leftWheelEncoder.getVelocity());
         tm.addData("Right Shooter (A=600, B=520): ", rightWheelEncoder.getVelocity());
         tm.addData("Ball Feeder (X Button): ", ballFeedServo.getPosition());
