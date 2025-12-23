@@ -42,6 +42,8 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            telemetry.addData("Status", "Run Time: " + runtime.toString());
+
             if(gamepad1.left_trigger > 0) {
                 driveTrain.setSpeedReduction(0.25);
             }
@@ -96,8 +98,13 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             launcher.run();
 
             // Show the elapsed game time and wheel power.
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            BallColorSensor.DetectedColor color = colorSensor.getColor();
+            BallColorSensor.DetectedColor detectedColor = colorSensor.getColor();
+            if( detectedColor == BallColorSensor.DetectedColor.PURPLE ){
+                telemetry.addData( "Color: ", "Purple" );
+            } else if(detectedColor == BallColorSensor.DetectedColor.GREEN) {
+                telemetry.addData( "Color: ", "Green" );
+            }
+
             telemetry.update();
         }
     }

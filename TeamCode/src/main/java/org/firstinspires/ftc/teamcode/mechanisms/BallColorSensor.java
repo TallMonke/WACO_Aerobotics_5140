@@ -5,31 +5,31 @@ import android.graphics.ColorSpace;
 
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+/**
+ * Object to wrap a color sensor and retrieve if the color is PURPLE or GREEN
+ */
 public class BallColorSensor {
     private RevColorSensorV3 colorSensor = null;
 
     public enum DetectedColor {
-        GREEN(Color.parseColor("#00FF00")),
-        PURPLE(Color.parseColor("#800080")),
-        BLACK(Color.parseColor("#000000")),
-        UNKNOWN(Color.parseColor("#FFFFFF"));
-
-        private int color = Color.parseColor("#FFFFFF");
-
-        DetectedColor(int colorHexValue){
-            color = colorHexValue;
-        }
-
-        int getColor(){ return color; }
+        GREEN,
+        PURPLE,
+        UNKNOWN;
     }
 
     Telemetry tm = null;
 
+    /**
+     * Initializes a the hardware for a RevColorSensorV3
+     *
+     * @param hardwareMap HardwareMap from the ControlHub
+     * @param telemetry Telemetry object from the ControlHub
+     */
     public BallColorSensor(HardwareMap hardwareMap, Telemetry telemetry){
         if(telemetry == null) {
             return;
@@ -42,31 +42,45 @@ public class BallColorSensor {
 
         tm = telemetry;
         colorSensor = hardwareMap.get(RevColorSensorV3.class, "colorSensor");
-        colorSensor.setGain(0.5f);
+        colorSensor.setGain(1.0f);
     }
 
+    /**
+     * Current distance reported from the color sensor in centimeters
+     *
+     * @return detected distance in CM
+     */
+    public double getDistance(){
+        return colorSensor.getDistance(DistanceUnit.CM);
+    }
+
+    /**
+     * Retrieves the detected color (PURPLE, GREEN) from the sensor, if it is <3.0cm away.
+     * UNKNOWN is returned if it is >3.0cm away or color is not known. Uses the normalized
+     * hue value for color detection.
+     *
+     * @return DectectedColor.GREEN, DectectedColor.PURPLE, DectectedColor.UNKNOWN
+     */
     public DetectedColor getColor(){
-        NormalizedRGBA color = colorSensor.getNormalizedColors();
+        NormalizedRGBA normColor = colorSensor.getNormalizedColors();
 
-        tm.addData("Detected Red: ", color.red );
-        tm.addData("Detected Blue: ", color.blue );
-        tm.addData("Detected Green: ", color.green );
+        float[] hsv = {0,0,0};
+        Color.colorToHSV( normColor.toColor(), hsv);
+        double hue = hsv[0]; // Hue is the most useful for color identification
+        double saturation = hsv[1];
+        double value = hsv[2];
 
-        // TODO: Base the color detection on a threshold value (%) around the color
-        /*
-        if(color >= 158.0 && color <= 165.0) {
-            tm.addData("Color Detected", "Green" );
-            return DetectedColor.GREEN;
+        tm.addData("Detected Distance: ", getDistance() );
+        tm.addData("Detected Hue: ", hue );
+
+        if( getDistance() < 3.0 ) {
+            if (hue > 220 && hue < 250) {
+                return DetectedColor.PURPLE;
+            } else if (hue > 140 && hue < 180) {
+                return DetectedColor.GREEN;
+            }
         }
-        else if(color >= 190.0 && color <= 230.0) {
-            tm.addData("Color Detected", "Purple" );
-            return DetectedColor.PURPLE;
-        }
-        else if(color >= 166.0 && color <= 175.0) {
-            tm.addData("Color Detected", "BLACK" );
-            return DetectedColor.BLACK;
-        }
-*/
+
         return DetectedColor.UNKNOWN;
     }
 }
