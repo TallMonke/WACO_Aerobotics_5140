@@ -11,17 +11,19 @@ public class MeepMeepTesting {
 
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
-                .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
+                .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 16)
                 .build();
 
-        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(0, 0, 0))
-                .lineToX(30)
+        // The X/Y is the coordinate on the mapped field for DECODE. linToX/Y drives a straight line to
+        // that coordinate
+        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(61, 16, 0))
+                .lineToX(-52)
                 .turn(Math.toRadians(90))
-                .lineToY(30)
+                .lineToY(50)
                 .turn(Math.toRadians(90))
-                .lineToX(0)
+                .lineToX(61 )
                 .turn(Math.toRadians(90))
-                .lineToY(0)
+                .lineToY(16)
                 .turn(Math.toRadians(90))
                 .build());
 
