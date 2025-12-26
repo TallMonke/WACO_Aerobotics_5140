@@ -19,6 +19,8 @@ public class BallColorSensor {
     public enum DetectedColor {
         GREEN,
         PURPLE,
+        BLUE,
+        RED,
         UNKNOWN
     }
 

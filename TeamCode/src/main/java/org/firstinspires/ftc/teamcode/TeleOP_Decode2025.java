@@ -4,14 +4,26 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.mechanisms.AprilTagColors;
 import org.firstinspires.ftc.teamcode.mechanisms.BallColorSensor;
 import org.firstinspires.ftc.teamcode.mechanisms.DriveTrain;
 import org.firstinspires.ftc.teamcode.mechanisms.Launcher;
 import org.firstinspires.ftc.teamcode.mechanisms.Revolver;
 import org.firstinspires.ftc.teamcode.mechanisms.Sweeper;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 @TeleOp(name="TeleOP_Decode2025", group="Linear OpMode")
 public class TeleOP_Decode2025 extends LinearOpMode {
+    private AprilTagColors aprilTagColors = new AprilTagColors();
+
+    // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
+    // we should aim for when shooting
+    private Integer teamColorID = 0;
+
+    private HashMap<Integer, List<BallColorSensor.DetectedColor>> obeliskColorMap = new HashMap<Integer, List<BallColorSensor.DetectedColor>>(3);
 
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
@@ -24,13 +36,18 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        // TODO: Select which team color we are, use the AprilTagColors to get red/blue team ID values
+
         // Initialize the drive base
         driveTrain = new DriveTrain(hardwareMap, telemetry);
         revolver = new Revolver(hardwareMap, telemetry);
         sweeper = new Sweeper(hardwareMap, telemetry);
+
+        // TODO: Set the teamColorID into the launcher for search and aim
         launcher = new Launcher(hardwareMap, telemetry);
 
         // ColorSensor Init
+        // TODO: Move this to the Revolver?
         colorSensor = new BallColorSensor(hardwareMap, telemetry);
 
         // Wait for the game to start (driver presses START)
