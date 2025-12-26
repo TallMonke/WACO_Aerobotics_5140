@@ -19,10 +19,15 @@ public class BallColorSensor {
     public enum DetectedColor {
         GREEN,
         PURPLE,
-        UNKNOWN;
+        UNKNOWN
     }
 
+    // Telemetry object for logging in the driver station
     Telemetry tm = null;
+
+    // ControLHub configuration name for the color sensor
+    final private String SENSOR_NAME = "colorSensor";
+
 
     /**
      * Initializes a the hardware for a RevColorSensorV3
@@ -41,7 +46,7 @@ public class BallColorSensor {
         }
 
         tm = telemetry;
-        colorSensor = hardwareMap.get(RevColorSensorV3.class, "colorSensor");
+        colorSensor = hardwareMap.get(RevColorSensorV3.class, SENSOR_NAME);
         colorSensor.setGain(1.0f);
     }
 
