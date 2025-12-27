@@ -30,7 +30,7 @@ public class Sweeper {
         tm = telemetry;
 
         // Sweeper component initialization
-        sweeperMotor = hardwareMap.get(DcMotor.class, "sweep");
+        sweeperMotor = hardwareMap.get(DcMotor.class, "par0");
         sweeperMotor.setDirection(DcMotor.Direction.REVERSE);
     }
 

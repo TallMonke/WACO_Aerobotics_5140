@@ -74,19 +74,17 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
             driveTrain.run(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
+
             //revolver run "up arrow" & "Down Arrow"
             if(gamepad2.dpad_up)
             {
-                revolver.setSweepDirection(Revolver.RevolverDirection.FORWARD);
+                revolver.stepUp();
             }
             else if (gamepad2.dpad_down)
             {
-                revolver.setSweepDirection(Revolver.RevolverDirection.BACKWARD);
+                revolver.stepDown();
             }
-            else
-            {
-                revolver.setSweepDirection(Revolver.RevolverDirection.STOP);
-            }
+
             revolver.run();
 
             sweeper.enable(gamepad2.right_bumper);
@@ -100,6 +98,10 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             // B button sets close shooter power
             if(gamepad2.b){
                 launcher.setWheelVelocity( Launcher.WHEEL_VELOCITY.NEAR_VELOCITY );
+            }
+
+            if(gamepad2.y){
+                launcher.setWheelVelocity( Launcher.WHEEL_VELOCITY.NONE );
             }
 
             //BallFeed servo "x" push ball out

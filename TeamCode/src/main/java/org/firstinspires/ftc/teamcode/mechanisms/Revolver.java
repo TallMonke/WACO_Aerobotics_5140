@@ -1,19 +1,18 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Revolver {
     //revolver
-    private DcMotor revolverDrive = null;
-    private double revolverDrivePower = 0.5;
-    public enum RevolverDirection{
-        FORWARD,
-        BACKWARD,
-        STOP
-    }
+    private ServoImplEx revolverDrive = null;
+    private double revolverPosition = 0.0;
+
+    // Step size for the 6 position revolver to hit each spot
+    double revolverStep = 0.036;
     Telemetry tm;
 
     /**
@@ -33,8 +32,11 @@ public class Revolver {
         }
         tm = telemetry;
 
-        //revolver DCmotor
-        revolverDrive = hardwareMap.get(DcMotor.class, "par0");
+        //revolver servo
+        revolverDrive = hardwareMap.get(ServoImplEx.class, "revolverServo");
+        revolverDrive.setDirection(Servo.Direction.FORWARD);
+        revolverDrive.setPosition(1.0);
+        revolverPosition = revolverDrive.getPosition();
     }
 
     /**
@@ -42,29 +44,25 @@ public class Revolver {
      *
      * @param direction spin direction of the sweeper mechanism
      */
-    public void setSweepDirection( RevolverDirection direction ){
-        final double REVOLVER_POWER_MAX = 0.5;
+    public void setSweepDirection( double position ){
+        revolverPosition = position;
+        revolverDrive.setPosition(revolverPosition);
+    }
 
-        switch(direction){
-            case FORWARD:
-                revolverDrivePower = REVOLVER_POWER_MAX;
-                break;
-            case BACKWARD:
-                revolverDrivePower = -REVOLVER_POWER_MAX;
-                break;
-            case STOP:
-                revolverDrivePower = 0.0;
-                break;
-        }
+    public void stepUp(){
+        revolverPosition += revolverStep;
+        revolverDrive.setPosition(revolverPosition);
+    }
+    public void stepDown(){
+        revolverPosition -= revolverStep;
+        revolverDrive.setPosition(revolverPosition);
     }
 
     /**
      * Performs the actions for Revolver sorting mechanism
      */
     public void run(){
-        revolverDrive.setPower(revolverDrivePower);
-
-        tm.addData("Sorter (D-Pad Left/Right): ", revolverDrive.getPower());
+        tm.addData("Sorter (D-Up/D-Down): ", revolverDrive.getPosition());
     }
 }
 
