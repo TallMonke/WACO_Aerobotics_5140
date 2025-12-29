@@ -40,19 +40,26 @@ public class Revolver {
     }
 
     /**
-     * Sets the direction of the revolver: FORWARD, BACKWARD, STOP
+     * Moves the revolver to position
      *
-     * @param direction spin direction of the sweeper mechanism
+     * @param position Position of the revolver in ticks
      */
     public void setSweepDirection( double position ){
         revolverPosition = position;
         revolverDrive.setPosition(revolverPosition);
     }
 
+    /**
+     * Increases the revolver to the next position
+     */
     public void stepUp(){
         revolverPosition += revolverStep;
         revolverDrive.setPosition(revolverPosition);
     }
+    
+    /**
+     * Reverses the revolver to the previous position
+     */
     public void stepDown(){
         revolverPosition -= revolverStep;
         revolverDrive.setPosition(revolverPosition);

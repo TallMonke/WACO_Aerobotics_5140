@@ -3,13 +3,26 @@ package org.firstinspires.ftc.teamcode.mechanisms;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/// Object wrapper for FTC DECODE specific AprilTag IDs.
+/// Obelisk IDs:
+///    21: GREEN, PURPLE, PURPLE
+///    22: PURPLE, GREEN, PURPLE
+///    23: PURPLE, PURPLE, GREEN
+/// Red Team Bucket: 24
+/// Blue Team Bucket: 20
 public class AprilTagColors {
+    /**
+     * FTC DECODE AprilTag IDs
+     */
     final private int RED_TEAM_ID = 24;
     final private int BLUE_TEAM_ID = 20;
-    final private int OBELISK_ID_1 = 21;
-    final private int OBELISK_ID_2 = 22;
-    final private int OBELISK_ID_3 = 23;
+    final private int OBELISK_ID_1 = 21; // GREEN, PURPLE, PURPLE
+    final private int OBELISK_ID_2 = 22; // PURPLE, GREEN, PURPLE
+    final private int OBELISK_ID_3 = 23; // PURPLE, PURPLE, GREEN
 
+    /**
+     * Map of AprilTag IDs to the colors associated with them
+     */
     private HashMap<Integer, ArrayList<BallColorSensor.DetectedColor>> colorMap = new HashMap<Integer, ArrayList<BallColorSensor.DetectedColor>>(3);
 
     /**

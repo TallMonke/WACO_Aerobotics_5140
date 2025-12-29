@@ -1,9 +1,14 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+/**
+ * Object to define and run the sweeper intake mechanism. Direction can be reversed to
+ * eject the balls.
+ */
 public class Sweeper {
     // Sweeper Variables
     private DcMotor sweeperMotor = null;
@@ -47,6 +52,21 @@ public class Sweeper {
         }
         else {
             sweeperSpeed = 0.0;
+        }
+    }
+
+    /**
+     * Sets the direction of the sweeper intake. Forward (true) will eject the balls, reverse (false)
+     * will intake the balls
+     *
+     * @param direction True for forward, false for reverse
+     */
+    public void reverse(Boolean direction){
+        if(direction){
+            sweeperMotor.setDirection(DcMotor.Direction.FORWARD);
+        }
+        else {
+            sweeperMotor.setDirection(DcMotor.Direction.REVERSE);
         }
     }
 

@@ -5,15 +5,27 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+/**
+ * Object to define and run the drive motors for a mechanum wheeled robot base.
+ */
 public class DriveTrain {
+    /**
+     * Motor objects for the drive train
+     */
     private DcMotor leftBack = null;
     private DcMotor leftFront = null;
     private DcMotor rightFront = null;
     private DcMotor rightBack = null;
 
+    /**
+     * Telemetry object for logging in the driver station
+     */
     Telemetry tm;
 
-    double SpeedReduction = 0.5;
+    /**
+     * The amount to reduce the speed by. 0.0-1.0
+     */
+    double speedReduction = 0.5;
 
     /**
      * Initializes the drive base mechanisms for the given hardware map.
@@ -46,20 +58,32 @@ public class DriveTrain {
         rightBack.setDirection(DcMotor.Direction.FORWARD);
     }
 
+    /**
+     * Sets the speed to reduce the speed by. 0.0-1.0
+     * @param speed Velocity to set the wheels to
+     */
     public void setSpeedReduction(double speed){
-        SpeedReduction = speed;
+        speedReduction = speed;
     }
 
+    /**
+     * Normalizes the axial, lateral and yaw directions and applies them to the wheels
+     * to move the robot.
+     *
+     * @param axial Forward and backward movement
+     * @param lateral Left/Right movement
+     * @param yaw Turning movement
+     */
     public void run(double axial, double lateral, double yaw){
         double max = 0.0;
 
         // Combine the joystick requests for each axis-motion to determine each wheel's power.
         // Set up a variable for each drive wheel to save the power level for telemetry.
         // Multiply by speed reduction variable
-        double frontLeftPower  = (axial + lateral + yaw) * SpeedReduction;
-        double frontRightPower = (axial - lateral - yaw) * SpeedReduction;
-        double backLeftPower   = (axial - lateral + yaw) * SpeedReduction;
-        double backRightPower  = (axial + lateral - yaw) * SpeedReduction;
+        double frontLeftPower  = (axial + lateral + yaw) * speedReduction;
+        double frontRightPower = (axial - lateral - yaw) * speedReduction;
+        double backLeftPower   = (axial - lateral + yaw) * speedReduction;
+        double backRightPower  = (axial + lateral - yaw) * speedReduction;
 
         // Normalize the values so no wheel power exceeds 100%
         // This ensures that the robot maintains the desired motion.

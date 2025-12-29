@@ -74,7 +74,6 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
             driveTrain.run(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
-
             //revolver run "up arrow" & "Down Arrow"
             if(gamepad2.dpad_up)
             {

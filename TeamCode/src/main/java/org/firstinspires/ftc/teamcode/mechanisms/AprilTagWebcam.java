@@ -15,29 +15,33 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * AprilTag detection object using a webcam. Retrieves the detected tag IDs or searches for
+ * a specific tag ID.
+ */
 public class AprilTagWebcam {
-    /*
-        AprilTag recognition and pose estimation using FTC generated code
+    /**
+     * AprilTag recognition and pose estimation using FTC generated code
      */
     private AprilTagProcessor aprilTagProcessor;
 
-    /*
-        OpenCV based camera processing using FTC generated code
+    /**
+     * OpenCV based camera processing using FTC generated code
      */
     private VisionPortal visionPortal;
 
-    /*
-        List of AprilTag detections
+    /**
+     * List of AprilTag detections
      */
     private List<AprilTagDetection> detectedTags = new ArrayList<>();
 
-    /*
-        Telemetry module for providing feedback
+    /**
+     * Telemetry object for logging in the driver station
      */
     private Telemetry tm;
 
-    /*
-        ControlHub hardware configuration name for the camera.
+    /**
+     * ControlHub hardware configuration name for the camera.
      */
     final private String WEBCAM_NAME = "Webcam 1";
 
