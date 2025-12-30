@@ -34,6 +34,10 @@ public class TeleOP_Decode2025 extends LinearOpMode {
     private Launcher launcher = null;
     private BallColorSensor colorSensor = null;
 
+    //VELOCITY for each distance of shot far and near
+    final double nearWheelVelocity = 775.0;
+    final double farWheelVelocity = 1000.0;
+
     @Override
     public void runOpMode() {
         // TODO: Select which team color we are, use the AprilTagColors to get red/blue team ID values
@@ -75,12 +79,10 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             driveTrain.run(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
             //revolver run "up arrow" & "Down Arrow"
-            if(gamepad2.dpad_up)
-            {
+            if(gamepad2.dpad_up) {
                 revolver.stepUp();
             }
-            else if (gamepad2.dpad_down)
-            {
+            else if (gamepad2.dpad_down) {
                 revolver.stepDown();
             }
 
@@ -91,25 +93,23 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
             // A-Button set far Shooter Power
             if(gamepad2.a){
-                launcher.setWheelVelocity( Launcher.WHEEL_VELOCITY.FAR_VELOCITY );
+                launcher.setWheelVelocity( farWheelVelocity );
             }
 
             // B button sets close shooter power
             if(gamepad2.b){
-                launcher.setWheelVelocity( Launcher.WHEEL_VELOCITY.NEAR_VELOCITY );
+                launcher.setWheelVelocity( nearWheelVelocity );
             }
 
             if(gamepad2.y){
-                launcher.setWheelVelocity( Launcher.WHEEL_VELOCITY.NONE );
+                launcher.setWheelVelocity( 0.0 );
             }
 
             //BallFeed servo "x" push ball out
-            if(gamepad2.x)
-            {
+            if(gamepad2.x) {
                 launcher.push();
             }
-            else
-            {
+            else {
                 launcher.release();
             }
 

@@ -17,12 +17,6 @@ public class Launcher {
     private DcMotorEx leftShoot = null;
     private DcMotorEx rightShoot = null;
 
-    public enum WHEEL_VELOCITY {
-        NEAR_VELOCITY,
-        FAR_VELOCITY,
-        NONE
-    }
-
     // Current velocity of the launcher motors
     private double wheelVelocity = 0.0;
 
@@ -70,25 +64,12 @@ public class Launcher {
     }
 
     /**
-     * Sets the VELOCITY of the shooter wheels to NEAR_VELOCITY or FAR_VELOCITY
+     * Sets the VELOCITY of the shooter wheels to the given value
      *
-     * @param velocity NEAR_VELOCITY or FAR_VELOCITY or NONE (off)
+     * @param velocity The RPM value to set the wheel velocity
      */
-    public void setWheelVelocity(WHEEL_VELOCITY velocity){
-        //VELOCITY for each distance of shot far and near
-        final double nearWheelVelocity = 775.0;
-        final double farWheelVelocity = 1000.0;
-
-        if(velocity==WHEEL_VELOCITY.NEAR_VELOCITY){
-            wheelVelocity = nearWheelVelocity;
-        }
-        else if(velocity == WHEEL_VELOCITY.FAR_VELOCITY)
-        {
-            wheelVelocity = farWheelVelocity;
-        }
-        else{
-            wheelVelocity = 0.0;
-        }
+    public void setWheelVelocity(double velocity){
+        wheelVelocity = velocity;
     }
 
     /**
