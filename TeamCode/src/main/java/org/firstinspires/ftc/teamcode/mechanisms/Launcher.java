@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.mechanisms;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -44,12 +45,12 @@ public class Launcher {
         tm = telemetry;
 
         // drive motors
-        leftShoot = hardwareMap.get(DcMotorEx.class, "perp");
+        leftShoot = hardwareMap.get(DcMotorEx.class, "leftShoot");
         rightShoot = hardwareMap.get(DcMotorEx.class, "rightShoot");
 
         // Direction of individual wheels.
-        leftShoot.setDirection(DcMotorEx.Direction.REVERSE);
-        rightShoot.setDirection(DcMotorEx.Direction.FORWARD);
+        leftShoot.setDirection(DcMotorEx.Direction.FORWARD);
+        rightShoot.setDirection(DcMotorEx.Direction.REVERSE);
 
         leftShoot.setMotorEnable();
         rightShoot.setMotorEnable();
@@ -60,7 +61,7 @@ public class Launcher {
 
 
         // initialize the ball feeder
-        ballFeedServo = hardwareMap.get(Servo.class, "BallFeed");
+        ballFeedServo = hardwareMap.get(Servo.class, "ballFeed");
     }
 
     /**
@@ -97,9 +98,9 @@ public class Launcher {
         leftShoot.setVelocity(wheelVelocity);
         rightShoot.setVelocity(wheelVelocity);
 
-        tm.addData("Shooter A=Long / B=Short: ", wheelVelocity);
-        tm.addData("Left Shooter (A=600, B=520): ", leftShoot.getVelocity());
-        tm.addData("Right Shooter (A=600, B=520): ", rightShoot.getVelocity());
+        tm.addData("Shooter A=Long / B=Short: ", 2 * wheelVelocity);
+        tm.addData("Left Shooter (A=600, B=520): ", 2 * leftShoot.getVelocity());
+        tm.addData("Right Shooter (A=600, B=520): ", 2 * rightShoot.getVelocity());
         tm.addData("Ball Feeder (X Button): ", ballFeedServo.getPosition());
     }
 }

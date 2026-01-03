@@ -5,11 +5,13 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTagColors;
+import org.firstinspires.ftc.teamcode.mechanisms.AprilTagWebcam;
 import org.firstinspires.ftc.teamcode.mechanisms.BallColorSensor;
 import org.firstinspires.ftc.teamcode.mechanisms.DriveTrain;
 import org.firstinspires.ftc.teamcode.mechanisms.Launcher;
 import org.firstinspires.ftc.teamcode.mechanisms.Revolver;
 import org.firstinspires.ftc.teamcode.mechanisms.Sweeper;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,7 +24,7 @@ public class TeleOP_Decode2025 extends LinearOpMode {
     // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
     // we should aim for when shooting
     private Integer teamColorID = 0;
-
+    private AprilTagWebcam  webcam;
     private HashMap<Integer, List<BallColorSensor.DetectedColor>> obeliskColorMap = new HashMap<Integer, List<BallColorSensor.DetectedColor>>(3);
 
     // Declare OpMode members for each of the 4 motors.
@@ -35,12 +37,14 @@ public class TeleOP_Decode2025 extends LinearOpMode {
     private BallColorSensor colorSensor = null;
 
     //VELOCITY for each distance of shot far and near
-    final double nearWheelVelocity = 775.0;
-    final double farWheelVelocity = 1000.0;
+    final double nearWheelVelocity = 1500.0;
+    final double farWheelVelocity = 2000.0;
 
     @Override
     public void runOpMode() {
         // TODO: Select which team color we are, use the AprilTagColors to get red/blue team ID values
+        webcam = new AprilTagWebcam();
+        webcam.init(hardwareMap, telemetry);
 
         // Initialize the drive base
         driveTrain = new DriveTrain(hardwareMap, telemetry);
@@ -93,12 +97,12 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
             // A-Button set far Shooter Power
             if(gamepad2.a){
-                launcher.setWheelVelocity( farWheelVelocity );
+                launcher.setWheelVelocity( 0.5 * farWheelVelocity );
             }
 
             // B button sets close shooter power
             if(gamepad2.b){
-                launcher.setWheelVelocity( nearWheelVelocity );
+                launcher.setWheelVelocity( 0.5 * nearWheelVelocity );
             }
 
             if(gamepad2.y){
@@ -114,6 +118,13 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             }
 
             launcher.run();
+
+            webcam.update();
+            for (AprilTagDetection detection: webcam.getDetectedTags()){
+                if(detection != null) {
+                    webcam.displayDetectionTelemetry(detection);
+                }
+            }
 
             // Show the elapsed game time and wheel power.
             BallColorSensor.DetectedColor detectedColor = colorSensor.getColor();

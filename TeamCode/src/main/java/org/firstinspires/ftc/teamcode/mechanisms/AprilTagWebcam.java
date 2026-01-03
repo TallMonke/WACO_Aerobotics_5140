@@ -94,9 +94,12 @@ public class AprilTagWebcam {
     public void displayDetectionTelemetry(AprilTagDetection detection) {
         if(detection != null) {
             tm.addData("Detection ID", detection.id);
-            tm.addLine(String.format("   Range: %6.1f", detection.ftcPose.range ));
-            tm.addLine(String.format("   Bearing: %6.1f (inch)", detection.ftcPose.bearing ));
-            tm.addLine(String.format("   Elevation: %6.1f (inch)", detection.ftcPose.elevation ));
+
+            if(detection.ftcPose != null) {
+                tm.addLine(String.format("   Range: %6.1f", detection.ftcPose.range));
+                tm.addLine(String.format("   Bearing: %6.1f (inch)", detection.ftcPose.bearing));
+                tm.addLine(String.format("   Elevation: %6.1f (inch)", detection.ftcPose.elevation));
+            }
         }
     }
 

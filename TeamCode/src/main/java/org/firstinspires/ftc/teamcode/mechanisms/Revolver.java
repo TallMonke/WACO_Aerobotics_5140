@@ -6,10 +6,17 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Revolver {
+
+    List<Double> revolverPositions = new ArrayList<>(6);
+
+
     //revolver
     private ServoImplEx revolverDrive = null;
-    private double revolverPosition = 0.0;
+    private int currentIndex = 1;
 
     // Step size for the 6 position revolver to hit each spot
     double revolverStep = 0.036;
@@ -32,44 +39,66 @@ public class Revolver {
         }
         tm = telemetry;
 
+        revolverPositions.add(0.43);  //Index 0  X
+        revolverPositions.add(0.4515);//Index 1  X
+        revolverPositions.add(0.4725);//Index 2  X
+        revolverPositions.add(0.494); //Index 3  X
+        revolverPositions.add(0.515);  //Index 4
+        revolverPositions.add(0.538);  //Index 5
+
         //revolver servo
         revolverDrive = hardwareMap.get(ServoImplEx.class, "revolverServo");
         revolverDrive.setDirection(Servo.Direction.FORWARD);
-        revolverDrive.setPosition(1.0);
-        revolverPosition = revolverDrive.getPosition();
+        setIndex(3);
+    }
+
+    public int getIndex(){
+        return currentIndex;
     }
 
     /**
      * Moves the revolver to position
      *
-     * @param position Position of the revolver in ticks
+     * @param index Position of the revolver
      */
-    public void setSweepDirection( double position ){
-        revolverPosition = position;
-        revolverDrive.setPosition(revolverPosition);
+    public void setIndex(int index ) {
+        if (index >= 0 && index <= 5){
+            currentIndex = index;
+            revolverDrive.setPosition(revolverPositions.get(currentIndex));
+        }
     }
 
     /**
      * Increases the revolver to the next position
      */
     public void stepUp(){
-        revolverPosition += revolverStep;
-        revolverDrive.setPosition(revolverPosition);
+        if (currentIndex == 5 ){
+            currentIndex = 0;
+        }
+        else {
+            currentIndex++;
+        }
+        revolverDrive.setPosition(revolverPositions.get(currentIndex));
     }
     
     /**
      * Reverses the revolver to the previous position
      */
     public void stepDown(){
-        revolverPosition -= revolverStep;
-        revolverDrive.setPosition(revolverPosition);
+        if (currentIndex == 0 ){
+            currentIndex = 5;
+        }
+        else {
+            currentIndex--;
+        }
+        revolverDrive.setPosition(revolverPositions.get(currentIndex));
     }
 
     /**
      * Performs the actions for Revolver sorting mechanism
      */
     public void run(){
-        tm.addData("Sorter (D-Up/D-Down): ", revolverDrive.getPosition());
+        tm.addData("Sorter (D-Up/D-Down): ", String.format("%d(%.6f)", getIndex(), revolverDrive.getPosition()));
     }
 }
 
