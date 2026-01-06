@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.annotation.SuppressLint;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -14,18 +16,16 @@ import org.firstinspires.ftc.teamcode.mechanisms.Sweeper;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 @TeleOp(name="TeleOP_Decode2025", group="Linear OpMode")
 public class TeleOP_Decode2025 extends LinearOpMode {
     private AprilTagColors aprilTagColors = new AprilTagColors();
+    private ArrayList<BallColorSensor.DetectedColor> currentObeliskColors = null;
 
     // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
     // we should aim for when shooting
-    private Integer teamColorID = 0;
+    private Integer teamColorID = aprilTagColors.getRedTeamID();
     private AprilTagWebcam  webcam;
-    private HashMap<Integer, List<BallColorSensor.DetectedColor>> obeliskColorMap = new HashMap<Integer, List<BallColorSensor.DetectedColor>>(3);
 
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
@@ -34,12 +34,12 @@ public class TeleOP_Decode2025 extends LinearOpMode {
     private Revolver revolver = null;
     private Sweeper sweeper = null;
     private Launcher launcher = null;
-    private BallColorSensor colorSensor = null;
 
     //VELOCITY for each distance of shot far and near
     final double nearWheelVelocity = 1500.0;
     final double farWheelVelocity = 2000.0;
 
+    @SuppressLint("DefaultLocale")
     @Override
     public void runOpMode() {
         // TODO: Select which team color we are, use the AprilTagColors to get red/blue team ID values
@@ -52,15 +52,23 @@ public class TeleOP_Decode2025 extends LinearOpMode {
         sweeper = new Sweeper(hardwareMap, telemetry);
 
         // TODO: Set the teamColorID into the launcher for search and aim
-        launcher = new Launcher(hardwareMap, telemetry);
-
-        // ColorSensor Init
-        // TODO: Move this to the Revolver?
-        colorSensor = new BallColorSensor(hardwareMap, telemetry);
+        launcher = new Launcher(hardwareMap, telemetry, webcam);
+        launcher.setTargetID(teamColorID);
 
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+
+        webcam.update();
+        ArrayList<Integer> obelisksIDs = aprilTagColors.getObeliskIDs();
+        for (AprilTagDetection detection: webcam.getDetectedTags()){
+            if(detection != null) {
+                if(aprilTagColors.isObeliskID(detection.id)){
+                    currentObeliskColors = aprilTagColors.getColor(detection.id);
+                    telemetry.addLine(String.format("Obelisk ID: %d", detection.id));
+                }
+            }
+        }
 
         waitForStart();
         runtime.reset();
@@ -118,21 +126,6 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             }
 
             launcher.run();
-
-            webcam.update();
-            for (AprilTagDetection detection: webcam.getDetectedTags()){
-                if(detection != null) {
-                    webcam.displayDetectionTelemetry(detection);
-                }
-            }
-
-            // Show the elapsed game time and wheel power.
-            BallColorSensor.DetectedColor detectedColor = colorSensor.getColor();
-            if( detectedColor == BallColorSensor.DetectedColor.PURPLE ){
-                telemetry.addData( "Color: ", "Purple" );
-            } else if(detectedColor == BallColorSensor.DetectedColor.GREEN) {
-                telemetry.addData( "Color: ", "Green" );
-            }
 
             telemetry.update();
         }

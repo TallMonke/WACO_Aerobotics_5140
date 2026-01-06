@@ -91,8 +91,8 @@ public class AprilTagWebcam {
      *
      * @param detection Detection to display
      */
-    public void displayDetectionTelemetry(AprilTagDetection detection) {
-        if(detection != null) {
+    public void displayTelemetry(AprilTagDetection detection) {
+        if(tm != null && detection != null) {
             tm.addData("Detection ID", detection.id);
 
             if(detection.ftcPose != null) {

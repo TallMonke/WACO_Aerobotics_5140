@@ -14,8 +14,8 @@ public class AprilTagColors {
     /**
      * FTC DECODE AprilTag IDs
      */
-    final private int RED_TEAM_ID = 24;
-    final private int BLUE_TEAM_ID = 20;
+    final private int RED_TEAM_ID = 24; // Corresponds to the red team goal
+    final private int BLUE_TEAM_ID = 20; // Corresponds to the blue team goal
     final private int OBELISK_ID_1 = 21; // GREEN, PURPLE, PURPLE
     final private int OBELISK_ID_2 = 22; // PURPLE, GREEN, PURPLE
     final private int OBELISK_ID_3 = 23; // PURPLE, PURPLE, GREEN
@@ -23,7 +23,7 @@ public class AprilTagColors {
     /**
      * Map of AprilTag IDs to the colors associated with them
      */
-    private HashMap<Integer, ArrayList<BallColorSensor.DetectedColor>> colorMap = new HashMap<Integer, ArrayList<BallColorSensor.DetectedColor>>(3);
+    private final HashMap<Integer, ArrayList<BallColorSensor.DetectedColor>> colorMap = new HashMap<Integer, ArrayList<BallColorSensor.DetectedColor>>(3);
 
     /**
      * Initializes the color map for each AprilTag ID
@@ -65,11 +65,31 @@ public class AprilTagColors {
     /**
      * Retrieves the AprilTag ID of the red team
      *
-     * @return AprilTag ID correpsonding to the red team
+     * @return AprilTag ID corresponding to the red team
      */
     public int getRedTeamID()
     {
         return RED_TEAM_ID;
+    }
+
+    /**
+     * Checks if the given ID corresponds to the red team
+     *
+     * @param id ID to check
+     * @return True if the ID corresponds to the red team goal, false otherwise
+     */
+    public boolean isRedTeamID(int id) {
+        return (id == RED_TEAM_ID);
+    }
+
+    /**
+     * Checks if the given ID corresponds to the blue team goal
+     *
+     * @param id ID to check
+     * @return True if the ID corresponds to the blue team goal, false otherwise
+     */
+    public boolean isBlueTeamID(int id) {
+        return (id == BLUE_TEAM_ID);
     }
 
     /**
@@ -95,6 +115,17 @@ public class AprilTagColors {
         obelisks.add(OBELISK_ID_3);
 
         return obelisks;
+    }
+
+    /**
+     * Checks if the given ID corresponds to an obelisks
+     *
+     * @param id ID to check
+     * @return True if the ID corresponds to an obelisks, false otherwise
+     */
+    public boolean isObeliskID(int id)
+    {
+        return getObeliskIDs().contains(id);
     }
 
     /**
