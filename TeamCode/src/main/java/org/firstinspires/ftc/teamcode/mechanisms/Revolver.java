@@ -25,6 +25,17 @@ public class Revolver {
     private ServoImplEx revolverDrive = null;
     private int currentIndex = 1;
 
+    //variables to eliminate double button sences
+    boolean buttonWasPressedUp = false;
+    int motorModeUp = 0;
+    boolean buttonWasPressedDown = false;
+    int motorModeDown = 0;
+
+
+    // Step size for the 6 position revolver to hit each spot
+    double revolverStep = 0.036;
+    Telemetry tm;
+
     /**
      * Initializes the Revolver sorting mechanism
      *
@@ -87,27 +98,61 @@ public class Revolver {
     /**
      * Increases the revolver to the next position
      */
-    public void stepUp(){
-        if (currentIndex == 5 ){
-            currentIndex = 0;
+    public void stepUp(boolean buttonIsPressed){
+        if (buttonIsPressed && !buttonWasPressedUp) {
+
+            // Cycle through 0 → 1 → 2 → 0
+            if (motorModeUp == 0) {
+                motorModeUp = 1;
+            } else if (motorModeUp == 1) {
+                motorModeUp = 2;
+            } else {
+                motorModeUp = 0;
+            }
+
+            // cycle revolver index up
+            if (currentIndex == 5) {
+                currentIndex = 0;
+            } else {
+                currentIndex++;
+            }
+
+            // Move the servo to the new position
+            revolverDrive.setPosition(revolverPositions.get(currentIndex));
         }
-        else {
-            currentIndex++;
-        }
-        revolverDrive.setPosition(revolverPositions.get(currentIndex));
+
+        // Update debounce tracker
+        buttonWasPressedUp = buttonIsPressed;
     }
     
     /**
      * Reverses the revolver to the previous position
      */
-    public void stepDown(){
-        if (currentIndex == 0 ){
-            currentIndex = 5;
+    public void stepDown(boolean buttonIsPressed){
+        if (buttonIsPressed && !buttonWasPressedDown) {
+
+            // Cycle through 0 → 1 → 2 → 0
+            if (motorModeDown == 0) {
+                motorModeDown = 1;
+            } else if (motorModeDown == 1) {
+                motorModeDown = 2;
+            } else {
+                motorModeDown = 0;
+            }
+
+            // cycle revolver index down
+            if (currentIndex == 0) {
+                currentIndex = 5;
+            } else {
+                currentIndex--;
+            }
+
+            // Move the servo to the new position
+            revolverDrive.setPosition(revolverPositions.get(currentIndex));
         }
-        else {
-            currentIndex--;
-        }
-        revolverDrive.setPosition(revolverPositions.get(currentIndex));
+
+        // Update debounce tracker
+        buttonWasPressedDown = buttonIsPressed;
     }
 
     public void displayTelemetry(){
@@ -129,7 +174,6 @@ public class Revolver {
             }
         }
     }
-
     /**
      * Performs the actions for Revolver sorting mechanism
      */

@@ -76,6 +76,6 @@ public class Sweeper {
     public void run(){
         sweeperMotor.setPower(sweeperSpeed);
 
-        tm.addData("Sweeper (Right Bumper): ", sweeperMotor.getPower());
+        tm.addData("Sweeper (Right_Bumper=In Both Bumper=Reverse): ", sweeperMotor.getPower());
     }
 }

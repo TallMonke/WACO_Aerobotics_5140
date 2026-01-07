@@ -91,31 +91,38 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             driveTrain.run(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
             //revolver run "up arrow" & "Down Arrow"
-            if(gamepad2.dpad_up) {
-                revolver.stepUp();
-            }
-            else if (gamepad2.dpad_down) {
-                revolver.stepDown();
-            }
+            revolver.stepUp(gamepad2.dpad_up);
+            revolver.stepDown(gamepad2.dpad_down);
 
             revolver.run();
 
+            //sweep in with right bumper and reverse with both bumpers at same time.
             sweeper.enable(gamepad2.right_bumper);
+            sweeper.reverse(gamepad2.left_bumper);
             sweeper.run();
 
-            // A-Button set far Shooter Power
+            // A-Button set far Shooter velocity
             if(gamepad2.a){
                 launcher.setWheelVelocity( 0.5 * farWheelVelocity );
             }
 
-            // B button sets close shooter power
+            // B-button sets close shooter velocity
             if(gamepad2.b){
                 launcher.setWheelVelocity( 0.5 * nearWheelVelocity );
             }
 
+            // y-button to set shooter velocity 0
             if(gamepad2.y){
                 launcher.setWheelVelocity( 0.0 );
             }
+
+            /*
+            set velocity getRPM passing distance from camera into..
+            */
+            if(gamepad2.left_trigger > 0.5){
+                launcher.setWheelVelocity(getRPM(x_Distance(detection.ftcPose.range)));
+            }
+
 
             //BallFeed servo "x" push ball out
             if(gamepad2.x) {
