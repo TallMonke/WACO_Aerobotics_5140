@@ -8,7 +8,6 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Revolver {
     Telemetry tm;
@@ -25,16 +24,11 @@ public class Revolver {
     private ServoImplEx revolverDrive = null;
     private int currentIndex = 1;
 
-    //variables to eliminate double button sences
+    //variables to eliminate double button presses
     boolean buttonWasPressedUp = false;
     int motorModeUp = 0;
     boolean buttonWasPressedDown = false;
     int motorModeDown = 0;
-
-
-    // Step size for the 6 position revolver to hit each spot
-    double revolverStep = 0.036;
-    Telemetry tm;
 
     /**
      * Initializes the Revolver sorting mechanism

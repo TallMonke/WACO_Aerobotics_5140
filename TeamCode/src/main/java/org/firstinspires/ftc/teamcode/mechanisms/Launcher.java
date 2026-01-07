@@ -80,9 +80,7 @@ public class Launcher {
     /**
      * Sets the position of the feed servo to the default/rest position
      */
-    public void release() {
-        ballFeedServo.setPosition(INIT_FEED_POSITION);
-    }
+    public void release() { ballFeedServo.setPosition(INIT_FEED_POSITION); }
 
     public void displayTelemetry(){
         if(tm != null){
