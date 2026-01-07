@@ -35,10 +35,6 @@ public class TeleOP_Decode2025 extends LinearOpMode {
     private Sweeper sweeper = null;
     private Launcher launcher = null;
 
-    //VELOCITY for each distance of shot far and near
-    final double nearWheelVelocity = 1500.0;
-    final double farWheelVelocity = 2000.0;
-
     @SuppressLint("DefaultLocale")
     @Override
     public void runOpMode() {
@@ -52,8 +48,7 @@ public class TeleOP_Decode2025 extends LinearOpMode {
         sweeper = new Sweeper(hardwareMap, telemetry);
 
         // TODO: Set the teamColorID into the launcher for search and aim
-        launcher = new Launcher(hardwareMap, telemetry, webcam);
-        launcher.setTargetID(teamColorID);
+        launcher = new Launcher(hardwareMap, telemetry);
 
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
@@ -101,26 +96,28 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             sweeper.reverse(gamepad2.left_bumper);
             sweeper.run();
 
-            // A-Button set far Shooter velocity
-            if(gamepad2.a){
-                launcher.setWheelVelocity( 0.5 * farWheelVelocity );
-            }
-
-            // B-button sets close shooter velocity
-            if(gamepad2.b){
-                launcher.setWheelVelocity( 0.5 * nearWheelVelocity );
-            }
-
-            // y-button to set shooter velocity 0
-            if(gamepad2.y){
-                launcher.setWheelVelocity( 0.0 );
-            }
-
             /*
             set velocity getRPM passing distance from camera into..
             */
             if(gamepad2.left_trigger > 0.5){
+                // detect target AprilTag
+                if(aprilTagWebcam != null) {
+                    aprilTagWebcam.update();
+                    for (AprilTagDetection detection : aprilTagWebcam.getDetectedTags()) {
+                        if (detection != null) {
+                            aprilTagWebcam.displayTelemetry(detection);
+                        }
+                    }
+                }
+
+                // Steer robot to center AprilTag
+
+                // Calculate RPM from range to April Tag
+
+                // Set the wheel velocity to achieve distance
                 launcher.setWheelVelocity(getRPM(x_Distance(detection.ftcPose.range)));
+
+                // Launch ball at that velocity
             }
 
 
