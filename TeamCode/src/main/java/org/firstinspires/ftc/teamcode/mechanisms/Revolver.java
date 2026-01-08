@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import org.firstinspires.ftc.teamcode.mechanisms.DetectedColor;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +20,7 @@ public class Revolver {
     List<Double> revolverPositions = new ArrayList<>(6);
 
     // Balls currently loaded into the revolver
-    List<BallColorSensor.DetectedColor> currentLoad = new ArrayList<>();
+    List<DetectedColor> currentLoad = new ArrayList<>();
 
     //revolver
     private ServoImplEx revolverDrive = null;
@@ -59,12 +61,12 @@ public class Revolver {
         revolverPositions.add(0.538);  //Index 5
 
         // Init each revolver position with an UNKNOWN color
-        currentLoad.add(BallColorSensor.DetectedColor.UNKNOWN);
-        currentLoad.add(BallColorSensor.DetectedColor.UNKNOWN);
-        currentLoad.add(BallColorSensor.DetectedColor.UNKNOWN);
-        currentLoad.add(BallColorSensor.DetectedColor.UNKNOWN);
-        currentLoad.add(BallColorSensor.DetectedColor.UNKNOWN);
-        currentLoad.add(BallColorSensor.DetectedColor.UNKNOWN);
+        currentLoad.add(DetectedColor.UNKNOWN);
+        currentLoad.add(DetectedColor.UNKNOWN);
+        currentLoad.add(DetectedColor.UNKNOWN);
+        currentLoad.add(DetectedColor.UNKNOWN);
+        currentLoad.add(DetectedColor.UNKNOWN);
+        currentLoad.add(DetectedColor.UNKNOWN);
 
 
         //revolver servo
@@ -161,7 +163,7 @@ public class Revolver {
      *
      * @param color Color to search for (PURPLE, GREEN)
      */
-    public void seekToColor(BallColorSensor.DetectedColor color){
+    public void seekToColor(DetectedColor color){
         for(int i = 0; i < currentLoad.size(); i++) {
             if (currentLoad.get(i) == color) {
                 revolverDrive.setPosition(revolverPositions.get(currentIndex));
@@ -172,23 +174,13 @@ public class Revolver {
      * Performs the actions for Revolver sorting mechanism
      */
     public void run(){
-        BallColorSensor.DetectedColor detectedColor = colorSensor.getColor();
-
         int currentIndex = getIndex();
 
-        // Test the object distance to the color sensor and if something is close (<2) and a valid
-        // color, store it for the current index
-        if( colorSensor.getDistance() < 2.0 && detectedColor == BallColorSensor.DetectedColor.PURPLE ){
-            currentLoad.set(currentIndex, BallColorSensor.DetectedColor.PURPLE);
-            tm.addLine( String.format("%d) Color: %s", currentIndex, "PURPLE" ) );
-        } else if(colorSensor.getDistance() < 2.0 && detectedColor == BallColorSensor.DetectedColor.GREEN) {
-            currentLoad.set(currentIndex, BallColorSensor.DetectedColor.GREEN);
-            tm.addLine( String.format("%d) Color: %s", currentIndex, "GREEN" ) );
-        } else if(colorSensor.getDistance() >= 3.0 ) {
-            // Nothing close enough to detect at this current index
-            currentLoad.set(currentIndex, BallColorSensor.DetectedColor.UNKNOWN);
-            tm.addLine( String.format("%d) Color: %s", currentIndex, "NONE" ) );
-        }
+        // colorSensor only reports a color based on the distance to the object
+        DetectedColor detectedColor = colorSensor.getColor();
+
+        currentLoad.set(currentIndex, detectedColor);
+        tm.addLine( String.format("%d) Color: %s", currentIndex, detectedColor.toString() ) );
 
         displayTelemetry();
     }

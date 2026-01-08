@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
+import org.firstinspires.ftc.teamcode.mechanisms.DetectedColor;
 
 import android.graphics.Color;
 
@@ -14,14 +15,6 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
  */
 public class BallColorSensor {
     private RevColorSensorV3 colorSensor = null;
-
-    public enum DetectedColor {
-        GREEN,
-        PURPLE,
-        BLUE,
-        RED,
-        UNKNOWN
-    }
 
     // Telemetry object for logging in the driver station
     Telemetry tm = null;

@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.mechanisms;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.firstinspires.ftc.teamcode.mechanisms.DetectedColor;
+
 /// Object wrapper for FTC DECODE specific AprilTag IDs.
 /// Obelisk IDs:
 ///    21: GREEN, PURPLE, PURPLE
@@ -23,7 +25,7 @@ public class AprilTagColors {
     /**
      * Map of AprilTag IDs to the colors associated with them
      */
-    private final HashMap<Integer, ArrayList<BallColorSensor.DetectedColor>> colorMap = new HashMap<Integer, ArrayList<BallColorSensor.DetectedColor>>(3);
+    private final HashMap<Integer, ArrayList<DetectedColor>> colorMap = new HashMap<Integer, ArrayList<DetectedColor>>(3);
 
     /**
      * Initializes the color map for each AprilTag ID
@@ -31,34 +33,34 @@ public class AprilTagColors {
     public AprilTagColors()
     {
         // Obelisk colors are SPECIFIC to each ID. Do NOT rearrange the color orders
-        ArrayList<BallColorSensor.DetectedColor> id21 = new ArrayList<BallColorSensor.DetectedColor>(3);
-        id21.add( BallColorSensor.DetectedColor.GREEN );
-        id21.add( BallColorSensor.DetectedColor.PURPLE );
-        id21.add( BallColorSensor.DetectedColor.PURPLE );
+        ArrayList<DetectedColor> id21 = new ArrayList<DetectedColor>(3);
+        id21.add( DetectedColor.GREEN );
+        id21.add( DetectedColor.PURPLE );
+        id21.add( DetectedColor.PURPLE );
 
         colorMap.put(OBELISK_ID_1, id21);
 
-        ArrayList<BallColorSensor.DetectedColor> id22 = new ArrayList<BallColorSensor.DetectedColor>(3);
-        id22.add( BallColorSensor.DetectedColor.PURPLE );
-        id22.add( BallColorSensor.DetectedColor.GREEN );
-        id22.add( BallColorSensor.DetectedColor.PURPLE );
+        ArrayList<DetectedColor> id22 = new ArrayList<DetectedColor>(3);
+        id22.add( DetectedColor.PURPLE );
+        id22.add( DetectedColor.GREEN );
+        id22.add( DetectedColor.PURPLE );
 
         colorMap.put(OBELISK_ID_2, id22);
 
-        ArrayList<BallColorSensor.DetectedColor> id23 = new ArrayList<BallColorSensor.DetectedColor>(3);
-        id23.add( BallColorSensor.DetectedColor.PURPLE );
-        id23.add( BallColorSensor.DetectedColor.PURPLE );
-        id23.add( BallColorSensor.DetectedColor.GREEN );
+        ArrayList<DetectedColor> id23 = new ArrayList<DetectedColor>(3);
+        id23.add( DetectedColor.PURPLE );
+        id23.add( DetectedColor.PURPLE );
+        id23.add( DetectedColor.GREEN );
 
         colorMap.put(OBELISK_ID_3, id23);
 
         // Blue/Red represent the teams colored goals
-        ArrayList<BallColorSensor.DetectedColor> blueTeam = new ArrayList<BallColorSensor.DetectedColor>(1);
-        blueTeam.add( BallColorSensor.DetectedColor.BLUE );
+        ArrayList<DetectedColor> blueTeam = new ArrayList<DetectedColor>(1);
+        blueTeam.add( DetectedColor.BLUE );
         colorMap.put(BLUE_TEAM_ID, blueTeam);
 
-        ArrayList<BallColorSensor.DetectedColor> redTeam = new ArrayList<BallColorSensor.DetectedColor>(1);
-        redTeam.add( BallColorSensor.DetectedColor.RED );
+        ArrayList<DetectedColor> redTeam = new ArrayList<DetectedColor>(1);
+        redTeam.add( DetectedColor.RED );
         colorMap.put(RED_TEAM_ID, redTeam);
     }
 
@@ -134,7 +136,7 @@ public class AprilTagColors {
      * @param id ID of the AprilTag to search
      * @return List of colors associated with the ID or null if not found
      */
-    public ArrayList<BallColorSensor.DetectedColor> getColor(int id)
+    public ArrayList<DetectedColor> getColor(int id)
     {
         return colorMap.get(id);
     }

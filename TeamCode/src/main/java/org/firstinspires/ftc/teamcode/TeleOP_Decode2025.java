@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTagColors;
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTagWebcam;
-import org.firstinspires.ftc.teamcode.mechanisms.BallColorSensor;
+import org.firstinspires.ftc.teamcode.mechanisms.DetectedColor;
 import org.firstinspires.ftc.teamcode.mechanisms.DriveTrain;
 import org.firstinspires.ftc.teamcode.mechanisms.Launcher;
 import org.firstinspires.ftc.teamcode.mechanisms.Revolver;
@@ -19,8 +19,9 @@ import java.util.ArrayList;
 
 @TeleOp(name="TeleOP_Decode2025", group="Linear OpMode")
 public class TeleOP_Decode2025 extends LinearOpMode {
-    private AprilTagColors aprilTagColors = new AprilTagColors();
-    private ArrayList<BallColorSensor.DetectedColor> currentObeliskColors = null;
+    private final AprilTagColors aprilTagColors = new AprilTagColors();
+    // Obelisk colors hold the color order of the balls to shoot
+    private ArrayList<DetectedColor> currentObeliskColors = null;
 
     // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
     // we should aim for when shooting
@@ -38,32 +39,29 @@ public class TeleOP_Decode2025 extends LinearOpMode {
     @SuppressLint("DefaultLocale")
     @Override
     public void runOpMode() {
+        // Initialize the hardware mechanisms
         // TODO: Select which team color we are, use the AprilTagColors to get red/blue team ID values
-        webcam = new AprilTagWebcam();
-        webcam.init(hardwareMap, telemetry);
-
-        // Initialize the drive base
+        webcam = new AprilTagWebcam(hardwareMap, telemetry);
         driveTrain = new DriveTrain(hardwareMap, telemetry);
         revolver = new Revolver(hardwareMap, telemetry);
         sweeper = new Sweeper(hardwareMap, telemetry);
-
-        // TODO: Set the teamColorID into the launcher for search and aim
         launcher = new Launcher(hardwareMap, telemetry);
 
-        // Wait for the game to start (driver presses START)
-        telemetry.addData("Status", "Initialized");
-        telemetry.update();
-
-        webcam.update();
-        ArrayList<Integer> obelisksIDs = aprilTagColors.getObeliskIDs();
-        for (AprilTagDetection detection: webcam.getDetectedTags()){
-            if(detection != null) {
-                if(aprilTagColors.isObeliskID(detection.id)){
-                    currentObeliskColors = aprilTagColors.getColor(detection.id);
-                    telemetry.addLine(String.format("Obelisk ID: %d", detection.id));
-                }
-            }
+        // While initializing look for the obelisk IDs to initialize the color order
+        // This may be moved to the opModeIsActive() and only performed if currentObeliskColors is
+        // null if running in opModeInInit() is being problematic
+        while(currentObeliskColors == null && opModeInInit()){
+            if(detectObelisk()) break;
         }
+
+        // Wait for the game to start (driver presses START)
+        if( teamColorID == aprilTagColors.getRedTeamID() ) {
+            telemetry.addData("Status", "RED Team Ready!");
+        }
+        else if( teamColorID == aprilTagColors.getBlueTeamID() ) {
+            telemetry.addData("Status", "BLUE Team Ready!");
+        }
+        telemetry.update();
 
         waitForStart();
         runtime.reset();
@@ -96,46 +94,13 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             sweeper.reverse(gamepad2.left_bumper);
             sweeper.run();
 
-            /*
-                set velocity getRPM passing distance from camera into..
-            */
-            if(gamepad2.left_trigger > 0.5 && webcam != null){
-                // detect target AprilTag
-                webcam.update();
-                AprilTagDetection towerDetection = webcam.getTagByID(teamColorID);
+            // Attempt to auto-aim and fire ball at the team tower
+            if(gamepad2.left_trigger > 0.5 && webcam != null){ autoFire(); }
 
-                // TODO: remove this for loop, just displaying detections
-                for (AprilTagDetection detection : webcam.getDetectedTags()) {
-                    if (detection != null) {
-                        webcam.displayTelemetry(detection);
-                    }
-                }
+            // Just push the ball out the launcher
+            if(gamepad2.x) { manualFire(); }
 
-                // Steer robot to center AprilTag
-
-                // Calculate RPM from range to April Tag
-                // Set the wheel velocity to achieve distance
-                if (towerDetection != null && towerDetection.ftcPose != null) {
-                    double rpm = getRPM(x_Distance(towerDetection.ftcPose.range));
-
-                    launcher.setWheelVelocity(rpm);
-
-                    // Launch ball at that velocity
-                    launcher.run();
-
-                    launcher.push();
-                    launcher.release();
-                }
-            }
-
-            //BallFeed servo "x" push ball out
-            if(gamepad2.x) {
-                launcher.push();
-            }
-            else {
-                launcher.release();
-            }
-
+            // This ensures the launcher is always spun up at the set velocity
             launcher.run();
 
             telemetry.update();
@@ -143,9 +108,69 @@ public class TeleOP_Decode2025 extends LinearOpMode {
     }
 
     /**
-     * @param distance of shooter to apirl tag into x-component distance robot to basket.
+     * Just push the ball out the launcher using the current velocity
      */
-    public double x_Distance(double distance){
+    private void manualFire() {
+        // Ensure the launcher is running
+        launcher.run();
+
+        launcher.push();
+        launcher.release();
+
+        // Ensure the launcher is running
+        launcher.run();
+    }
+
+    /**
+     * Attempt to auto-aim (move robot) and fire ball at the team tower
+     */
+    private void autoFire() {
+        // detect target AprilTag
+        webcam.update();
+        AprilTagDetection towerDetection = webcam.getTagByID(teamColorID);
+
+        // TODO: Steer robot to center AprilTag
+
+        // Calculate RPM from range to April Tag
+        // Set the wheel velocity to achieve distance
+        if (towerDetection != null && towerDetection.ftcPose != null) {
+            double rpm = getRPM(x_Distance(towerDetection.ftcPose.range));
+
+            launcher.setWheelVelocity(rpm);
+
+            // Ensure the wheels are spinning at that velocity
+            launcher.run();
+
+            // Push the ball out the launcher and return to ready state
+            launcher.push();
+            launcher.release();
+
+            launcher.run();
+        }
+    }
+
+    private Boolean detectObelisk() {
+        webcam.update();
+        ArrayList<Integer> obelisksIDs = aprilTagColors.getObeliskIDs();
+        for (AprilTagDetection detection: webcam.getDetectedTags()){
+            if(detection != null) {
+                if(aprilTagColors.isObeliskID(detection.id)){
+                    currentObeliskColors = aprilTagColors.getColor(detection.id);
+                    telemetry.addLine(String.format("Obelisk ID: %d", detection.id));
+                    telemetry.update();
+
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param distance of shooter to april tag into x-component distance robot to basket.
+     */
+    private double x_Distance(double distance){
         double launchHeight = 13.75; //distance of point of launch of the robot from the ground, y-component (pla=11.25 + centerOfBall=2.5 = 13.75)
         double x_DistanceCamera = 7.0; //distance (x-component) the camera is away from launch point.
         double y_DistanceCamera = 1.68; //distance (y-component) the camera is away from launch point.
@@ -159,7 +184,7 @@ public class TeleOP_Decode2025 extends LinearOpMode {
     /**
      * Calculate the RPM needed based on the @param x_distance of launcher to basket. (x component)
      */
-    public double getRPM(double distance) {
+    private double getRPM(double distance) {
         double valueInDegrees = 44.3; //launch angle in degrees
         double valueInRadians = Math.toRadians(valueInDegrees);
         double height = 27.75;  //height the ball needs to be off the ground to make basket based from the launcher of robot. 41-13.75

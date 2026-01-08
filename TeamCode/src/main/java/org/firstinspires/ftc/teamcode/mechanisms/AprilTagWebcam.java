@@ -49,7 +49,7 @@ public class AprilTagWebcam {
         Initializes the hardware and starts the camera for AprilTag processing. DriverHub
         displays the camera feed marking the detections. Reports units in INCHes and DEGREES
      */
-    public void init(HardwareMap hardwareMap, Telemetry telemetry) {
+    public AprilTagWebcam(HardwareMap hardwareMap, Telemetry telemetry) {
         tm = telemetry;
 
         // Initialize AprilTag processor that "highlights" the detection on the DriverHub screen.
