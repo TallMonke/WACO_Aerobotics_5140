@@ -66,6 +66,13 @@ public class DriveTrain {
         speedReduction = speed;
     }
 
+    public void displayTelemetry(){
+        if(leftFront != null || leftBack != null || rightFront != null || rightBack != null) {
+            tm.addData("Front Drive L/R Motor: ", "%4.2f, %4.2f", leftFront.getPower(), rightFront.getPower());
+            tm.addData("Back L/R Motor: ", "%4.2f, %4.2f", leftBack.getPower(), rightBack.getPower());
+        }
+    }
+
     /**
      * Normalizes the axial, lateral and yaw directions and applies them to the wheels
      * to move the robot.
@@ -103,9 +110,6 @@ public class DriveTrain {
         rightFront.setPower(frontRightPower);
         leftBack.setPower(backLeftPower);
         rightBack.setPower(backRightPower);
-
-        tm.addData("Front Drive L/R Motor: ", "%4.2f, %4.2f", frontLeftPower, frontRightPower);
-        tm.addData("Back L/R Motor: ", "%4.2f, %4.2f", backLeftPower, backRightPower);
     }
 
     /**
