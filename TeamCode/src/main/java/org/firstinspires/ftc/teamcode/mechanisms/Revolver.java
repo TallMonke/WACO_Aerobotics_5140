@@ -54,11 +54,11 @@ public class Revolver {
 
         // Odd indexes are "firing" positions, even are load
         revolverPositions.add(0.43);  //Index 0  X
-        revolverPositions.add(0.4515);//Index 1  X
+        revolverPositions.add(0.4525);//Index 1  X
         revolverPositions.add(0.4725);//Index 2  X
         revolverPositions.add(0.494); //Index 3  X
         revolverPositions.add(0.515);  //Index 4
-        revolverPositions.add(0.538);  //Index 5
+        revolverPositions.add(0.54);  //Index 5
 
         // Init each revolver position with an UNKNOWN color
         currentLoad.add(DetectedColor.UNKNOWN);

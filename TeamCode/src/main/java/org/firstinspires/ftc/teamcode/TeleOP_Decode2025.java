@@ -104,7 +104,7 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             for (AprilTagDetection detection: detections ) {
                 if(detection != null && detection.ftcPose != null) {
                     telemetry.addData("Detection",
-                            String.format("ID: %d, Range: %.2f", detection.id, detection.ftcPose.range));
+                            String.format("ID: %d, R: %.2f, B: %.2f", detection.id, detection.ftcPose.range, detection.ftcPose.bearing));
                 }
             }
 
@@ -179,7 +179,8 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
             // Ensure the wheels are spinning at that velocity
             launcher.run();
-            sleep(500);
+
+            sleep(750);
 
             // Fire the ball and return to ready state
             launcher.push();
@@ -197,9 +198,9 @@ public class TeleOP_Decode2025 extends LinearOpMode {
      * @param target Target to steer the robot to center the camera
      */
     private void aim(AprilTagDetection target) {
-        final double bearingWeighting = 0.0;
+        final double bearingWeighting = -180.0;
 
-        driveTrain.rotate(target.ftcPose.bearing + bearingWeighting);
+        driveTrain.rotate(-target.ftcPose.bearing + bearingWeighting);
     }
 
     private Boolean detectObelisk() {
@@ -241,12 +242,13 @@ public class TeleOP_Decode2025 extends LinearOpMode {
         double valueInDegrees = 45.0; //launch angle in degrees
         double valueInRadians = Math.toRadians(valueInDegrees);
         double height = 29.0;  //height the ball needs to be off the ground to make basket based from the launcher of robot. 41-13.75
+        double tuneCorrection = 200; //Value you set to eliminate discreptincies.
         double term1 = (60.0 / (4 * Math.PI));
         double numerator = (386.09 * Math.pow(distance, 2)); // 386.09(D^2)
         double cosineSquared = Math.pow((Math.cos(valueInRadians)), 2);
         double denominator = 2 * cosineSquared * ((distance * (Math.tan(valueInRadians))) - height);
         double RPM = (term1 * (Math.sqrt(numerator / denominator))); //total formula to get RPM from x-component distance.
         telemetry.addData("RPM =", RPM);
-        return RPM;
+        return RPM - tuneCorrection;
     }
 }
