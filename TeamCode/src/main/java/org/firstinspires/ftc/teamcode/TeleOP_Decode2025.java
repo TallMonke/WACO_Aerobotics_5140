@@ -17,6 +17,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.List;
 
 @TeleOp(name="TeleOP_Decode2025", group="Linear OpMode")
 public class TeleOP_Decode2025 extends LinearOpMode {
@@ -99,9 +100,12 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             sweeper.run();
 
             webcam.update();
-            ArrayList<AprilTagDetection> detections = webcam.getDetections();
+            List<AprilTagDetection> detections = webcam.getDetectedTags();
             for (AprilTagDetection detection: detections ) {
-                telemetry.addData("Detection", detection.id);
+                if(detection != null && detection.ftcPose != null) {
+                    telemetry.addData("Detection",
+                            String.format("ID: %d, Range: %.2f", detection.id, detection.ftcPose.range));
+                }
             }
 
             // Attempt to auto-aim and fire ball at the team tower
@@ -145,6 +149,8 @@ public class TeleOP_Decode2025 extends LinearOpMode {
         launcher.run();
 
         launcher.push();
+        sleep(500);
+
         launcher.release();
 
         // Ensure the launcher is running
@@ -159,26 +165,41 @@ public class TeleOP_Decode2025 extends LinearOpMode {
         webcam.update();
         AprilTagDetection towerDetection = webcam.getTagByID(teamColorID);
 
-        // TODO: Steer robot to center AprilTag
-
         // Calculate RPM from range to April Tag
         // Set the wheel velocity to achieve distance
         if (towerDetection != null && towerDetection.ftcPose != null) {
+            // Steer robot to center AprilTag using the pose bearing which is the angle
+            // from the camera to the AprilTag center
+            aim( towerDetection );
+
+            // Calculate the velocity needed to shoot the ball at the correct distance
             double rpm = getRPM(x_Distance(towerDetection.ftcPose.range));
 
             launcher.setWheelVelocity(rpm);
 
             // Ensure the wheels are spinning at that velocity
             launcher.run();
-
             sleep(500);
 
-            // Push the ball out the launcher and return to ready state
+            // Fire the ball and return to ready state
             launcher.push();
             sleep(500);
+
             launcher.release();
             launcher.run();
         }
+    }
+
+    /**
+     * Steer robot to center AprilTag using the pose bearing which is the angle
+     * from the camera to the AprilTag center
+     *
+     * @param target Target to steer the robot to center the camera
+     */
+    private void aim(AprilTagDetection target) {
+        final double bearingWeighting = 0.0;
+
+        driveTrain.rotate(target.ftcPose.bearing + bearingWeighting);
     }
 
     private Boolean detectObelisk() {

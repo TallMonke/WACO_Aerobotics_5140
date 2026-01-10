@@ -108,4 +108,12 @@ public class DriveTrain {
         tm.addData("Back L/R Motor: ", "%4.2f, %4.2f", backLeftPower, backRightPower);
     }
 
+    /**
+     * Rotates the robot by the given degrees. Helper function calling run()
+     *
+     * @param degrees Amount of degrees to rotate the robot
+     */
+    public void rotate(double degrees){
+        this.run(0, 0, degrees );
+    }
 }
