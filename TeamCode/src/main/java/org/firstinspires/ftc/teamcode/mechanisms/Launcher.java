@@ -84,10 +84,9 @@ public class Launcher {
 
     public void displayTelemetry(){
         if(tm != null){
-            tm.addData("Shooter A=Long / B=Short: ", 2 * wheelVelocity);
-            tm.addData("Left Shooter (A=600, B=520): ", 2 * leftShoot.getVelocity());
-            tm.addData("Right Shooter (A=600, B=520): ", 2 * rightShoot.getVelocity());
-            tm.addData("Ball Feeder (X Button): ", ballFeedServo.getPosition());
+            tm.addData("Shooter A=Long / B=Short: ", wheelVelocity);
+            tm.addData("Left Shooter (A=600, B=520): ", leftShoot.getVelocity());
+            tm.addData("Right Shooter (A=600, B=520): ", rightShoot.getVelocity());
         }
     }
 

@@ -16,17 +16,20 @@ public enum DetectedColor {
     public int getColor() { return this.color; }
 
     public String toString(){
-        switch(this.color){
-            case GREEN:
-                return "GREEN";
-            case PURPLE:
-                return "PURPLE";
-            case BLUE:
-                return "BLUE";
-            case RED:
-                return "RED";
-            default:
-                return "UNKNOWN";
+
+        if(this.color == GREEN.ordinal()) {
+            return "GREEN";
         }
+        else if(this.color == PURPLE.ordinal()) {
+            return "PURPLE";
+        }
+        else if(this.color == BLUE.ordinal()) {
+            return "BLUE";
+        }
+        else if(this.color == RED.ordinal()) {
+            return "RED";
+        }
+
+        return "UNKNOWN";
     }
 }

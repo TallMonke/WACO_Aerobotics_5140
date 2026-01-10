@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Revolver;
 import org.firstinspires.ftc.teamcode.mechanisms.Sweeper;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 @TeleOp(name="TeleOP_Decode2025", group="Linear OpMode")
@@ -47,13 +48,6 @@ public class TeleOP_Decode2025 extends LinearOpMode {
         sweeper = new Sweeper(hardwareMap, telemetry);
         launcher = new Launcher(hardwareMap, telemetry);
 
-        // While initializing look for the obelisk IDs to initialize the color order
-        // This may be moved to the opModeIsActive() and only performed if currentObeliskColors is
-        // null if running in opModeInInit() is being problematic
-        while(currentObeliskColors == null && opModeInInit()){
-            if(detectObelisk()) break;
-        }
-
         // Wait for the game to start (driver presses START)
         if( teamColorID == aprilTagColors.getRedTeamID() ) {
             telemetry.addData("Status", "RED Team Ready!");
@@ -61,7 +55,6 @@ public class TeleOP_Decode2025 extends LinearOpMode {
         else if( teamColorID == aprilTagColors.getBlueTeamID() ) {
             telemetry.addData("Status", "BLUE Team Ready!");
         }
-        telemetry.update();
 
         waitForStart();
         runtime.reset();
@@ -69,6 +62,17 @@ public class TeleOP_Decode2025 extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             telemetry.addData("Status", "Run Time: " + runtime.toString());
+            if( teamColorID == aprilTagColors.getRedTeamID() ) {
+                telemetry.addData("Team", "RED");
+            }
+            else if( teamColorID == aprilTagColors.getBlueTeamID() ) {
+                telemetry.addData("Team", "BLUE");
+            }
+            if(currentObeliskColors == null){
+                detectObelisk();
+            }
+
+            telemetry.addData("Obelisk", printCurrentObelisk() );
 
             if(gamepad1.left_trigger > 0) {
                 driveTrain.setSpeedReduction(0.25);
@@ -94,6 +98,12 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             sweeper.reverse(gamepad2.left_bumper);
             sweeper.run();
 
+            webcam.update();
+            ArrayList<AprilTagDetection> detections = webcam.getDetections();
+            for (AprilTagDetection detection: detections ) {
+                telemetry.addData("Detection", detection.id);
+            }
+
             // Attempt to auto-aim and fire ball at the team tower
             if(gamepad2.left_trigger > 0.5 && webcam != null){ autoFire(); }
 
@@ -105,6 +115,26 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
             telemetry.update();
         }
+    }
+
+    private String printCurrentObelisk() {
+        String currentColors = "Unknown";
+
+        if( currentObeliskColors == null){
+            return "Not Set";
+        }
+
+        for (DetectedColor color : currentObeliskColors) {
+            if (color == DetectedColor.PURPLE) {
+                currentColors.concat("P");
+            } else if (color == DetectedColor.GREEN) {
+                currentColors.concat("G");
+            } else {
+                currentColors.concat("U");
+            }
+        }
+
+        return currentColors;
     }
 
     /**
@@ -141,10 +171,12 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             // Ensure the wheels are spinning at that velocity
             launcher.run();
 
+            sleep(500);
+
             // Push the ball out the launcher and return to ready state
             launcher.push();
+            sleep(500);
             launcher.release();
-
             launcher.run();
         }
     }
@@ -171,12 +203,12 @@ public class TeleOP_Decode2025 extends LinearOpMode {
      * @param distance of shooter to april tag into x-component distance robot to basket.
      */
     private double x_Distance(double distance){
-        double launchHeight = 13.75; //distance of point of launch of the robot from the ground, y-component (pla=11.25 + centerOfBall=2.5 = 13.75)
+        double launchHeight = 14.0; //distance of point of launch of the robot from the ground, y-component
         double x_DistanceCamera = 7.0; //distance (x-component) the camera is away from launch point.
-        double y_DistanceCamera = 1.68; //distance (y-component) the camera is away from launch point.
+        double y_DistanceCamera = 1.5; //distance (y-component) the camera is away from launch point.
         double aprilFromTop = 9.25; //distance from center of april tag to top of the basket front wall.
         double aprilTagWallHeight = 38.75; //total height of the basket front wall with the location april tags on it.
-        double Y = aprilTagWallHeight-y_DistanceCamera-launchHeight-aprilFromTop;
+        double Y = 14;    //aprilTagWallHeight-y_DistanceCamera-launchHeight-aprilFromTop
         double X = (Math.sqrt(Math.pow(distance,2)-(Math.pow(Y,2)))-x_DistanceCamera);
         return X;
     }
@@ -185,13 +217,15 @@ public class TeleOP_Decode2025 extends LinearOpMode {
      * Calculate the RPM needed based on the @param x_distance of launcher to basket. (x component)
      */
     private double getRPM(double distance) {
-        double valueInDegrees = 44.3; //launch angle in degrees
+        double valueInDegrees = 45.0; //launch angle in degrees
         double valueInRadians = Math.toRadians(valueInDegrees);
-        double height = 27.75;  //height the ball needs to be off the ground to make basket based from the launcher of robot. 41-13.75
-        double term1 = (60 / (4 * Math.PI));
+        double height = 29.0;  //height the ball needs to be off the ground to make basket based from the launcher of robot. 41-13.75
+        double term1 = (60.0 / (4 * Math.PI));
         double numerator = (386.09 * Math.pow(distance, 2)); // 386.09(D^2)
         double cosineSquared = Math.pow((Math.cos(valueInRadians)), 2);
-        double RPM = (term1 * (Math.sqrt(numerator / (2 * cosineSquared * (distance * (Math.tan(valueInRadians)) - height))))); //total formula to get RPM from x-component distance.
+        double denominator = 2 * cosineSquared * ((distance * (Math.tan(valueInRadians))) - height);
+        double RPM = (term1 * (Math.sqrt(numerator / denominator))); //total formula to get RPM from x-component distance.
+        telemetry.addData("RPM =", RPM);
         return RPM;
     }
 }
