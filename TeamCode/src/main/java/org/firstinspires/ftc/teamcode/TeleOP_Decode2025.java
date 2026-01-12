@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Sweeper;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.lang.reflect.Array;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,26 +50,38 @@ public class TeleOP_Decode2025 extends LinearOpMode {
         sweeper = new Sweeper(hardwareMap, telemetry);
         launcher = new Launcher(hardwareMap, telemetry);
 
-        // Wait for the game to start (driver presses START)
-        if( teamColorID == aprilTagColors.getRedTeamID() ) {
-            telemetry.addData("Status", "RED Team Ready!");
+        long initTime = System.currentTimeMillis();
+
+        // Only spend 5s looking for the obelisk
+        while (currentObeliskColors == null && System.currentTimeMillis() - initTime < 5000) {
+            if (detectObelisk()) {
+                telemetry.addData("Obelisk", "Detected");
+                telemetry.update();
+                break;
+            }
         }
-        else if( teamColorID == aprilTagColors.getBlueTeamID() ) {
+
+        // Wait for the game to start (driver presses START)
+        if (teamColorID == aprilTagColors.getRedTeamID()) {
+            telemetry.addData("Status", "RED Team Ready!");
+        } else if (teamColorID == aprilTagColors.getBlueTeamID()) {
             telemetry.addData("Status", "BLUE Team Ready!");
         }
+
+        telemetry.update();
 
         waitForStart();
         runtime.reset();
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
             if( teamColorID == aprilTagColors.getRedTeamID() ) {
-                telemetry.addData("Team", "RED");
+                telemetry.addData("Red Team", runtime.toString());
             }
             else if( teamColorID == aprilTagColors.getBlueTeamID() ) {
-                telemetry.addData("Team", "BLUE");
+                telemetry.addData("Blue Team", runtime.toString());
             }
+
             if(currentObeliskColors == null){
                 detectObelisk();
             }
