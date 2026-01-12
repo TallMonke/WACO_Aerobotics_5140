@@ -115,8 +115,10 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             if(gamepad2.x) { manualFire(); }
 
             if(gamepad1.a) {
-                telemetry.addData("A Button", "Pressed");
-                driveTrain.rotate(180);
+                driveTrain.rotate(10.0);
+            }
+            if(gamepad1.b) {
+                driveTrain.rotate(-20.0);
             }
 
             // This ensures the launcher is always spun up at the set velocity

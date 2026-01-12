@@ -1,28 +1,18 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.PoseVelocity2d;
-import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.TimeTurn;
-import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
-import com.acmerobotics.roadrunner.TurnConstraints;
-import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 /**
  * Object to define and run the drive motors for a mechanum wheeled robot base.
  */
 public class DriveTrain {
-    // Initialize RoadRunner drive system
-    MecanumDrive drive = null;
-    Pose2d initPose = null;
+    IMU imu = null;
 
     /**
      * Motor objects for the drive train
@@ -59,8 +49,13 @@ public class DriveTrain {
 
         tm = telemetry;
 
-        initPose = new Pose2d( new Vector2d(0, 0), 0 );
-        drive = new MecanumDrive(hardwareMap, initPose );
+        imu = hardwareMap.get(IMU.class, "imu");
+        imu.initialize(new IMU.Parameters(
+                new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
+                        RevHubOrientationOnRobot.UsbFacingDirection.UP
+                )
+        ));
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
@@ -86,8 +81,8 @@ public class DriveTrain {
 
     public void displayTelemetry(){
         if(leftFront != null || leftBack != null || rightFront != null || rightBack != null) {
-            tm.addData("Front Drive L/R Motor: ", "%4.2f, %4.2f", leftFront.getPower(), rightFront.getPower());
-            tm.addData("Back L/R Motor: ", "%4.2f, %4.2f", leftBack.getPower(), rightBack.getPower());
+            tm.addData("Front L/R: ", "%4.2f, %4.2f", leftFront.getPower(), rightFront.getPower());
+            tm.addData("Back L/R: ", "%4.2f, %4.2f", leftBack.getPower(), rightBack.getPower());
         }
     }
 
@@ -131,20 +126,50 @@ public class DriveTrain {
     }
 
     /**
-     * Rotates the robot by the given degrees. Utilizes RoadRunner action builder to simplify controls
+     * Rotates the robot by the given degrees.
      *
      * @param degrees Amount of degrees to rotate the robot
      */
     public void rotate(double degrees){
-        tm.addData("Rotate", degrees);
-        PoseVelocity2d currentPose = drive.updatePoseEstimate();
-        tm.addData("Pose", currentPose.toString());
-        tm.update();
+        imu.resetYaw();
 
-        Action turn = drive.actionBuilder(initPose)
-                .turn(Math.toRadians(degrees))
-                .build();
+        // Example for FTC/FRC environment using a simple PID logic
+        double currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES); // Get current heading from IMU
+        double error = currentAngle - degrees;
 
-        Actions.runBlocking(turn);
+        // Keep error within -180 to 180 range
+        while (error > 180) error -= 360;
+        while (error <= -180) error += 360;
+
+        double kP = 0.05; // Proportional constant (tune for your robot)
+
+        while (Math.abs(error) > 1.0) { // Threshold of 1 degree
+            double power = error * kP;
+
+            // Mecanum rotation: Left side same, Right side opposite
+            leftFront.setPower(power);
+            leftBack.setPower(power);
+            rightFront.setPower(-power);
+            rightBack.setPower(-power);
+
+            currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            error = currentAngle - degrees;
+
+            // Re-normalize error
+            while (error > 180) error -= 360;
+            while (error <= -180) error += 360;
+        }
+
+        stop();
+    }
+
+    /**
+     * Stops the motors by setting power to 0.0
+     */
+    public void stop(){
+        leftFront.setPower(0.0);
+        rightFront.setPower(0.0);
+        leftBack.setPower(0.0);
+        rightBack.setPower(0.0);
     }
 }
