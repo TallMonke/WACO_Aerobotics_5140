@@ -1,14 +1,29 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.PoseVelocity2d;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.TimeTurn;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.TurnConstraints;
+import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 /**
  * Object to define and run the drive motors for a mechanum wheeled robot base.
  */
 public class DriveTrain {
+    // Initialize RoadRunner drive system
+    MecanumDrive drive = null;
+    Pose2d initPose = null;
+
     /**
      * Motor objects for the drive train
      */
@@ -43,6 +58,9 @@ public class DriveTrain {
         }
 
         tm = telemetry;
+
+        initPose = new Pose2d( new Vector2d(0, 0), 0 );
+        drive = new MecanumDrive(hardwareMap, initPose );
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
@@ -113,11 +131,20 @@ public class DriveTrain {
     }
 
     /**
-     * Rotates the robot by the given degrees. Helper function calling run()
+     * Rotates the robot by the given degrees. Utilizes RoadRunner action builder to simplify controls
      *
      * @param degrees Amount of degrees to rotate the robot
      */
     public void rotate(double degrees){
-        this.run(0, 0, degrees );
+        tm.addData("Rotate", degrees);
+        PoseVelocity2d currentPose = drive.updatePoseEstimate();
+        tm.addData("Pose", currentPose.toString());
+        tm.update();
+
+        Action turn = drive.actionBuilder(initPose)
+                .turn(Math.toRadians(degrees))
+                .build();
+
+        Actions.runBlocking(turn);
     }
 }
