@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -120,6 +122,17 @@ public class Revolver {
         // Update debounce tracker
         buttonWasPressedUp = buttonIsPressed;
     }
+
+    public Action stepUpAction(){
+        return new Action() {
+            @Override
+            public boolean run(TelemetryPacket packet) {
+                stepUp(true);
+
+                return true;
+            }
+        };
+    }
     
     /**
      * Reverses the revolver to the previous position
@@ -149,6 +162,17 @@ public class Revolver {
 
         // Update debounce tracker
         buttonWasPressedDown = buttonIsPressed;
+    }
+
+    public Action stepDownAction(){
+        return new Action() {
+            @Override
+            public boolean run(TelemetryPacket packet) {
+                stepDown(true);
+
+                return true;
+            }
+        };
     }
 
     public void displayTelemetry(){

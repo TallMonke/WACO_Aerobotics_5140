@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -53,6 +55,30 @@ public class Sweeper {
         else {
             sweeperSpeed = 0.0;
         }
+    }
+
+    public Action enableAction(){
+        return new Action() {
+            @Override
+            public boolean run(TelemetryPacket packet) {
+                enable(true);
+                sweeperMotor.setPower(sweeperSpeed);
+
+                return true;
+            }
+        };
+    }
+
+    public Action disableAction(){
+        return new Action() {
+            @Override
+            public boolean run(TelemetryPacket packet) {
+                enable(false);
+                sweeperMotor.setPower(sweeperSpeed);
+
+                return true;
+            }
+        };
     }
 
     /**

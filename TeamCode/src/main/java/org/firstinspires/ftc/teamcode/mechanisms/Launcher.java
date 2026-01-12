@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -70,6 +74,27 @@ public class Launcher {
     }
 
     /**
+     * RoadRunner Action to start spinning the shooter wheels at setWheelVelocity
+     *
+     * @return RoadRunner Action to be used in the Autonomous OpModes
+     */
+    public Action spinUpAction() {
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                if(leftShoot == null || rightShoot == null) {
+                    return false;
+                }
+
+                leftShoot.setVelocity(wheelVelocity);
+                rightShoot.setVelocity(wheelVelocity);
+
+                return true;
+            }
+        };
+    }
+
+    /**
      * Sets the position of the feed servo to push the ball forward
      */
     public void push()
@@ -78,9 +103,49 @@ public class Launcher {
     }
 
     /**
+     * RoadRunner Action to move the feeder arm to the "fire" position
+     *
+     * @return RoadRunner Action to be used in the Autonomous OpModes
+     */
+    public Action pushAction() {
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                if(leftShoot == null || rightShoot == null) {
+                    return false;
+                }
+
+                ballFeedServo.setPosition(PUSH_FEED_POSITION);
+
+                return true;
+            }
+        };
+    }
+
+    /**
      * Sets the position of the feed servo to the default/rest position
      */
     public void release() { ballFeedServo.setPosition(INIT_FEED_POSITION); }
+
+    /**
+     * RoadRunner Action to move the feeder arm to default position
+     *
+     * @return RoadRunner Action to be used in the Autonomous OpModes
+     */
+    public Action releaseAction() {
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                if(leftShoot == null || rightShoot == null) {
+                    return false;
+                }
+
+                ballFeedServo.setPosition(INIT_FEED_POSITION);
+
+                return true;
+            }
+        };
+    }
 
     public void displayTelemetry(){
         if(tm != null){
