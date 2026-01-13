@@ -5,6 +5,9 @@ import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.x_Distanc
 
 import android.annotation.SuppressLint;
 
+import com.acmerobotics.roadrunner.ParallelAction;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -86,17 +89,11 @@ public class TeleOP_Decode extends LinearOpMode {
                 telemetry.addData("Blue Team", runtime.toString());
             }
 
-            if(currentObeliskColors == null){
-                detectObelisk();
-            }
-
             // Get the launcher spun up
             if (!init) {
                 launcher.setWheelVelocity(950.0);
                 launcher.run();
             }
-
-            telemetry.addData("Obelisk", printCurrentObelisk() );
 
             if(gamepad1.left_trigger > 0) {
                 driveTrain.setSpeedReduction(0.25);
@@ -122,15 +119,16 @@ public class TeleOP_Decode extends LinearOpMode {
             sweeper.reverse(gamepad2.left_bumper);
             sweeper.run();
 
-//            webcam.update();
-//            List<AprilTagDetection> detections = webcam.getDetectedTags();
-//            for (AprilTagDetection detection: detections ) {
-//                if(detection != null && detection.ftcPose != null) {
-//                    telemetry.addData("Detection",
-//                            String.format("ID: %d, R: %.2f, B: %.2f",
-//                                    detection.id, detection.ftcPose.range, detection.ftcPose.bearing));
-//                }
-//            }
+            // TODO Remove this as its not needed after testing
+            webcam.update();
+            List<AprilTagDetection> detections = webcam.getDetectedTags();
+            for (AprilTagDetection detection: detections ) {
+                if(detection != null && detection.ftcPose != null) {
+                    telemetry.addData("Detection",
+                            String.format("ID: %d, R: %.2f, B: %.2f",
+                                    detection.id, detection.ftcPose.range, detection.ftcPose.bearing));
+                }
+            }
 
             // Attempt to auto-aim and fire ball at the team tower
             if(gamepad2.left_trigger > 0.5 && webcam != null){ autoFire(); }
@@ -138,8 +136,18 @@ public class TeleOP_Decode extends LinearOpMode {
             // Just push the ball out the launcher
             if(gamepad2.x) { manualFire(); }
 
-            if(gamepad1.a) {
-                driveTrain.rotate(90.0);
+            if(gamepad2.a) {
+                Actions.runBlocking( new SequentialAction(
+                        revolver.stepToLoadAction()
+                    )
+                );
+            }
+
+            if(gamepad2.b) {
+                Actions.runBlocking( new SequentialAction(
+                                revolver.stepToFireAction()
+                        )
+                );
             }
 
             telemetry.update();
@@ -171,15 +179,14 @@ public class TeleOP_Decode extends LinearOpMode {
      */
     private void manualFire() {
         // Ensure the launcher is running
-        launcher.run();
-
-        launcher.push();
-        sleep(500);
-
-        launcher.release();
-
-        // Ensure the launcher is running
-        launcher.run();
+        Actions.runBlocking(new ParallelAction(
+                launcher.spinUp(900),
+                new SequentialAction(
+                        launcher.fireAction(),
+                        launcher.releaseAction()
+                )
+            )
+        );
     }
 
     /**
@@ -212,19 +219,14 @@ public class TeleOP_Decode extends LinearOpMode {
             telemetry.addData("Detection", "SPEED");
             telemetry.update();
 
-            launcher.setWheelVelocity(rpm);
-
-            // Ensure the wheels are spinning at that velocity
-            launcher.run();
-
-            sleep(750);
-
-            // Fire the ball and return to ready state
-            launcher.push();
-            sleep(500);
-
-            launcher.release();
-            launcher.run();
+            Actions.runBlocking(new ParallelAction(
+                            launcher.spinUp(rpm),
+                            new SequentialAction(
+                                    launcher.fireAction(),
+                                    launcher.releaseAction()
+                            )
+                    )
+            );
         }
         else{
             telemetry.addData("Detection", "Not Found");

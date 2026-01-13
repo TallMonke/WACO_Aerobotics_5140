@@ -98,7 +98,7 @@ public class Launcher {
     /**
      * Sets the position of the feed servo to push the ball forward
      */
-    public void push()
+    public void fire()
     {
         ballFeedServo.setPosition(PUSH_FEED_POSITION);
     }
@@ -117,7 +117,7 @@ public class Launcher {
                 if (timer == null) {
                     timer = new ElapsedTime();
 
-                    push();
+                    fire();
                 }
 
                 telemetryPacket.addLine("Feed Pushed");

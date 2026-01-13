@@ -9,6 +9,7 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTagColors;
@@ -22,6 +23,8 @@ import java.util.ArrayList;
 
 @Autonomous(name = "RED Auto 1", group = "autonomous")
 public final class AutoOP_PoseFar extends LinearOpMode {
+    ElapsedTime timer = null;
+
     static private int HOME_X = 31;
     static private int HOME_Y = -10;
     static private double HOME_ANGLE = -45;
@@ -37,7 +40,7 @@ public final class AutoOP_PoseFar extends LinearOpMode {
     static private Pose2d thirdLinePos = new Pose2d(-12, -42, Math.toRadians(-90));
 
     // Human player loading zone, changes based on team color
-    static private Pose2d loadingPos = null; // position based on team color
+    static private Vector2d loadingPos = null; // position based on team color
 
     // Hardware objects
     FtcDashboard dashboard = null;
@@ -70,16 +73,18 @@ public final class AutoOP_PoseFar extends LinearOpMode {
         launcher = new Launcher(hardwareMap, telemetry);
 
         if (teamColorID == aprilTagColors.getRedTeamID()) {
-            loadingPos = new Pose2d( 56, -56, Math.toRadians(45));
+            loadingPos = new Vector2d( 56, -56);
 
             sendTelemetryPacket("RED Team Ready!");
         } else if (teamColorID == aprilTagColors.getBlueTeamID()) {
-            loadingPos = new Pose2d( 56, 56, Math.toRadians(45));
+            loadingPos = new Vector2d( 56, 56);
 
             sendTelemetryPacket("BLUE Team Ready!");
         }
 
         waitForStart();
+
+        timer = new ElapsedTime();
 
         // Drive "backward" away from wall, but touching far shooting zone
         Actions.runBlocking( new SequentialAction(
@@ -120,13 +125,13 @@ public final class AutoOP_PoseFar extends LinearOpMode {
         double rpm = 900;
 
         // Fire the ball
-        if(!firingSequence(rpm)) {
+        if(!tripleFireSequence(rpm)) {
             sendTelemetryPacket("Firing sequence failed");
             stop();
         }
 
-        // Drive to first line of field balls and intake
-        if(!intakeFirstLine()) {
+        // ***First Line of Balls***
+        if(!intakeBallLine(1)) {
             sendTelemetryPacket("Error running intake sequence");
             stop();
         }
@@ -142,13 +147,72 @@ public final class AutoOP_PoseFar extends LinearOpMode {
         // TODO
         //  Detect tower, auto-aim, calculate firing velocity
 
-        if(!firingSequence(rpm)) {
+        if(!tripleFireSequence(rpm)) {
             sendTelemetryPacket("Error running firing sequence");
             stop();
         }
+
+        // Ensure we have plenty of time to get back to human player
+        if(timer.seconds() <= 20) {
+            // ***Second Line of Balls***
+            if (!intakeBallLine(2)) {
+                sendTelemetryPacket("Error running intake sequence");
+                stop();
+            }
+
+            Actions.runBlocking(
+                    new SequentialAction(
+                            drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
+                                    .splineTo(midShootingPos, Math.toRadians(90))
+                                    .build()
+                    )
+            );
+
+            // TODO
+            //  Detect tower, auto-aim, calculate firing velocity
+
+            if (!tripleFireSequence(rpm)) {
+                sendTelemetryPacket("Error running firing sequence");
+                stop();
+            }
+        }
+
+        // Ensure we have plenty of time to get back to human player
+        if(timer.seconds() <= 20) {
+            // ***Third Line of Balls***
+            if (!intakeBallLine(2)) {
+                sendTelemetryPacket("Error running intake sequence");
+                stop();
+            }
+
+            Actions.runBlocking(
+                    new SequentialAction(
+                            drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
+                                    .splineTo(nearShootingPos, Math.toRadians(90))
+                                    .build()
+                    )
+            );
+
+            // TODO
+            //  Detect tower, auto-aim, calculate firing velocity
+
+            if (!tripleFireSequence(rpm)) {
+                sendTelemetryPacket("Error running firing sequence");
+                stop();
+            }
+        }
+
+        // Return to loading zone to start TeleOp
+        Actions.runBlocking(
+                new SequentialAction(
+                        drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
+                                .splineTo(loadingPos, Math.toRadians(90))
+                                .build()
+                )
+        );
     }
 
-    private boolean firingSequence(double rpm){
+    private boolean singleFireSequence(double rpm) {
         if(launcher == null || revolver == null){
             sendTelemetryPacket("Invalid Hardware");
             return false;
@@ -158,6 +222,27 @@ public final class AutoOP_PoseFar extends LinearOpMode {
                 new ParallelAction(
                         launcher.spinUp(rpm), // Ensure the launcher runs for the entire action
                         new SequentialAction(
+                                revolver.stepToFireAction(), // Select next ball in firing slot
+                                launcher.fireAction(), // Fire loaded ball
+                                launcher.releaseAction()
+                        )
+                )
+        );
+
+        return true;
+    }
+
+    private boolean tripleFireSequence(double rpm){
+        if(launcher == null || revolver == null){
+            sendTelemetryPacket("Invalid Hardware");
+            return false;
+        }
+
+        Actions.runBlocking(
+                new ParallelAction(
+                        launcher.spinUp(rpm), // Ensure the launcher runs for the entire action
+                        new SequentialAction(
+                                revolver.stepToFireAction(), // Select next ball in firing slot
                                 launcher.fireAction(), // Fire loaded ball
                                 launcher.releaseAction(),
                                 revolver.stepToFireAction(), // Select next ball in firing slot
@@ -173,10 +258,27 @@ public final class AutoOP_PoseFar extends LinearOpMode {
         return true;
     }
 
-    private boolean intakeFirstLine() {
+    private boolean intakeBallLine(int row) {
         if (sweeper == null || drive == null || revolver == null) {
             sendTelemetryPacket("Invalid Hardware");
             return false;
+        }
+
+        Pose2d ballLinePos = null;
+
+        switch (row) {
+            case 1:
+                ballLinePos = firstLinePos;
+                break;
+            case 2:
+                ballLinePos = secondLinePos;
+                break;
+            case 3:
+                ballLinePos = thirdLinePos;
+                break;
+            default:
+                sendTelemetryPacket("Invalid ball line position");
+                return false;
         }
 
         Actions.runBlocking(
@@ -185,15 +287,15 @@ public final class AutoOP_PoseFar extends LinearOpMode {
                         new SequentialAction(
                                 revolver.stepToLoadAction(), // Select next ball in loading slot
                                 drive.actionBuilder(drive.localizer.getPose()) // Suck up first ball
-                                        .splineTo(new Vector2d(firstLinePos.component1().x, firstLinePos.component1().y), Math.toRadians(90))
+                                        .splineTo(new Vector2d(ballLinePos.component1().x, ballLinePos.component1().y), Math.toRadians(90))
                                         .build(),
                                 revolver.stepToLoadAction(), // Select next ball in loading slot
                                 drive.actionBuilder(drive.localizer.getPose()) // Suck up second ball
-                                        .lineToY(firstLinePos.component1().y - 5)
+                                        .lineToY(ballLinePos.component1().y - 5)
                                         .build(),
                                 revolver.stepToLoadAction(), // Select next ball in loading slot
                                 drive.actionBuilder(drive.localizer.getPose()) // Suck up third ball
-                                        .lineToY(firstLinePos.component1().y - 10)
+                                        .lineToY(ballLinePos.component1().y - 10)
                                         .build(),
                                 sweeper.disableAction()
                         )
