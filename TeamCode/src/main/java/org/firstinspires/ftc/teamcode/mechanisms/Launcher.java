@@ -108,7 +108,7 @@ public class Launcher {
      *
      * @return RoadRunner Action to be used in the Autonomous OpModes
      */
-    public Action pushAction() {
+    public Action fireAction() {
         return new Action() {
             ElapsedTime timer = null;
 

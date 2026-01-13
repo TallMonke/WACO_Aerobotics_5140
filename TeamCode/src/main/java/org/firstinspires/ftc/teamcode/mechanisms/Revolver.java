@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
+import static android.os.SystemClock.sleep;
+
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -10,8 +12,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-
-import org.firstinspires.ftc.teamcode.mechanisms.DetectedColor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,7 +97,8 @@ public class Revolver {
     }
 
     /**
-     * Increases the revolver to the next position
+     * Increases the revolver to the next position. Sleeps for 500ms to allow time for the revolver
+     * to actually complete the operation
      */
     public void stepUp(boolean buttonIsPressed){
         if (buttonIsPressed && !buttonWasPressedUp) {
@@ -120,41 +121,42 @@ public class Revolver {
 
             // Move the servo to the new position
             revolverDrive.setPosition(revolverPositions.get(currentIndex));
+            sleep(500);
         }
 
         // Update debounce tracker
         buttonWasPressedUp = buttonIsPressed;
     }
 
-    public Action stepUpAction(){
+    /**
+     * Turns the ball revolver to the next loading position. Even indexes are "loading" positions.
+     * @return RoadRunner Action to be used in the Autonomous OpModes
+     */
+    public Action stepToLoadAction(){
 
         return new Action() {
-            boolean init = false;
+            ElapsedTime timer = null;
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                if (!init) {
-                    init = true;
+                if (timer == null) {
+                    timer = new ElapsedTime();
 
-                    // cycle revolver index up
-                    if (currentIndex == 5) {
-                        currentIndex = 0;
-                    } else {
-                        currentIndex++;
-                    }
+                    currentIndex = selectNextEvenIndex();
 
                     // Move the servo to the new position
                     revolverDrive.setPosition(revolverPositions.get(currentIndex));
                     packet.put("revolver_position", revolverPositions.get(currentIndex));
                 }
 
-                return revolverDrive.getPosition() == revolverPositions.get(currentIndex);
+                return (timer.seconds() < 2);
             }
         };
     }
     
     /**
-     * Reverses the revolver to the previous position
+     * Reverses the revolver to the previous position. This will sleep for 500ms to allow time
+     * for the revolver to actually complete the operation
      */
     public void stepDown(boolean buttonIsPressed){
         if (buttonIsPressed && !buttonWasPressedDown) {
@@ -177,35 +179,35 @@ public class Revolver {
 
             // Move the servo to the new position
             revolverDrive.setPosition(revolverPositions.get(currentIndex));
+            sleep(500);
         }
 
         // Update debounce tracker
         buttonWasPressedDown = buttonIsPressed;
     }
 
-    public Action stepDownAction(){
+    /**
+     * Turns the ball revolver to the next firing position. Odd indexes are "firing" positions.
+     * @return RoadRunner Action to be used in the Autonomous OpModes
+     */
+    public Action stepToFireAction(){
 
         return new Action() {
-            boolean init = false;
+            ElapsedTime timer = null;
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                if (!init) {
-                    init = true;
+                if (timer == null) {
+                    timer = new ElapsedTime();
 
-                    // cycle revolver index down
-                    if (currentIndex == 0) {
-                        currentIndex = 5;
-                    } else {
-                        currentIndex--;
-                    }
+                    currentIndex = selectNextOddIndex();
 
                     // Move the servo to the new position
                     revolverDrive.setPosition(revolverPositions.get(currentIndex));
                     packet.put("revolver_position", revolverPositions.get(currentIndex));
                 }
 
-                return revolverDrive.getPosition() == revolverPositions.get(currentIndex);
+                return (timer.seconds() < 1);
             }
         };
     }
@@ -229,6 +231,40 @@ public class Revolver {
             }
         }
     }
+
+    /**
+     * Selects the next odd index in the revolver.
+     * @return Next index that is odd
+     */
+    private int selectNextOddIndex() {
+        int nextIndex = currentIndex;
+
+        do {
+            nextIndex++;
+            if (nextIndex > 5) {
+                nextIndex = 0;
+            }
+        } while (nextIndex % 2 != 0);
+
+        return nextIndex;
+    }
+
+    /**
+     * Selects the next even index in the revolver.
+     * @return Next index that is even
+     */
+    private int selectNextEvenIndex() {
+        int nextIndex = currentIndex;
+        do {
+            nextIndex++;
+            if (nextIndex > 5) {
+                nextIndex = 0;
+            }
+        } while (nextIndex % 2 == 0);
+
+        return nextIndex;
+    }
+
     /**
      * Performs the actions for Revolver sorting mechanism
      */

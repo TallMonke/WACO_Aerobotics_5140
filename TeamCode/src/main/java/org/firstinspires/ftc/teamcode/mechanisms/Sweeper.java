@@ -76,7 +76,7 @@ public class Sweeper {
                 enable(false);
                 sweeperMotor.setPower(sweeperSpeed);
 
-                return true;
+                return false;
             }
         };
     }
