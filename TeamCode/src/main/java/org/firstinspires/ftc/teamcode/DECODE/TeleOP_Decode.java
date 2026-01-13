@@ -21,8 +21,8 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import java.util.ArrayList;
 import java.util.List;
 
-@TeleOp(name="TeleOP_Decode2025", group="Linear OpMode")
-public class TeleOP_Decode2025 extends LinearOpMode {
+@TeleOp(name="TeleOP_Decode", group="Linear OpMode")
+public class TeleOP_Decode extends LinearOpMode {
     private final AprilTagColors aprilTagColors = new AprilTagColors();
     // Obelisk colors hold the color order of the balls to shoot
     private ArrayList<DetectedColor> currentObeliskColors = null;
@@ -30,7 +30,8 @@ public class TeleOP_Decode2025 extends LinearOpMode {
     // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
     // we should aim for when shooting
     private Integer teamColorID = aprilTagColors.getRedTeamID();
-    private AprilTagWebcam  webcam;
+    private AprilTagWebcam  webcam = null;
+    private boolean autoFireInit = false;
 
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
@@ -53,7 +54,7 @@ public class TeleOP_Decode2025 extends LinearOpMode {
 
         long initTime = System.currentTimeMillis();
 
-        // Only spend 5s looking for the obelisk
+        /*/ Only spend 5s looking for the obelisk
         while (currentObeliskColors == null && System.currentTimeMillis() - initTime < 5000) {
             if (detectObelisk()) {
                 telemetry.addData("Obelisk", "Detected");
@@ -61,7 +62,7 @@ public class TeleOP_Decode2025 extends LinearOpMode {
                 break;
             }
         }
-
+        */
         // Wait for the game to start (driver presses START)
         if (teamColorID == aprilTagColors.getRedTeamID()) {
             telemetry.addData("Status", "RED Team Ready!");
@@ -86,6 +87,10 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             if(currentObeliskColors == null){
                 detectObelisk();
             }
+
+            // Get the launcher spun up
+            launcher.setWheelVelocity(950.0);
+            launcher.run();
 
             telemetry.addData("Obelisk", printCurrentObelisk() );
 
@@ -113,14 +118,15 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             sweeper.reverse(gamepad2.left_bumper);
             sweeper.run();
 
-            webcam.update();
-            List<AprilTagDetection> detections = webcam.getDetectedTags();
-            for (AprilTagDetection detection: detections ) {
-                if(detection != null && detection.ftcPose != null) {
-                    telemetry.addData("Detection",
-                            String.format("ID: %d, R: %.2f, B: %.2f", detection.id, detection.ftcPose.range, detection.ftcPose.bearing));
-                }
-            }
+//            webcam.update();
+//            List<AprilTagDetection> detections = webcam.getDetectedTags();
+//            for (AprilTagDetection detection: detections ) {
+//                if(detection != null && detection.ftcPose != null) {
+//                    telemetry.addData("Detection",
+//                            String.format("ID: %d, R: %.2f, B: %.2f",
+//                                    detection.id, detection.ftcPose.range, detection.ftcPose.bearing));
+//                }
+//            }
 
             // Attempt to auto-aim and fire ball at the team tower
             if(gamepad2.left_trigger > 0.5 && webcam != null){ autoFire(); }
@@ -182,6 +188,11 @@ public class TeleOP_Decode2025 extends LinearOpMode {
      * Attempt to auto-aim (move robot) and fire ball at the team tower
      */
     private void autoFire() {
+        if(webcam == null || autoFireInit)
+            return;
+
+        autoFireInit = true;
+
         // detect target AprilTag
         webcam.update();
         AprilTagDetection towerDetection = webcam.getTagByID(teamColorID);
@@ -189,15 +200,19 @@ public class TeleOP_Decode2025 extends LinearOpMode {
         // Calculate RPM from range to April Tag
         // Set the wheel velocity to achieve distance
         if (towerDetection != null && towerDetection.ftcPose != null) {
+            telemetry.addData("Detection", "Found");
+            telemetry.update();
+
             // Steer robot to center AprilTag using the pose bearing which is the angle
             // from the camera to the AprilTag center
-            aim( towerDetection );
-
-            webcam.update();
-            towerDetection = webcam.getTagByID(teamColorID);
+            aim(towerDetection);
+            telemetry.addData("Detection", "AIM");
+            telemetry.update();
 
             // Calculate the velocity needed to shoot the ball at the correct distance
             double rpm = getRPM(x_Distance(towerDetection.ftcPose.range));
+            telemetry.addData("Detection", "SPEED");
+            telemetry.update();
 
             launcher.setWheelVelocity(rpm);
 
@@ -213,6 +228,11 @@ public class TeleOP_Decode2025 extends LinearOpMode {
             launcher.release();
             launcher.run();
         }
+        else{
+            telemetry.addData("Detection", "Not Found");
+        }
+
+        autoFireInit = false;
     }
 
     /**
@@ -222,9 +242,9 @@ public class TeleOP_Decode2025 extends LinearOpMode {
      * @param target Target to steer the robot to center the camera
      */
     private void aim(AprilTagDetection target) {
-        final double bearingWeighting = -180.0;
+        final double bearingWeighting = 1.0;
 
-        driveTrain.rotate(-target.ftcPose.bearing + bearingWeighting);
+        driveTrain.rotate(target.ftcPose.bearing + bearingWeighting);
     }
 
     private Boolean detectObelisk() {

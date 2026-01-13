@@ -142,9 +142,12 @@ public class DriveTrain {
         while (error > 180) error -= 360;
         while (error <= -180) error += 360;
 
-        double kP = 0.05; // Proportional constant (tune for your robot)
+        double kP = 0.07; // Proportional constant (tune for your robot)
 
-        while (Math.abs(error) > 1.0) { // Threshold of 1 degree
+        while (Math.abs(error) > 1.5) { // Threshold of 1 degree
+            tm.addData("ROTATE", error);
+            tm.update();
+
             double power = error * kP;
 
             // Mecanum rotation: Left side same, Right side opposite
@@ -161,13 +164,13 @@ public class DriveTrain {
             while (error <= -180) error += 360;
         }
 
-        stop();
+        stopDrive();
     }
 
     /**
      * Stops the motors by setting power to 0.0
      */
-    public void stop(){
+    public void stopDrive(){
         leftFront.setPower(0.0);
         rightFront.setPower(0.0);
         leftBack.setPower(0.0);
