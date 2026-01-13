@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -109,15 +110,19 @@ public class Launcher {
      */
     public Action pushAction() {
         return new Action() {
+            ElapsedTime timer = null;
+
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                if(leftShoot == null || rightShoot == null) {
-                    return false;
+                if (timer == null) {
+                    timer = new ElapsedTime();
+
+                    push();
                 }
 
-                ballFeedServo.setPosition(PUSH_FEED_POSITION);
+                telemetryPacket.addLine("Feed Pushed");
 
-                return true;
+                return timer.seconds() < 1;
             }
         };
     }
@@ -134,15 +139,19 @@ public class Launcher {
      */
     public Action releaseAction() {
         return new Action() {
+            ElapsedTime timer = null;
+
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                if(leftShoot == null || rightShoot == null) {
-                    return false;
+                if (timer == null) {
+                    timer = new ElapsedTime();
+
+                    release();
                 }
 
-                ballFeedServo.setPosition(INIT_FEED_POSITION);
+                telemetryPacket.addLine("Feed Released");
 
-                return true;
+                return timer.seconds() < 1;
             }
         };
     }
@@ -163,5 +172,22 @@ public class Launcher {
         rightShoot.setVelocity(wheelVelocity);
 
         displayTelemetry();
+    }
+
+    public Action spinUp(double velocity) {
+        wheelVelocity = velocity;
+
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                leftShoot.setVelocity(wheelVelocity);
+                rightShoot.setVelocity(wheelVelocity);
+
+                telemetryPacket.put("launcher_velocity", wheelVelocity);
+                displayTelemetry();
+
+                return false;
+            }
+        };
     }
 }

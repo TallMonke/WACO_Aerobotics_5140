@@ -44,6 +44,8 @@ public class TeleOP_Decode extends LinearOpMode {
     @SuppressLint("DefaultLocale")
     @Override
     public void runOpMode() {
+        boolean init = false;
+
         // Initialize the hardware mechanisms
         // TODO: Select which team color we are, use the AprilTagColors to get red/blue team ID values
         webcam = new AprilTagWebcam(hardwareMap, telemetry);
@@ -89,8 +91,10 @@ public class TeleOP_Decode extends LinearOpMode {
             }
 
             // Get the launcher spun up
-            launcher.setWheelVelocity(950.0);
-            launcher.run();
+            if (!init) {
+                launcher.setWheelVelocity(950.0);
+                launcher.run();
+            }
 
             telemetry.addData("Obelisk", printCurrentObelisk() );
 
@@ -135,14 +139,8 @@ public class TeleOP_Decode extends LinearOpMode {
             if(gamepad2.x) { manualFire(); }
 
             if(gamepad1.a) {
-                driveTrain.rotate(10.0);
+                driveTrain.rotate(90.0);
             }
-            if(gamepad1.b) {
-                driveTrain.rotate(-20.0);
-            }
-
-            // This ensures the launcher is always spun up at the set velocity
-            launcher.run();
 
             telemetry.update();
         }

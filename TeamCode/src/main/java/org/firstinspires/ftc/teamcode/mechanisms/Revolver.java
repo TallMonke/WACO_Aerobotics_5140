@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -19,7 +22,7 @@ public class Revolver {
 
     // Maps the positions of the Servo to the index of the revolver. Even indexes are loading positions
     // Odd indexes are firing positions
-    List<Double> revolverPositions = new ArrayList<>(6);
+    List<Double> revolverPositions = new ArrayList<>();
 
     // Balls currently loaded into the revolver
     List<DetectedColor> currentLoad = new ArrayList<>();
@@ -124,12 +127,28 @@ public class Revolver {
     }
 
     public Action stepUpAction(){
-        return new Action() {
-            @Override
-            public boolean run(TelemetryPacket packet) {
-                stepUp(true);
 
-                return true;
+        return new Action() {
+            boolean init = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!init) {
+                    init = true;
+
+                    // cycle revolver index up
+                    if (currentIndex == 5) {
+                        currentIndex = 0;
+                    } else {
+                        currentIndex++;
+                    }
+
+                    // Move the servo to the new position
+                    revolverDrive.setPosition(revolverPositions.get(currentIndex));
+                    packet.put("revolver_position", revolverPositions.get(currentIndex));
+                }
+
+                return revolverDrive.getPosition() == revolverPositions.get(currentIndex);
             }
         };
     }
@@ -165,12 +184,28 @@ public class Revolver {
     }
 
     public Action stepDownAction(){
-        return new Action() {
-            @Override
-            public boolean run(TelemetryPacket packet) {
-                stepDown(true);
 
-                return true;
+        return new Action() {
+            boolean init = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!init) {
+                    init = true;
+
+                    // cycle revolver index down
+                    if (currentIndex == 0) {
+                        currentIndex = 5;
+                    } else {
+                        currentIndex--;
+                    }
+
+                    // Move the servo to the new position
+                    revolverDrive.setPosition(revolverPositions.get(currentIndex));
+                    packet.put("revolver_position", revolverPositions.get(currentIndex));
+                }
+
+                return revolverDrive.getPosition() == revolverPositions.get(currentIndex);
             }
         };
     }

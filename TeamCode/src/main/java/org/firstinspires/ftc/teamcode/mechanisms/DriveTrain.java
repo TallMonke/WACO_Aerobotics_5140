@@ -1,19 +1,20 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 /**
  * Object to define and run the drive motors for a mechanum wheeled robot base.
  */
 public class DriveTrain {
-    IMU imu = null;
+
+    MecanumDrive drive = null;
 
     /**
      * Motor objects for the drive train
@@ -50,13 +51,7 @@ public class DriveTrain {
 
         tm = telemetry;
 
-        imu = hardwareMap.get(IMU.class, "imu");
-        imu.initialize(new IMU.Parameters(
-                new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
-                        RevHubOrientationOnRobot.UsbFacingDirection.UP
-                )
-        ));
+        drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, Math.toRadians(0)));
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
@@ -127,44 +122,16 @@ public class DriveTrain {
     }
 
     /**
-     * Rotates the robot by the given degrees.
+     * Rotates the robot by the given degrees using the MecanumDrive
      *
      * @param degrees Amount of degrees to rotate the robot
      */
     public void rotate(double degrees){
-        imu.resetYaw();
-
-        // Example for FTC/FRC environment using a simple PID logic
-        double currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES); // Get current heading from IMU
-        double error = currentAngle - degrees;
-
-        // Keep error within -180 to 180 range
-        while (error > 180) error -= 360;
-        while (error <= -180) error += 360;
-
-        double kP = 0.07; // Proportional constant (tune for your robot)
-
-        while (Math.abs(error) > 1.5) { // Threshold of 1 degree
-            tm.addData("ROTATE", error);
-            tm.update();
-
-            double power = error * kP;
-
-            // Mecanum rotation: Left side same, Right side opposite
-            leftFront.setPower(power);
-            leftBack.setPower(power);
-            rightFront.setPower(-power);
-            rightBack.setPower(-power);
-
-            currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-            error = currentAngle - degrees;
-
-            // Re-normalize error
-            while (error > 180) error -= 360;
-            while (error <= -180) error += 360;
-        }
-
-        stopDrive();
+        Actions.runBlocking(new SequentialAction(
+                drive.actionBuilder(drive.localizer.getPose())
+                        .turn(Math.toRadians(degrees))
+                        .build())
+        );
     }
 
     /**

@@ -3,8 +3,11 @@ package org.firstinspires.ftc.teamcode.DECODE;
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.getRPM;
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.x_Distance;
 
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -20,7 +23,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 
-@Autonomous(name="Auto Pose 1", group = "autonomous")
+@Autonomous(name = "Auto Pose Far", group = "autonomous")
 public final class AutoOP_PoseFar extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
@@ -50,78 +53,77 @@ public final class AutoOP_PoseFar extends LinearOpMode {
         Actions.runBlocking( new SequentialAction(
                 drive.actionBuilder(drive.localizer.getPose())
                         .lineToX(42)
-                        .lineToY(51)
                         .turn(Math.toRadians(45)) // Turn towards tower
                         .build())
         );
 
         // Detect the team tower AprilTag
-        webcam.update();
-        AprilTagDetection towerDetection = webcam.getTagByID(teamColorID);
-
-        // Turn 1 degree attempting to find target AprilTag
-        while (towerDetection == null) {
-            Actions.runBlocking( new SequentialAction(
-                    drive.actionBuilder(drive.localizer.getPose())
-                            .turn(Math.toRadians(1.0)) // Turn towards tower
-                            .build())
-            );
-            webcam.update();
-            towerDetection = webcam.getTagByID(teamColorID);
-        }
-
-        // Aim robot towards team tower
-        Actions.runBlocking( new SequentialAction(
-                drive.actionBuilder(drive.localizer.getPose())
-                        .turn(Math.toRadians(Math.toRadians(towerDetection.ftcPose.bearing)))
-                        .build())
-        );
+//        webcam.update();
+//        AprilTagDetection towerDetection = webcam.getTagByID(teamColorID);
+//
+//        // Turn 1 degree attempting to find target AprilTag
+//        while (towerDetection == null) {
+//            Actions.runBlocking( new SequentialAction(
+//                    drive.actionBuilder(drive.localizer.getPose())
+//                            .turn(Math.toRadians(1.0)) // Turn towards tower
+//                            .build())
+//            );
+//            webcam.update();
+//            towerDetection = webcam.getTagByID(teamColorID);
+//        }
+//
+//        // Aim robot towards team tower
+//        Actions.runBlocking( new SequentialAction(
+//                drive.actionBuilder(drive.localizer.getPose())
+//                        .turn(Math.toRadians(Math.toRadians(towerDetection.ftcPose.bearing)))
+//                        .build())
+//        );
 
         // Calculate the velocity needed to shoot the ball at the correct distance
-        webcam.update();
-        towerDetection = webcam.getTagByID(teamColorID);
-
-        double rpm = getRPM(x_Distance(towerDetection.ftcPose.range));
-
-        // Spin up launcher
-        launcher.setWheelVelocity(rpm);
+//        webcam.update();
+//        towerDetection = webcam.getTagByID(teamColorID);
+//
+//        double rpm = getRPM(x_Distance(towerDetection.ftcPose.range));
+        //launcher.setWheelVelocity(900);
+        //launcher.run();
 
         // Fire the ball
         Actions.runBlocking(
-                new SequentialAction(
-                    launcher.pushAction(), // Fire loaded ball
-                    launcher.releaseAction(),
-                    revolver.stepUpAction(), // Select next ball
-                    launcher.pushAction(), // Fire second ball
-                    launcher.releaseAction(),
-                    revolver.stepUpAction(), // Select next ball
-                    launcher.pushAction(), // Fire third ball
-                    launcher.releaseAction()
+                new ParallelAction(
+                        launcher.spinUp(900), // Ensure the launcher runs for the entire action
+                        new SequentialAction(
+                                launcher.pushAction(), // Fire loaded ball
+                                launcher.releaseAction(),
+                                revolver.stepUpAction(), // Select next ball
+                                revolver.stepUpAction(), // Select next ball
+                                launcher.pushAction(), // Fire second ball
+                                launcher.releaseAction(),
+                                revolver.stepUpAction(), // Select next ball
+                                revolver.stepUpAction(), // Select next ball
+                                launcher.pushAction(), // Fire third ball
+                                launcher.releaseAction()
+                        )
                 )
         );
 
         // Drive to first line of field balls and intake
         Actions.runBlocking( new SequentialAction(
                 drive.actionBuilder(drive.localizer.getPose()) // Drive to line of balls
-                        .lineToX(42)
-                        .lineToY(51)
+                        .splineTo(new Vector2d(42, 51), 52.0)
                         .turn(Math.toRadians(45))
                         .build(),
                 sweeper.enableAction(),
                 // TODO: Revolver action to skip to empty loading position
                 drive.actionBuilder(drive.localizer.getPose()) // Suck up first ball
-                        .lineToX(42 + 4)
-                        .lineToY(51)
+                        .splineTo(new Vector2d(42 + 4, 51), 52.0)
                         .build(),
                 // TODO: Revolver action to skip to next empty loading position
                 drive.actionBuilder(drive.localizer.getPose()) // Suck up second ball
-                        .lineToX(42 + 8)
-                        .lineToY(51)
+                        .splineTo(new Vector2d(42 + 8, 51), 52.0)
                         .build(),
                 // TODO: Revolver action to skip to last empty loading position
                 drive.actionBuilder(drive.localizer.getPose()) // Suck up last ball
-                        .lineToX(42 + 12)
-                        .lineToY(51)
+                        .splineTo(new Vector2d(42 + 12, 51), 52.0)
                         .build(),
                 // TODO: Drive to scoring zone
                 sweeper.disableAction()
