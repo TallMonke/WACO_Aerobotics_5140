@@ -1,15 +1,12 @@
-package org.firstinspires.ftc.teamcode.DECODE;
+package org.firstinspires.ftc.teamcode.tests;
 
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.getRPM;
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.x_Distance;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.SleepAction;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -18,7 +15,7 @@ import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Launcher;
 import org.firstinspires.ftc.teamcode.mechanisms.Revolver;
 
-@Autonomous(name = "Triple Fire Test", group = "tests", preselectTeleOp = "DECODE_2025")
+@Autonomous(name = "Triple Fire Test", group = "tests")
 public final class Auto_TripleFireTest extends LinearOpMode {
     static private int HOME_X = 61;
     static private int HOME_Y = -10;

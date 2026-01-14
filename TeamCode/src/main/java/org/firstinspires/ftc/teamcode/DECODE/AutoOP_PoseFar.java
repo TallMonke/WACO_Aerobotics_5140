@@ -189,6 +189,8 @@ public final class AutoOP_PoseFar extends LinearOpMode {
 //                                .build()
 //                )
 //        );
+
+        dashboard.getTelemetry().update();
     }
 
     /**
