@@ -142,14 +142,14 @@ public class Revolver {
                 if (timer == null) {
                     timer = new ElapsedTime();
 
-                    currentIndex = selectNextEvenIndex();
+                    currentIndex = selectNextOddIndex();
 
                     // Move the servo to the new position
                     revolverDrive.setPosition(revolverPositions.get(currentIndex));
                     packet.put("revolver_position", revolverPositions.get(currentIndex));
                 }
 
-                return (timer.seconds() < 2);
+                return (timer.seconds() < 2.5);
             }
         };
     }
@@ -191,7 +191,6 @@ public class Revolver {
      * @return RoadRunner Action to be used in the Autonomous OpModes
      */
     public Action stepToFireAction(){
-
         return new Action() {
             ElapsedTime timer = null;
 
@@ -200,14 +199,14 @@ public class Revolver {
                 if (timer == null) {
                     timer = new ElapsedTime();
 
-                    currentIndex = selectNextOddIndex();
+                    currentIndex = selectNextEvenIndex();
 
                     // Move the servo to the new position
                     revolverDrive.setPosition(revolverPositions.get(currentIndex));
                     packet.put("revolver_position", revolverPositions.get(currentIndex));
                 }
 
-                return (timer.seconds() < 1);
+                return (timer.seconds() < 2.5);
             }
         };
     }

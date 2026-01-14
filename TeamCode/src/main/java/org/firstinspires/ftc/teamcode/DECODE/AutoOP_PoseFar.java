@@ -1,10 +1,14 @@
 package org.firstinspires.ftc.teamcode.DECODE;
 
+import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.getRPM;
+import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.x_Distance;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -18,16 +22,17 @@ import org.firstinspires.ftc.teamcode.mechanisms.DetectedColor;
 import org.firstinspires.ftc.teamcode.mechanisms.Launcher;
 import org.firstinspires.ftc.teamcode.mechanisms.Revolver;
 import org.firstinspires.ftc.teamcode.mechanisms.Sweeper;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 
-@Autonomous(name = "RED Auto 1", group = "autonomous")
+@Autonomous(name = "RED Auto 1", group = "auto", preselectTeleOp = "DECODE_2025")
 public final class AutoOP_PoseFar extends LinearOpMode {
     ElapsedTime timer = null;
 
-    static private int HOME_X = 31;
+    static private int HOME_X = 61;
     static private int HOME_Y = -10;
-    static private double HOME_ANGLE = -45;
+    static private double HOME_ANGLE = 0;
 
     // Set field positions
     static private Vector2d farShootingPos = new Vector2d(HOME_X, HOME_Y);
@@ -89,127 +94,145 @@ public final class AutoOP_PoseFar extends LinearOpMode {
         // Drive "backward" away from wall, but touching far shooting zone
         Actions.runBlocking( new SequentialAction(
                 drive.actionBuilder(drive.localizer.getPose())
-                        .lineToX(42)
-                        .turn(Math.toRadians(45)) // Turn towards tower
+                        .lineToX(HOME_X - 5)
+                        .turn(Math.toRadians(-30)) // Turn camera towards tower
                         .build())
         );
 
-        // TODO
-        //  Detect tower, auto-aim, calculate firing velocity
-//        webcam.update();
-//        AprilTagDetection towerDetection = webcam.getTagByID(teamColorID);
+        double rpm = aimBot();
+
+        if (rpm > 0.0) {
+            // Fire the ball
+            if (!tripleFireSequence(rpm)) {
+                sendTelemetryPacket("Firing sequence failed");
+                stop();
+            }
+        }
 //
-//        // Turn 1 degree attempting to find target AprilTag
-//        while (towerDetection == null) {
-//            Actions.runBlocking( new SequentialAction(
-//                    drive.actionBuilder(drive.localizer.getPose())
-//                            .turn(Math.toRadians(20)) // Turn towards tower
-//                            .build())
-//            );
-//            webcam.update();
-//            towerDetection = webcam.getTagByID(teamColorID);
+//        // ***First Line of Balls***
+//        if(!intakeBallLine(1)) {
+//            sendTelemetryPacket("Error running intake sequence");
+//            stop();
 //        }
 //
-//        // Aim robot towards team tower
-//        Actions.runBlocking( new SequentialAction(
-//                drive.actionBuilder(drive.localizer.getPose())
-//                        .turn(Math.toRadians(Math.toRadians(towerDetection.ftcPose.bearing)))
-//                        .build())
+//        Actions.runBlocking(
+//                new SequentialAction(
+//                        drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
+//                                .splineTo(farShootingPos, Math.toRadians(90))
+//                                .build()
+//                )
 //        );
-
-        // Calculate the velocity needed to shoot the ball at the correct distance
-//        webcam.update();
-//        towerDetection = webcam.getTagByID(teamColorID);
 //
-//        double rpm = getRPM(x_Distance(towerDetection.ftcPose.range));
-        double rpm = 900;
+//        // TODO
+//        //  Detect tower, auto-aim, calculate firing velocity
+//
+//        if(!tripleFireSequence(rpm)) {
+//            sendTelemetryPacket("Error running firing sequence");
+//            stop();
+//        }
+//
+//        // Ensure we have plenty of time to get back to human player
+//        if(timer.seconds() <= 20) {
+//            // ***Second Line of Balls***
+//            if (!intakeBallLine(2)) {
+//                sendTelemetryPacket("Error running intake sequence");
+//                stop();
+//            }
+//
+//            Actions.runBlocking(
+//                    new SequentialAction(
+//                            drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
+//                                    .splineTo(midShootingPos, Math.toRadians(90))
+//                                    .build()
+//                    )
+//            );
+//
+//            // TODO
+//            //  Detect tower, auto-aim, calculate firing velocity
+//
+//            if (!tripleFireSequence(rpm)) {
+//                sendTelemetryPacket("Error running firing sequence");
+//                stop();
+//            }
+//        }
+//
+//        // Ensure we have plenty of time to get back to human player
+//        if(timer.seconds() <= 20) {
+//            // ***Third Line of Balls***
+//            if (!intakeBallLine(2)) {
+//                sendTelemetryPacket("Error running intake sequence");
+//                stop();
+//            }
+//
+//            Actions.runBlocking(
+//                    new SequentialAction(
+//                            drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
+//                                    .splineTo(nearShootingPos, Math.toRadians(90))
+//                                    .build()
+//                    )
+//            );
+//
+//            // TODO
+//            //  Detect tower, auto-aim, calculate firing velocity
+//
+//            if (!tripleFireSequence(rpm)) {
+//                sendTelemetryPacket("Error running firing sequence");
+//                stop();
+//            }
+//        }
+//
+//        // Return to loading zone to start TeleOp
+//        Actions.runBlocking(
+//                new SequentialAction(
+//                        drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
+//                                .splineTo(loadingPos, Math.toRadians(90))
+//                                .build()
+//                )
+//        );
+    }
 
-        // Fire the ball
-        if(!tripleFireSequence(rpm)) {
-            sendTelemetryPacket("Firing sequence failed");
-            stop();
+    /**
+     * Utilizes the webcam to detect the teams tower and rotate the robot towards it
+     *
+     * @return Calculated velocity in RPM for shooting
+     */
+    private double aimBot() {
+        webcam.update();
+        AprilTagDetection towerDetection = webcam.getTagByID(teamColorID);
+
+        int totalDegrees = 0;
+        final int degreeChange = 45;
+
+        // Turn attempting to find target AprilTag
+        while (towerDetection == null && totalDegrees < 360) {
+            Actions.runBlocking(new SequentialAction(
+                    drive.actionBuilder(drive.localizer.getPose())
+                            .turn(Math.toRadians(-degreeChange)) // Turn towards tower
+                            .build())
+            );
+            totalDegrees += degreeChange;
+            webcam.update();
+            towerDetection = webcam.getTagByID(teamColorID);
         }
 
-        // ***First Line of Balls***
-        if(!intakeBallLine(1)) {
-            sendTelemetryPacket("Error running intake sequence");
-            stop();
-        }
-
-        Actions.runBlocking(
-                new SequentialAction(
-                        drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
-                                .splineTo(farShootingPos, Math.toRadians(90))
-                                .build()
-                )
-        );
-
-        // TODO
-        //  Detect tower, auto-aim, calculate firing velocity
-
-        if(!tripleFireSequence(rpm)) {
-            sendTelemetryPacket("Error running firing sequence");
-            stop();
-        }
-
-        // Ensure we have plenty of time to get back to human player
-        if(timer.seconds() <= 20) {
-            // ***Second Line of Balls***
-            if (!intakeBallLine(2)) {
-                sendTelemetryPacket("Error running intake sequence");
-                stop();
-            }
-
-            Actions.runBlocking(
-                    new SequentialAction(
-                            drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
-                                    .splineTo(midShootingPos, Math.toRadians(90))
-                                    .build()
-                    )
+        // Only fire if we detected something
+        if (towerDetection != null && towerDetection.ftcPose != null) {
+            // Aim robot towards team tower
+            Actions.runBlocking(new SequentialAction(
+                    drive.actionBuilder(drive.localizer.getPose())
+                            .turn(Math.toRadians(towerDetection.ftcPose.bearing))
+                            .build())
             );
 
-            // TODO
-            //  Detect tower, auto-aim, calculate firing velocity
+            // Calculate the velocity needed to shoot the ball at the correct distance
+            double rpm = getRPM(x_Distance(towerDetection.ftcPose.range));
 
-            if (!tripleFireSequence(rpm)) {
-                sendTelemetryPacket("Error running firing sequence");
-                stop();
-            }
+            sendTelemetryPacket("calc_rpm", rpm);
+
+            return rpm;
         }
 
-        // Ensure we have plenty of time to get back to human player
-        if(timer.seconds() <= 20) {
-            // ***Third Line of Balls***
-            if (!intakeBallLine(2)) {
-                sendTelemetryPacket("Error running intake sequence");
-                stop();
-            }
-
-            Actions.runBlocking(
-                    new SequentialAction(
-                            drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
-                                    .splineTo(nearShootingPos, Math.toRadians(90))
-                                    .build()
-                    )
-            );
-
-            // TODO
-            //  Detect tower, auto-aim, calculate firing velocity
-
-            if (!tripleFireSequence(rpm)) {
-                sendTelemetryPacket("Error running firing sequence");
-                stop();
-            }
-        }
-
-        // Return to loading zone to start TeleOp
-        Actions.runBlocking(
-                new SequentialAction(
-                        drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
-                                .splineTo(loadingPos, Math.toRadians(90))
-                                .build()
-                )
-        );
+        return -1.0;
     }
 
     private boolean singleFireSequence(double rpm) {
@@ -218,14 +241,13 @@ public final class AutoOP_PoseFar extends LinearOpMode {
             return false;
         }
 
+        sendTelemetryPacket("fire_rpm", rpm);
+
         Actions.runBlocking(
-                new ParallelAction(
-                        launcher.spinUp(rpm), // Ensure the launcher runs for the entire action
-                        new SequentialAction(
-                                revolver.stepToFireAction(), // Select next ball in firing slot
-                                launcher.fireAction(), // Fire loaded ball
-                                launcher.releaseAction()
-                        )
+                new SequentialAction(
+                        launcher.spinUp(rpm),
+                        launcher.fireAction(), // Fire loaded ball
+                        launcher.releaseAction()
                 )
         );
 
@@ -238,20 +260,19 @@ public final class AutoOP_PoseFar extends LinearOpMode {
             return false;
         }
 
+        sendTelemetryPacket("fire_rpm", rpm);
+
         Actions.runBlocking(
-                new ParallelAction(
-                        launcher.spinUp(rpm), // Ensure the launcher runs for the entire action
-                        new SequentialAction(
-                                revolver.stepToFireAction(), // Select next ball in firing slot
-                                launcher.fireAction(), // Fire loaded ball
-                                launcher.releaseAction(),
-                                revolver.stepToFireAction(), // Select next ball in firing slot
-                                launcher.fireAction(), // Fire second ball
-                                launcher.releaseAction(),
-                                revolver.stepToFireAction(), // Select next ball in the firing slot
-                                launcher.fireAction(), // Fire third ball
-                                launcher.releaseAction()
-                        )
+                new SequentialAction(
+                        launcher.spinUp(rpm),
+                        launcher.fireAction(), // Fire loaded ball
+                        launcher.releaseAction(),
+                        revolver.stepToFireAction(), // Select next ball in firing slot
+                        launcher.fireAction(), // Fire second ball
+                        launcher.releaseAction(),
+                        revolver.stepToFireAction(), // Select next ball in the firing slot
+                        launcher.fireAction(), // Fire third ball
+                        launcher.releaseAction()
                 )
         );
 

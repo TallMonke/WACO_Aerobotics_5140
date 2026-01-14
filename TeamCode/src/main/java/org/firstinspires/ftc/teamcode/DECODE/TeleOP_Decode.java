@@ -24,7 +24,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import java.util.ArrayList;
 import java.util.List;
 
-@TeleOp(name="TeleOP_Decode", group="Linear OpMode")
+@TeleOp(name = "DECODE_2025", group = "teleop")
 public class TeleOP_Decode extends LinearOpMode {
     private final AprilTagColors aprilTagColors = new AprilTagColors();
     // Obelisk colors hold the color order of the balls to shoot

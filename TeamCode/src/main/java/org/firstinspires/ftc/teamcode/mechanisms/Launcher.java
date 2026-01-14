@@ -118,11 +118,11 @@ public class Launcher {
                     timer = new ElapsedTime();
 
                     fire();
+
+                    telemetryPacket.addLine("Feed Pushed");
                 }
 
-                telemetryPacket.addLine("Feed Pushed");
-
-                return timer.seconds() < 1;
+                return timer.seconds() < 1.0;
             }
         };
     }
@@ -147,11 +147,11 @@ public class Launcher {
                     timer = new ElapsedTime();
 
                     release();
+
+                    telemetryPacket.addLine("Feed Released");
                 }
 
-                telemetryPacket.addLine("Feed Released");
-
-                return timer.seconds() < 1;
+                return timer.seconds() < 1.0;
             }
         };
     }
@@ -178,15 +178,21 @@ public class Launcher {
         wheelVelocity = velocity;
 
         return new Action() {
+            ElapsedTime timer = null;
+
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                leftShoot.setVelocity(wheelVelocity);
-                rightShoot.setVelocity(wheelVelocity);
+                if (timer == null) {
+                    timer = new ElapsedTime();
 
-                telemetryPacket.put("launcher_velocity", wheelVelocity);
-                displayTelemetry();
+                    leftShoot.setVelocity(wheelVelocity);
+                    rightShoot.setVelocity(wheelVelocity);
 
-                return false;
+                    telemetryPacket.put("launcher_velocity", wheelVelocity);
+                    displayTelemetry();
+                }
+
+                return timer.seconds() < 1.5;
             }
         };
     }

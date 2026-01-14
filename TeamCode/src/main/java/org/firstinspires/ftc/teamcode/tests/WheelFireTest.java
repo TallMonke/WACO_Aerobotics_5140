@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name="Wheel Gun Test", group="Linear OpMode")
+@TeleOp(name = "Wheel Gun Test", group = "tests")
 
 public class WheelFireTest extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();

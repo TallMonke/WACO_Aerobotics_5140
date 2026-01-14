@@ -29,8 +29,6 @@ public class MeepMeepTesting {
                 .setConstraints(90, 75, Math.toRadians(180), Math.toRadians(180), 16)
                 .build();
 
-        // The X/Y is the coordinate on the mapped field for DECODE. linToX/Y drives a straight line to
-        // that coordinate
         myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(HOME_X, HOME_Y, Math.toRadians(HOME_ANGLE)))
                 .lineToX(56) // Pull away from wall
                 // Auto search for target QR
@@ -78,7 +76,8 @@ public class MeepMeepTesting {
 
                 // add action to shoot balls in color order
                 .splineTo(loadingPos.position, loadingPos.heading.real)
-                .build());
+                .build()
+        );
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_DECODE_JUICE_DARK)
                 .setDarkMode(true)
