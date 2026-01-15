@@ -7,6 +7,8 @@ import android.annotation.SuppressLint;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
@@ -27,6 +29,8 @@ import java.util.ArrayList;
 
 @TeleOp(name = "DECODE_2025", group = "teleop")
 public class TeleOP_Decode extends LinearOpMode {
+    FtcDashboard dashboard = FtcDashboard.getInstance();
+
     private final AprilTagColors aprilTagColors = new AprilTagColors();
     // Obelisk colors hold the color order of the balls to shoot
     private ArrayList<DetectedColor> currentObeliskColors = null;
@@ -58,17 +62,6 @@ public class TeleOP_Decode extends LinearOpMode {
         sweeper = new Sweeper(hardwareMap, telemetry);
         launcher = new Launcher(hardwareMap, telemetry);
 
-        long initTime = System.currentTimeMillis();
-
-        /*/ Only spend 5s looking for the obelisk
-        while (currentObeliskColors == null && System.currentTimeMillis() - initTime < 5000) {
-            if (detectObelisk()) {
-                telemetry.addData("Obelisk", "Detected");
-                telemetry.update();
-                break;
-            }
-        }
-        */
         // Wait for the game to start (driver presses START)
         if (teamColorID == aprilTagColors.getRedTeamID()) {
             telemetry.addData("Status", "RED Team Ready!");
@@ -88,6 +81,14 @@ public class TeleOP_Decode extends LinearOpMode {
             }
             else if( teamColorID == aprilTagColors.getBlueTeamID() ) {
                 telemetry.addData("Blue Team", runtime.toString());
+            }
+
+            while (currentObeliskColors == null) {
+                if (detectObelisk()) {
+                    telemetry.addData("Obelisk", "Detected");
+                    telemetry.update();
+                    break;
+                }
             }
 
             // Get the launcher spun up
@@ -149,7 +150,7 @@ public class TeleOP_Decode extends LinearOpMode {
             sweeper.run();
 
             // Attempt to auto-aim and fire ball at the team tower
-            if(gamepad2.left_trigger > 0.5 && webcam != null){ autoFire(); }
+            if(gamepad2.left_trigger > 0.5){ autoFire(); }
 
             // Just push the ball out the launcher
             if(gamepad2.x) { manualFire(); }
@@ -184,21 +185,23 @@ public class TeleOP_Decode extends LinearOpMode {
      * using the calculated velocity. If the tower cannot be found, shoot at 900RPM
      */
     private void manualFire() {
+        if(launcher == null){
+            telemetry.addData("Error", "Launcher is null");
+            return;
+        }
+
         double rpm = 900.0;
 
-        webcam.update();
-        AprilTagDetection towerDetection = webcam.getTagByID(teamColorID);
+        if(webcam != null) {
+            webcam.update();
+            AprilTagDetection towerDetection = webcam.getTagByID(teamColorID);
 
-        // Calculate RPM from range to April Tag
-        // Set the wheel velocity to achieve distance
-        if (towerDetection != null && towerDetection.ftcPose != null) {
-            telemetry.addData("Detection", "Found");
-            telemetry.update();
-
-            // Calculate the velocity needed to shoot the ball at the correct distance
-            rpm = getRPM(x_Distance(towerDetection.ftcPose.range));
-            telemetry.addData("Detection", "SPEED");
-            telemetry.update();
+            // Calculate RPM from range to April Tag
+            // Set the wheel velocity to achieve distance
+            if (towerDetection != null && towerDetection.ftcPose != null) {
+                // Calculate the velocity needed to shoot the ball at the correct distance
+                rpm = getRPM(x_Distance(towerDetection.ftcPose.range));
+            }
         }
 
         // Ensure the launcher is running
@@ -210,14 +213,17 @@ public class TeleOP_Decode extends LinearOpMode {
                 )
             )
         );
+
+        sendTelemetryPacket("launcher_rpm", rpm);
     }
 
     /**
      * Attempt to auto-aim (move robot) and fire ball at the team tower
      */
     private void autoFire() {
-        if(webcam == null || autoFireInit)
+        if(webcam == null || autoFireInit) {
             return;
+        }
 
         autoFireInit = true;
 
@@ -250,6 +256,8 @@ public class TeleOP_Decode extends LinearOpMode {
                             )
                     )
             );
+
+            sendTelemetryPacket("launcher_rpm", rpm);
         }
         else{
             telemetry.addData("Detection", "Not Found");
@@ -272,6 +280,11 @@ public class TeleOP_Decode extends LinearOpMode {
 
     @NonNull
     private Boolean detectObelisk() {
+        if(webcam == null){
+            telemetry.addData("Error", "Webcam is null");
+            return false;
+        }
+
         webcam.update();
         ArrayList<Integer> obelisksIDs = aprilTagColors.getObeliskIDs();
 
@@ -279,6 +292,8 @@ public class TeleOP_Decode extends LinearOpMode {
             if(detection != null) {
                 if(aprilTagColors.isObeliskID(detection.id)){
                     currentObeliskColors = aprilTagColors.getColor(detection.id);
+
+                    sendTelemetryPacket("obelisk_id", detection.id);
                     telemetry.addLine(String.format("Obelisk ID: %d", detection.id));
                     telemetry.update();
 
@@ -288,5 +303,17 @@ public class TeleOP_Decode extends LinearOpMode {
         }
 
         return false;
+    }
+
+    private void sendTelemetryPacket(String key, Object value) {
+        TelemetryPacket packet = new TelemetryPacket();
+        packet.put(key, value);
+        dashboard.sendTelemetryPacket(packet);
+    }
+
+    private void sendTelemetryPacket(String message) {
+        TelemetryPacket packet = new TelemetryPacket();
+        packet.addLine(message);
+        dashboard.sendTelemetryPacket(packet);
     }
 }
