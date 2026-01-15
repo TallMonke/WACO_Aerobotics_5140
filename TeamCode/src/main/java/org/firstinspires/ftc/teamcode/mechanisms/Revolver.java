@@ -129,6 +129,36 @@ public class Revolver {
     }
 
     /**
+     * Turns the ball revolver to the next position.
+     * @return RoadRunner Action to be used in the Autonomous OpModes
+     */
+    public Action stepUpAction(){
+        return new Action() {
+            ElapsedTime timer = null;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (timer == null) {
+                    timer = new ElapsedTime();
+
+                    // cycle revolver index up
+                    if (currentIndex == 5) {
+                        currentIndex = 0;
+                    } else {
+                        currentIndex++;
+                    }
+
+                    // Move the servo to the new position
+                    revolverDrive.setPosition(revolverPositions.get(currentIndex));
+                    packet.put("revolver_position", revolverPositions.get(currentIndex));
+                }
+
+                return (timer.seconds() < 2.5);
+            }
+        };
+    }
+
+    /**
      * Turns the ball revolver to the next loading position. Even indexes are "loading" positions.
      * @return RoadRunner Action to be used in the Autonomous OpModes
      */
@@ -184,6 +214,36 @@ public class Revolver {
 
         // Update debounce tracker
         buttonWasPressedDown = buttonIsPressed;
+    }
+
+    /**
+     * Turns the ball revolver to the next position.
+     * @return RoadRunner Action to be used in the Autonomous OpModes
+     */
+    public Action stepDownAction(){
+        return new Action() {
+            ElapsedTime timer = null;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (timer == null) {
+                    timer = new ElapsedTime();
+
+                    // cycle revolver index down
+                    if (currentIndex == 0) {
+                        currentIndex = 5;
+                    } else {
+                        currentIndex--;
+                    }
+
+                    // Move the servo to the new position
+                    revolverDrive.setPosition(revolverPositions.get(currentIndex));
+                    packet.put("revolver_position", revolverPositions.get(currentIndex));
+                }
+
+                return (timer.seconds() < 2.5);
+            }
+        };
     }
 
     /**

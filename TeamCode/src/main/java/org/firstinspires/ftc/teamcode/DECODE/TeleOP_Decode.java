@@ -5,6 +5,8 @@ import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.x_Distanc
 
 import android.annotation.SuppressLint;
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
@@ -22,7 +24,6 @@ import org.firstinspires.ftc.teamcode.mechanisms.Sweeper;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @TeleOp(name = "DECODE_2025", group = "teleop")
 public class TeleOP_Decode extends LinearOpMode {
@@ -108,38 +109,28 @@ public class TeleOP_Decode extends LinearOpMode {
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
             driveTrain.run(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
-            //revolver run "up arrow" & "Down Arrow"
-            revolver.stepUp(gamepad2.dpad_up);
-            revolver.stepDown(gamepad2.dpad_down);
-
-            revolver.run();
-
-            //sweep in with right bumper and reverse with both bumpers at same time.
-            sweeper.enable(gamepad2.right_bumper);
-            sweeper.reverse(gamepad2.left_bumper);
-            sweeper.run();
-
-            // TODO Remove this as its not needed after testing
-            webcam.update();
-            List<AprilTagDetection> detections = webcam.getDetectedTags();
-            for (AprilTagDetection detection: detections ) {
-                if(detection != null && detection.ftcPose != null) {
-                    telemetry.addData("Detection",
-                            String.format("ID: %d, R: %.2f, B: %.2f",
-                                    detection.id, detection.ftcPose.range, detection.ftcPose.bearing));
-                }
+            // Revolver Controls
+            // D-Pad Up - step to next position
+            // D-Pad Down - Step to previous position
+            // A-Button - jump to next load position
+            // B-Button - Jump to next firing position
+            if(gamepad2.dpad_up){
+                Actions.runBlocking( new SequentialAction(
+                                revolver.stepUpAction()
+                        )
+                );
             }
-
-            // Attempt to auto-aim and fire ball at the team tower
-            if(gamepad2.left_trigger > 0.5 && webcam != null){ autoFire(); }
-
-            // Just push the ball out the launcher
-            if(gamepad2.x) { manualFire(); }
+            if(gamepad2.dpad_down){
+                Actions.runBlocking( new SequentialAction(
+                                revolver.stepDownAction()
+                        )
+                );
+            }
 
             if(gamepad2.a) {
                 Actions.runBlocking( new SequentialAction(
-                        revolver.stepToLoadAction()
-                    )
+                                revolver.stepToLoadAction()
+                        )
                 );
             }
 
@@ -150,10 +141,24 @@ public class TeleOP_Decode extends LinearOpMode {
                 );
             }
 
+            revolver.run();
+
+            //sweep in with right bumper and reverse with both bumpers at same time.
+            sweeper.enable(gamepad2.right_bumper);
+            sweeper.reverse(gamepad2.left_bumper);
+            sweeper.run();
+
+            // Attempt to auto-aim and fire ball at the team tower
+            if(gamepad2.left_trigger > 0.5 && webcam != null){ autoFire(); }
+
+            // Just push the ball out the launcher
+            if(gamepad2.x) { manualFire(); }
+
             telemetry.update();
         }
     }
 
+    @NonNull
     private String printCurrentObelisk() {
         String currentColors = "Unknown";
 
@@ -175,12 +180,30 @@ public class TeleOP_Decode extends LinearOpMode {
     }
 
     /**
-     * Just push the ball out the launcher using the current velocity
+     * Attempts to detect the tower distance and fire the ball
+     * using the calculated velocity. If the tower cannot be found, shoot at 900RPM
      */
     private void manualFire() {
+        double rpm = 900.0;
+
+        webcam.update();
+        AprilTagDetection towerDetection = webcam.getTagByID(teamColorID);
+
+        // Calculate RPM from range to April Tag
+        // Set the wheel velocity to achieve distance
+        if (towerDetection != null && towerDetection.ftcPose != null) {
+            telemetry.addData("Detection", "Found");
+            telemetry.update();
+
+            // Calculate the velocity needed to shoot the ball at the correct distance
+            rpm = getRPM(x_Distance(towerDetection.ftcPose.range));
+            telemetry.addData("Detection", "SPEED");
+            telemetry.update();
+        }
+
         // Ensure the launcher is running
         Actions.runBlocking(new ParallelAction(
-                launcher.spinUp(900),
+                launcher.spinUp(rpm),
                 new SequentialAction(
                         launcher.fireAction(),
                         launcher.releaseAction()
@@ -241,15 +264,17 @@ public class TeleOP_Decode extends LinearOpMode {
      *
      * @param target Target to steer the robot to center the camera
      */
-    private void aim(AprilTagDetection target) {
+    private void aim(@NonNull AprilTagDetection target) {
         final double bearingWeighting = 1.0;
 
         driveTrain.rotate(target.ftcPose.bearing + bearingWeighting);
     }
 
+    @NonNull
     private Boolean detectObelisk() {
         webcam.update();
         ArrayList<Integer> obelisksIDs = aprilTagColors.getObeliskIDs();
+
         for (AprilTagDetection detection: webcam.getDetectedTags()){
             if(detection != null) {
                 if(aprilTagColors.isObeliskID(detection.id)){
