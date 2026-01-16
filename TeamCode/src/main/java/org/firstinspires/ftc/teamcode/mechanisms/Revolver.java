@@ -162,6 +162,35 @@ public class Revolver {
      * Turns the ball revolver to the next loading position. Even indexes are "loading" positions.
      * @return RoadRunner Action to be used in the Autonomous OpModes
      */
+    public void stepToLoad(boolean buttonIsPressed){
+        if (buttonIsPressed && !buttonWasPressedUp) {
+
+            // Cycle through 0 → 1 → 2 → 0
+            if (motorModeUp == 0) {
+                motorModeUp = 1;
+            } else if (motorModeUp == 1) {
+                motorModeUp = 2;
+            } else {
+                motorModeUp = 0;
+            }
+
+            // Move the servo to the new position
+            currentIndex = selectNextOddIndex();
+
+            // Move the servo to the new position
+            revolverDrive.setPosition(revolverPositions.get(currentIndex));
+
+            sleep(500);
+        }
+
+        // Update debounce tracker
+        buttonWasPressedUp = buttonIsPressed;
+    }
+
+    /**
+     * Turns the ball revolver to the next loading position. Even indexes are "loading" positions.
+     * @return RoadRunner Action to be used in the Autonomous OpModes
+     */
     public Action stepToLoadAction(){
 
         return new Action() {
@@ -183,7 +212,7 @@ public class Revolver {
             }
         };
     }
-    
+
     /**
      * Reverses the revolver to the previous position. This will sleep for 500ms to allow time
      * for the revolver to actually complete the operation
@@ -245,7 +274,29 @@ public class Revolver {
             }
         };
     }
+    public void stepToFire(boolean buttonIsPressed){
+        if (buttonIsPressed && !buttonWasPressedDown) {
 
+            // Cycle through 0 → 1 → 2 → 0
+            if (motorModeDown == 0) {
+                motorModeDown = 1;
+            } else if (motorModeDown == 1) {
+                motorModeDown = 2;
+            } else {
+                motorModeDown = 0;
+            }
+
+            currentIndex = selectNextEvenIndex();
+
+            // Move the servo to the new position
+            revolverDrive.setPosition(revolverPositions.get(currentIndex));
+
+            sleep(500);
+        }
+
+        // Update debounce tracker
+        buttonWasPressedDown = buttonIsPressed;
+    }
     /**
      * Turns the ball revolver to the next firing position. Odd indexes are "firing" positions.
      * @return RoadRunner Action to be used in the Autonomous OpModes

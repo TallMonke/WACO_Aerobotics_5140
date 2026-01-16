@@ -83,13 +83,13 @@ public class TeleOP_Decode extends LinearOpMode {
                 telemetry.addData("Blue Team", runtime.toString());
             }
 
-            while (currentObeliskColors == null) {
-                if (detectObelisk()) {
-                    telemetry.addData("Obelisk", "Detected");
-                    telemetry.update();
-                    break;
-                }
-            }
+//            if (currentObeliskColors == null) {
+//                if (detectObelisk()) {
+//                    telemetry.addData("Obelisk", "Detected");
+//                    telemetry.update();
+//                    break;
+//                }
+//            }
 
             // Get the launcher spun up
             if (!init) {
@@ -109,38 +109,19 @@ public class TeleOP_Decode extends LinearOpMode {
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
             driveTrain.run(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+            if(gamepad1.y) {
+                aimBot();
+            }
 
             // Revolver Controls
             // D-Pad Up - step to next position
             // D-Pad Down - Step to previous position
             // A-Button - jump to next load position
             // B-Button - Jump to next firing position
-            if(gamepad2.dpad_up){
-                Actions.runBlocking( new SequentialAction(
-                                revolver.stepUpAction()
-                        )
-                );
-            }
-            if(gamepad2.dpad_down){
-                Actions.runBlocking( new SequentialAction(
-                                revolver.stepDownAction()
-                        )
-                );
-            }
-
-            if(gamepad2.a) {
-                Actions.runBlocking( new SequentialAction(
-                                revolver.stepToLoadAction()
-                        )
-                );
-            }
-
-            if(gamepad2.b) {
-                Actions.runBlocking( new SequentialAction(
-                                revolver.stepToFireAction()
-                        )
-                );
-            }
+            revolver.stepUp(gamepad2.dpad_up);
+            revolver.stepDown(gamepad2.dpad_down);
+            revolver.stepToLoad(gamepad2.a);
+            revolver.stepToFire(gamepad2.b);
 
             revolver.run();
 
@@ -217,6 +198,30 @@ public class TeleOP_Decode extends LinearOpMode {
         sendTelemetryPacket("launcher_rpm", rpm);
     }
 
+    private AprilTagDetection aimBot(){
+        if(webcam == null) {
+            telemetry.addData("AimBot", "Invalid Camera");
+            return null;
+        }
+
+        // detect target AprilTag
+        webcam.update();
+        AprilTagDetection towerDetection = webcam.getTagByID(teamColorID);
+
+        // Calculate RPM from range to April Tag
+        // Set the wheel velocity to achieve distance
+        if (towerDetection != null && towerDetection.ftcPose != null) {
+            telemetry.addData("AimBot", "Detection Found");
+            telemetry.update();
+
+            // Steer robot to center AprilTag using the pose bearing which is the angle
+            // from the camera to the AprilTag center
+            aim(towerDetection);
+        }
+
+        return towerDetection;
+    }
+
     /**
      * Attempt to auto-aim (move robot) and fire ball at the team tower
      */
@@ -228,21 +233,11 @@ public class TeleOP_Decode extends LinearOpMode {
         autoFireInit = true;
 
         // detect target AprilTag
-        webcam.update();
-        AprilTagDetection towerDetection = webcam.getTagByID(teamColorID);
+        AprilTagDetection towerDetection = aimBot();
 
         // Calculate RPM from range to April Tag
         // Set the wheel velocity to achieve distance
         if (towerDetection != null && towerDetection.ftcPose != null) {
-            telemetry.addData("Detection", "Found");
-            telemetry.update();
-
-            // Steer robot to center AprilTag using the pose bearing which is the angle
-            // from the camera to the AprilTag center
-            aim(towerDetection);
-            telemetry.addData("Detection", "AIM");
-            telemetry.update();
-
             // Calculate the velocity needed to shoot the ball at the correct distance
             double rpm = getRPM(x_Distance(towerDetection.ftcPose.range));
             telemetry.addData("Detection", "SPEED");

@@ -119,6 +119,8 @@ public class DriveTrain {
         rightFront.setPower(frontRightPower);
         leftBack.setPower(backLeftPower);
         rightBack.setPower(backRightPower);
+
+        drive.localizer.update();
     }
 
     /**

@@ -75,27 +75,6 @@ public class Launcher {
     }
 
     /**
-     * RoadRunner Action to start spinning the shooter wheels at setWheelVelocity
-     *
-     * @return RoadRunner Action to be used in the Autonomous OpModes
-     */
-    public Action spinUpAction() {
-        return new Action() {
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                if(leftShoot == null || rightShoot == null) {
-                    return false;
-                }
-
-                leftShoot.setVelocity(wheelVelocity);
-                rightShoot.setVelocity(wheelVelocity);
-
-                return true;
-            }
-        };
-    }
-
-    /**
      * Sets the position of the feed servo to push the ball forward
      */
     public void fire()
@@ -122,7 +101,7 @@ public class Launcher {
                     telemetryPacket.addLine("Feed Pushed");
                 }
 
-                return timer.seconds() < 1.0;
+                return timer.seconds() < 0.5;
             }
         };
     }
@@ -151,7 +130,7 @@ public class Launcher {
                     telemetryPacket.addLine("Feed Released");
                 }
 
-                return timer.seconds() < 1.0;
+                return timer.seconds() < 0.5;
             }
         };
     }
@@ -178,21 +157,27 @@ public class Launcher {
         wheelVelocity = velocity;
 
         return new Action() {
-            ElapsedTime timer = null;
+            boolean init = false;
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                if (timer == null) {
-                    timer = new ElapsedTime();
-
+                if (!init) {
                     leftShoot.setVelocity(wheelVelocity);
                     rightShoot.setVelocity(wheelVelocity);
 
                     telemetryPacket.put("launcher_velocity", wheelVelocity);
                     displayTelemetry();
+
+                    init = true;
                 }
 
-                return timer.seconds() < 1.5;
+                final double rangeTweak = 10.0;
+
+                double leftVelocity = leftShoot.getVelocity();
+                double rightVelocity = rightShoot.getVelocity();
+
+                return ((leftVelocity < wheelVelocity + rangeTweak && leftVelocity > wheelVelocity - rangeTweak) &&
+                        (rightVelocity < wheelVelocity + rangeTweak && rightVelocity > wheelVelocity - rangeTweak));
             }
         };
     }

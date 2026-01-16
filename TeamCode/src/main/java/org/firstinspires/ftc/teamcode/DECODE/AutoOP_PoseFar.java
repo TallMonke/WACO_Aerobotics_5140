@@ -33,7 +33,7 @@ public final class AutoOP_PoseFar extends LinearOpMode {
 
     static private int HOME_X = 61;
     static private int HOME_Y = -10;
-    static private double HOME_ANGLE = 180;
+    static private double HOME_ANGLE = -180;
 
     // Set field positions
     static private final Vector2d farShootingPos = new Vector2d(51, -7);
@@ -95,7 +95,7 @@ public final class AutoOP_PoseFar extends LinearOpMode {
         // Drive "backward" away from wall, but touching far shooting zone
         Actions.runBlocking( new SequentialAction(
                 drive.actionBuilder(drive.localizer.getPose())
-                        .lineToX(HOME_X - 5)
+                        .lineToX(HOME_X + 5)
                         .turn(Math.toRadians(30)) // Turn camera towards tower
                         .build())
         );
@@ -174,7 +174,7 @@ public final class AutoOP_PoseFar extends LinearOpMode {
         // ***Third Line of Balls***
         // Ensure we have plenty of time to get back to human player
         if(timer.seconds() <= 20) {
-            if (!intakeBallLine(2)) {
+            if (!intakeBallLine(3)) {
                 sendTelemetryPacket("Error running intake sequence");
                 stop();
             }
@@ -330,10 +330,12 @@ public final class AutoOP_PoseFar extends LinearOpMode {
                                 drive.actionBuilder(drive.localizer.getPose()) // Suck up first ball
                                         .splineTo(new Vector2d(ballLinePos.component1().x, ballLinePos.component1().y), Math.toRadians(90))
                                         .build(),
+                                new SleepAction(0.25),   // Add 1/4 second for ball to fully ingest
                                 revolver.stepToLoadAction(), // Select next ball in loading slot
                                 drive.actionBuilder(drive.localizer.getPose()) // Suck up second ball
                                         .lineToY(ballLinePos.component1().y - 5)
                                         .build(),
+                                new SleepAction(0.25),
                                 revolver.stepToLoadAction(), // Select next ball in loading slot
                                 drive.actionBuilder(drive.localizer.getPose()) // Suck up third ball
                                         .lineToY(ballLinePos.component1().y - 10)

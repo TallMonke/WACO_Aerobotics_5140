@@ -10,7 +10,7 @@ public class RotationalMath {
         double y_DistanceCamera = 1.5; //distance (y-component) the camera is away from launch point.
         double aprilFromTop = 9.25; //distance from center of april tag to top of the basket front wall.
         double aprilTagWallHeight = 38.75; //total height of the basket front wall with the location april tags on it.
-        double Y = 14;    //aprilTagWallHeight-y_DistanceCamera-launchHeight-aprilFromTop
+        double Y = aprilTagWallHeight-y_DistanceCamera-launchHeight-aprilFromTop; //Y-component distance from the camera to the center of the april tag. ( = 14)
         double X = (Math.sqrt(Math.pow(distance,2)-(Math.pow(Y,2)))-x_DistanceCamera);
         return X;
     }
@@ -19,15 +19,26 @@ public class RotationalMath {
      * Calculate the RPM needed based on the @param x_distance of launcher to basket. (x component)
      */
     public static double getRPM(double distance) {
-        double valueInDegrees = 45.0; //launch angle in degrees
-        double valueInRadians = Math.toRadians(valueInDegrees);
+       //robot
+        double angleInDegrees = 45.0; //launch angle in degrees
+        double angleInRadians = Math.toRadians(angleInDegrees);
         double height = 29.0;  //height the ball needs to be off the ground to make basket based from the launcher of robot. 41-13.75
         double tuneCorrection = 200; //Value you set to eliminate discreptincies.
+        double minimalLaunchDistance = 58; //Derivative of equation set to 0. Gives us the closest we can get to the basket without the need of changing the Launch angle.
+        double RPM_at_minimalDiatance = 810.45; //plug the minimalLaunchDistance into the formula and this is that RPM
+        //parts of equation.
         double term1 = (60.0 / (4 * Math.PI));
         double numerator = (386.09 * Math.pow(distance, 2)); // 386.09(D^2)
-        double cosineSquared = Math.pow((Math.cos(valueInRadians)), 2);
-        double denominator = 2 * cosineSquared * ((distance * (Math.tan(valueInRadians))) - height);
-        double RPM = (term1 * (Math.sqrt(numerator / denominator))); //total formula to get RPM from x-component distance.
-        return RPM - tuneCorrection;
+        double cosineSquared = Math.pow((Math.cos(angleInRadians)), 2);
+        double denominator = 2 * cosineSquared * ((distance * (Math.tan(angleInRadians))) - height);
+        //Total formula
+        double RPM = (term1 * (Math.sqrt(numerator / denominator)))- tuneCorrection; //total formula to get RPM from x-component distance - a little correction due to wheels changing velocity when they apply pressure on the ball.
+
+        if (distance <= minimalLaunchDistance){
+            return RPM_at_minimalDiatance;
+        }
+        else {
+            return RPM;
+        }
     }
 }
