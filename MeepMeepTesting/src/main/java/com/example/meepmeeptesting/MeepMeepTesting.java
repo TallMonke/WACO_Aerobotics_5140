@@ -11,12 +11,12 @@ import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 public class MeepMeepTesting {
     final static private int RED_HOME_X = 61;
     final static private int RED_HOME_Y = -10;
-    final static private int RED_HOME_ANGLE = 180;
+    final static private int RED_HOME_ANGLE = 0;
 
     // Red Team setup
-    final static private Pose2d red_farShootingPos = new Pose2d(51, -7, Math.toRadians(-60));
-    final static private Pose2d red_midShootingPos = new Pose2d(0, 0, Math.toRadians(45));
-    final static private Pose2d red_nearShootingPos = new Pose2d(-15, -13.2, Math.toRadians(45));
+    final static private Vector2d red_farShootingPos = new Vector2d(51, -7);
+    final static private Vector2d red_midShootingPos = new Vector2d(-15, -13.2);
+    final static private Vector2d red_nearShootingPos = new Vector2d(-30, -21.7);
     final static private Pose2d red_loadingPos = new Pose2d( 52, -52, Math.toRadians(45));
 
     static private final Pose2d red_firstLinePos = new Pose2d(36, -42, Math.toRadians(-90));
@@ -55,21 +55,23 @@ public class MeepMeepTesting {
                 .build();
 
         redBot.runAction(redBot.getDrive().actionBuilder(new Pose2d(RED_HOME_X, RED_HOME_Y, Math.toRadians(RED_HOME_ANGLE)))
-                .lineToX(56) // Pull away from wall
+                .lineToX(red_farShootingPos.x) // Pull away from wall
+                .turn(Math.toRadians(-45.0))
                 // Auto search for target QR
                 // Fire 3 into target
                 .waitSeconds(3)
                 // Turn on sweeper, set revolver to loading position
                 // ***FIRST LINE OF BALLS
-                .splineTo(new Vector2d(red_firstLinePos.component1().x, red_firstLinePos.component1().y), Math.toRadians(-90)) // ingest first ball
+                .turn(Math.toRadians(-45))
+                .splineToConstantHeading(new Vector2d(red_firstLinePos.component1().x, red_firstLinePos.component1().y), Math.toRadians(-90)) // ingest first ball
                 // revolver to next loading position
                 .waitSeconds(1)
                 .lineToY(red_firstLinePos.component1().y - 5) // ingest 2nd ball
                 // revolver to next loading position
                 .waitSeconds(1)
                 .lineToY(red_firstLinePos.component1().y - 10) // ingest 2nd ball
-                .splineToConstantHeading(red_farShootingPos.position, 90)
-                .turn(Math.toRadians(60))
+                .splineToConstantHeading(red_farShootingPos, Math.toRadians(90))
+                .turn(Math.toRadians(60.0))
                 // Auto search for target QR
                 // Fire 3 into target
                 .waitSeconds(3)
@@ -82,8 +84,8 @@ public class MeepMeepTesting {
                 // revolver to next loading position
                 .waitSeconds(1)
                 .lineToY(red_secondLinePos.component1().y - 10) // ingest 2nd ball
-                .splineToConstantHeading(red_midShootingPos.position, 90)
-                .turn(Math.toRadians(45))
+                .splineToConstantHeading(red_midShootingPos, -90)
+                .turn(Math.toRadians(30))
                 // Auto search for target QR
                 // Fire 3 into target
                 .waitSeconds(3)
@@ -96,14 +98,14 @@ public class MeepMeepTesting {
                 // revolver to next loading position
                 .waitSeconds(1)
                 .lineToY(red_thirdLinePos.component1().y - 10) // ingest 2nd ball
-                .splineToConstantHeading(red_nearShootingPos.position, -90)
-                                .turn(Math.toRadians(30))
+                .splineToConstantHeading(red_nearShootingPos, -90)
+                .turn(Math.toRadians(20))
                 // Auto search for target QR
                 // Fire 3 into target
                 .waitSeconds(3)
 
                 // add action to shoot balls in color order
-                .splineTo(red_loadingPos.position, red_loadingPos.heading.real)
+                .splineTo(red_loadingPos.position, 180)
                 .build()
         );
 
