@@ -54,57 +54,65 @@ public class MeepMeepTesting {
                 .setDimensions(17, 16)
                 .build();
 
-        redBot.runAction(redBot.getDrive().actionBuilder(new Pose2d(RED_HOME_X, RED_HOME_Y, Math.toRadians(RED_HOME_ANGLE)))
-                .lineToX(red_farShootingPos.x) // Pull away from wall
-                .turn(Math.toRadians(-45.0))
+//        redBot.runAction(redBot.getDrive().actionBuilder(new Pose2d(RED_HOME_X, RED_HOME_Y, Math.toRadians(RED_HOME_ANGLE)))
+//                .lineToX(red_farShootingPos.x) // Pull away from wall
+//                .turn(Math.toRadians(-45.0))
+//                // Auto search for target QR
+//                // Fire 3 into target
+//                .waitSeconds(3)
+//                // Turn on sweeper, set revolver to loading position
+//                // ***FIRST LINE OF BALLS
+//                .turn(Math.toRadians(-45))
+//                .splineToConstantHeading(new Vector2d(red_firstLinePos.component1().x, red_firstLinePos.component1().y), Math.toRadians(-90)) // ingest first ball
+//                // revolver to next loading position
+//                .waitSeconds(1)
+//                .lineToY(red_firstLinePos.component1().y - 5) // ingest 2nd ball
+//                // revolver to next loading position
+//                .waitSeconds(1)
+//                .lineToY(red_firstLinePos.component1().y - 10) // ingest 2nd ball
+//                .strafeToSplineHeading(red_farShootingPos, Math.toRadians(-35))
+//                // Auto search for target QR
+//                // Fire 3 into target
+//                .waitSeconds(3)
+//
+//                // ***SECOND LINE OF BALLS
+//                .splineTo(new Vector2d(red_secondLinePos.component1().x, red_secondLinePos.component1().y), Math.toRadians(-90))
+//                // revolver to next loading position
+//                .waitSeconds(1)
+//                .lineToY(red_secondLinePos.component1().y - 5) // ingest 2nd ball
+//                // revolver to next loading position
+//                .waitSeconds(1)
+//                .lineToY(red_secondLinePos.component1().y - 10)
+//                .waitSeconds(1)
+//                .lineToY(red_secondLinePos.component1().y - 15) // ingest 2nd ball
+//                .strafeToLinearHeading(red_midShootingPos, -45)
+//                // Auto search for target QR
+//                // Fire 3 into target
+//                .waitSeconds(3)
+//
+//                //***THIRD LINE OF BALLS
+//                .splineTo(new Vector2d(red_thirdLinePos.component1().x, red_thirdLinePos.component1().y), Math.toRadians(-90))
+//                // revolver to next loading position
+//                .waitSeconds(1)
+//                .lineToY(red_thirdLinePos.component1().y - 5) // ingest 2nd ball
+//                // revolver to next loading position
+//                .waitSeconds(1)
+//                .lineToY(red_thirdLinePos.component1().y - 10) // ingest 2nd ball
+//                .strafeToLinearHeading(red_nearShootingPos, -90)
+//                // Auto search for target QR
+//                // Fire 3 into target
+//                .waitSeconds(3)
+//
+//                // add action to shoot balls in color order
+//                .splineTo(red_loadingPos.position, -25)
+//                .build()
+//        );
+        redBot.runAction(redBot.getDrive().actionBuilder(new Pose2d(-49, 49, Math.toRadians(-50)))
+                .strafeToLinearHeading(new Vector2d(-25, 25 ), Math.toRadians(-50) )// Pull away from wall
                 // Auto search for target QR
                 // Fire 3 into target
                 .waitSeconds(3)
-                // Turn on sweeper, set revolver to loading position
-                // ***FIRST LINE OF BALLS
-                .turn(Math.toRadians(-45))
-                .splineToConstantHeading(new Vector2d(red_firstLinePos.component1().x, red_firstLinePos.component1().y), Math.toRadians(-90)) // ingest first ball
-                // revolver to next loading position
-                .waitSeconds(1)
-                .lineToY(red_firstLinePos.component1().y - 5) // ingest 2nd ball
-                // revolver to next loading position
-                .waitSeconds(1)
-                .lineToY(red_firstLinePos.component1().y - 10) // ingest 2nd ball
-                .strafeToSplineHeading(red_farShootingPos, Math.toRadians(-35))
-                // Auto search for target QR
-                // Fire 3 into target
-                .waitSeconds(3)
-
-                // ***SECOND LINE OF BALLS
-                .splineTo(new Vector2d(red_secondLinePos.component1().x, red_secondLinePos.component1().y), Math.toRadians(-90))
-                // revolver to next loading position
-                .waitSeconds(1)
-                .lineToY(red_secondLinePos.component1().y - 5) // ingest 2nd ball
-                // revolver to next loading position
-                .waitSeconds(1)
-                .lineToY(red_secondLinePos.component1().y - 10)
-                .waitSeconds(1)
-                .lineToY(red_secondLinePos.component1().y - 15) // ingest 2nd ball
-                .strafeToLinearHeading(red_midShootingPos, -45)
-                // Auto search for target QR
-                // Fire 3 into target
-                .waitSeconds(3)
-
-                //***THIRD LINE OF BALLS
-                .splineTo(new Vector2d(red_thirdLinePos.component1().x, red_thirdLinePos.component1().y), Math.toRadians(-90))
-                // revolver to next loading position
-                .waitSeconds(1)
-                .lineToY(red_thirdLinePos.component1().y - 5) // ingest 2nd ball
-                // revolver to next loading position
-                .waitSeconds(1)
-                .lineToY(red_thirdLinePos.component1().y - 10) // ingest 2nd ball
-                .strafeToLinearHeading(red_nearShootingPos, -90)
-                // Auto search for target QR
-                // Fire 3 into target
-                .waitSeconds(3)
-
-                // add action to shoot balls in color order
-                .splineTo(red_loadingPos.position, -25)
+                .strafeToSplineHeading(new Vector2d(0, 23 ), Math.toRadians(-45))
                 .build()
         );
 
@@ -113,10 +121,7 @@ public class MeepMeepTesting {
                 // Auto search for target QR
                 // Fire 3 into target
                 .waitSeconds(3)
-                // Turn on sweeper, set revolver to loading position
-                // ingest first ball
-                // revolver to next loading position
-                .waitSeconds(1)
+                .strafeToSplineHeading(new Vector2d(0, -23 ), Math.toRadians(45))
                 .build()
         );
 

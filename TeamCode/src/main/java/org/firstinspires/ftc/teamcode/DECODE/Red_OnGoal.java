@@ -78,11 +78,11 @@ public final class Red_OnGoal extends LinearOpMode {
         launcher = new Launcher(hardwareMap, telemetry);
 
         if (teamColorID == aprilTagColors.getRedTeamID()) {
-            loadingPos = new Pose2d( 52, -52, Math.toRadians(45));
+            loadingPos = new Pose2d( -49, 49, Math.toRadians(-50));
 
             sendTelemetryPacket("RED Team Ready!");
         } else if (teamColorID == aprilTagColors.getBlueTeamID()) {
-            loadingPos = new Pose2d( 52, 52, Math.toRadians(45));
+            loadingPos = new Pose2d( -49, -49, Math.toRadians(50));
 
             sendTelemetryPacket("BLUE Team Ready!");
         }
@@ -94,7 +94,7 @@ public final class Red_OnGoal extends LinearOpMode {
         // Drive "backward" away from wall, but touching far shooting zone
         Actions.runBlocking( new SequentialAction(
                 drive.actionBuilder(drive.localizer.getPose())
-                        .strafeToLinearHeading(new Vector2d(-25, -25 ), Math.toRadians(-50) )
+                        .strafeToLinearHeading(new Vector2d(-25, 25 ), Math.toRadians(-50) )
                         .build())
         );
 
@@ -112,10 +112,11 @@ public final class Red_OnGoal extends LinearOpMode {
         dashboard.getTelemetry().update();
 
         // Return to loading zone to start TeleOp
+        // Return to loading zone to start TeleOp
         Actions.runBlocking(
                 new SequentialAction(
-                        drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
-                                .splineTo(loadingPos.position, loadingPos.heading.real)
+                        drive.actionBuilder(drive.localizer.getPose())
+                                .strafeToSplineHeading(new Vector2d(0, 23 ), Math.toRadians(-45))
                                 .build()
                 )
         );

@@ -114,9 +114,9 @@ public final class Blue_OnGoal extends LinearOpMode {
         // Return to loading zone to start TeleOp
         Actions.runBlocking(
                 new SequentialAction(
-                        drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
-                                .splineTo(loadingPos.position, loadingPos.heading.real)
-                                .build()
+                        drive.actionBuilder(drive.localizer.getPose())
+                            .strafeToSplineHeading(new Vector2d(0, -23 ), Math.toRadians(45))
+                            .build()
                 )
         );
 
