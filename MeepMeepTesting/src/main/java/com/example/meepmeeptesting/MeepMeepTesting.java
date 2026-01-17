@@ -70,8 +70,7 @@ public class MeepMeepTesting {
                 // revolver to next loading position
                 .waitSeconds(1)
                 .lineToY(red_firstLinePos.component1().y - 10) // ingest 2nd ball
-                .splineToConstantHeading(red_farShootingPos, Math.toRadians(90))
-                .turn(Math.toRadians(60.0))
+                .strafeToSplineHeading(red_farShootingPos, Math.toRadians(-35))
                 // Auto search for target QR
                 // Fire 3 into target
                 .waitSeconds(3)
@@ -83,9 +82,10 @@ public class MeepMeepTesting {
                 .lineToY(red_secondLinePos.component1().y - 5) // ingest 2nd ball
                 // revolver to next loading position
                 .waitSeconds(1)
-                .lineToY(red_secondLinePos.component1().y - 10) // ingest 2nd ball
-                .splineToConstantHeading(red_midShootingPos, -90)
-                .turn(Math.toRadians(30))
+                .lineToY(red_secondLinePos.component1().y - 10)
+                .waitSeconds(1)
+                .lineToY(red_secondLinePos.component1().y - 15) // ingest 2nd ball
+                .strafeToLinearHeading(red_midShootingPos, -45)
                 // Auto search for target QR
                 // Fire 3 into target
                 .waitSeconds(3)
@@ -98,14 +98,13 @@ public class MeepMeepTesting {
                 // revolver to next loading position
                 .waitSeconds(1)
                 .lineToY(red_thirdLinePos.component1().y - 10) // ingest 2nd ball
-                .splineToConstantHeading(red_nearShootingPos, -90)
-                .turn(Math.toRadians(20))
+                .strafeToLinearHeading(red_nearShootingPos, -90)
                 // Auto search for target QR
                 // Fire 3 into target
                 .waitSeconds(3)
 
                 // add action to shoot balls in color order
-                .splineTo(red_loadingPos.position, 180)
+                .splineTo(red_loadingPos.position, -25)
                 .build()
         );
 
@@ -123,8 +122,7 @@ public class MeepMeepTesting {
                 // revolver to next loading position
                 .waitSeconds(1)
                 .lineToY(blue_firstLinePos.component1().y + 10) // ingest 2nd ball
-                .splineToConstantHeading(blue_farShootingPos.position, -90)
-                .turn(Math.toRadians(-60))
+                .strafeToSplineHeading(blue_farShootingPos.position, -150)
                 // Auto search for target QR
                 // Fire 3 into target
                 .waitSeconds(3)
@@ -137,8 +135,7 @@ public class MeepMeepTesting {
                 // revolver to next loading position
                 .waitSeconds(1)
                 .lineToY(blue_secondLinePos.component1().y + 10) // ingest 2nd ball
-                .splineToConstantHeading(blue_midShootingPos.position, -90)
-                .turn(Math.toRadians(-45))
+                .strafeToSplineHeading(blue_midShootingPos.position, -135)
                 // Auto search for target QR
                 // Fire 3 into target
                 .waitSeconds(3)
@@ -151,8 +148,7 @@ public class MeepMeepTesting {
                 // revolver to next loading position
                 .waitSeconds(1)
                 .lineToY(blue_thirdLinePos.component1().y + 10) // ingest 2nd ball
-                .splineToConstantHeading(blue_nearShootingPos.position, 90)
-                .turn(Math.toRadians(-30))
+                .strafeToSplineHeading(blue_nearShootingPos.position, 60)
                 // Auto search for target QR
                 // Fire 3 into target
                 .waitSeconds(3)
