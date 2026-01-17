@@ -27,8 +27,8 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 
-@TeleOp(name = "DECODE_2025_RED", group = "teleop")
-public class TeleOP_Decode extends LinearOpMode {
+@TeleOp(name = "DECODE_2025_BLUE", group = "teleop")
+public class TeleOP_Decode_Blue extends LinearOpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
 
     private final AprilTagColors aprilTagColors = new AprilTagColors();
@@ -37,7 +37,7 @@ public class TeleOP_Decode extends LinearOpMode {
 
     // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
     // we should aim for when shooting
-    private Integer teamColorID = aprilTagColors.getRedTeamID();
+    private Integer teamColorID = aprilTagColors.getBlueTeamID();
     private AprilTagWebcam  webcam = null;
     private boolean autoFireInit = false;
 
