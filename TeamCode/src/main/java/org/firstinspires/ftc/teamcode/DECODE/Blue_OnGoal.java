@@ -26,8 +26,8 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 
-@Autonomous(name = "Blue Auto 1", group = "auto", preselectTeleOp = "DECODE_2025_BLUE")
-public final class Blue_PoseFar extends LinearOpMode {
+@Autonomous(name = "Blue On Goal", group = "auto", preselectTeleOp = "DECODE_2025_BLUE")
+public final class Blue_OnGoal extends LinearOpMode {
     ElapsedTime timer = null;
 
     static private int HOME_X = 62;
@@ -68,7 +68,7 @@ public final class Blue_PoseFar extends LinearOpMode {
         dashboard = FtcDashboard.getInstance();
 
         // Initialize at SPECIFIC coordinates, touching the wall and scoring zone
-        drive = new MecanumDrive(hardwareMap, new Pose2d(HOME_X, HOME_Y, Math.toRadians(HOME_ANGLE)));
+        drive = new MecanumDrive(hardwareMap, new Pose2d(-49, -49, Math.toRadians(50)));
 
         // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
         // we should aim for when shooting
@@ -94,10 +94,10 @@ public final class Blue_PoseFar extends LinearOpMode {
         // Drive "backward" away from wall, but touching far shooting zone
         Actions.runBlocking( new SequentialAction(
                 drive.actionBuilder(drive.localizer.getPose())
-                        .lineToX(farShootingPos.x)
-                        .turn(Math.toRadians(-45)) // Turn camera towards tower
+                        .strafeToLinearHeading(new Vector2d(-25, -25 ), Math.toRadians(50) )
                         .build())
         );
+
         dashboard.getTelemetry().update();
 
         double rpm = aimBot();
@@ -110,94 +110,6 @@ public final class Blue_PoseFar extends LinearOpMode {
             }
         }
         dashboard.getTelemetry().update();
-
-        // ***First Line of Balls***
-        if(!intakeBallLine(1)) {
-            sendTelemetryPacket("Error running intake sequence");
-            stop();
-        }
-        dashboard.getTelemetry().update();
-
-        Actions.runBlocking(
-                new SequentialAction(
-                        drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
-                                .strafeToSplineHeading(farShootingPos, Math.toRadians(-35))
-                                .turn(Math.toRadians(-60))
-                                .build()
-                )
-        );
-        dashboard.getTelemetry().update();
-
-        rpm = aimBot();
-
-        if (rpm > 0.0) {
-            // Fire the ball
-            if (!tripleFireSequence(rpm)) {
-                sendTelemetryPacket("Firing sequence failed");
-                stop();
-            }
-        }
-        dashboard.getTelemetry().update();
-
-        // ***Second Line of Balls***
-        // Ensure we have plenty of time to get back to human player
-        if(timer.seconds() <= 20) {
-            if (!intakeBallLine(2)) {
-                sendTelemetryPacket("Error running intake sequence");
-                stop();
-            }
-
-            Actions.runBlocking(
-                    new SequentialAction(
-                            drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
-                                    .strafeToLinearHeading(midShootingPos, Math.toRadians(-45))
-                                    .turn(Math.toRadians(-30.0))
-                                    .build()
-                    )
-            );
-            dashboard.getTelemetry().update();
-
-            rpm = aimBot();
-
-            if (rpm > 0.0) {
-                // Fire the ball
-                if (!tripleFireSequence(rpm)) {
-                    sendTelemetryPacket("Firing sequence failed");
-                    stop();
-                }
-            }
-
-            dashboard.getTelemetry().update();
-        }
-
-        // ***Third Line of Balls***
-        // Ensure we have plenty of time to get back to human player
-        if(timer.seconds() <= 20) {
-            if (!intakeBallLine(3)) {
-                sendTelemetryPacket("Error running intake sequence");
-                stop();
-            }
-
-            Actions.runBlocking(
-                    new SequentialAction(
-                            drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
-                                    .strafeToLinearHeading(nearShootingPos, Math.toRadians(-90))
-                                    .turn(Math.toRadians(-20.0))
-                                    .build()
-                    )
-            );
-            dashboard.getTelemetry().update();
-
-            rpm = aimBot();
-
-            if (rpm > 0.0) {
-                // Fire the ball
-                if (!tripleFireSequence(rpm)) {
-                    sendTelemetryPacket("Firing sequence failed");
-                    stop();
-                }
-            }
-        }
 
         // Return to loading zone to start TeleOp
         Actions.runBlocking(

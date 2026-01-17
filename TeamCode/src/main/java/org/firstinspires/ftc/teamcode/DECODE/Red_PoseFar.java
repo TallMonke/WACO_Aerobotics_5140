@@ -35,14 +35,14 @@ public final class Red_PoseFar extends LinearOpMode {
     static private double HOME_ANGLE = 0;
 
     // Set field positions
-    static private final Vector2d farShootingPos = new Vector2d(51, -11);
-    static private final Vector2d midShootingPos = new Vector2d(-15, -13.2);
-    static private final Vector2d nearShootingPos = new Vector2d(-30.0, -21.7);
+    static private final Vector2d farShootingPos = new Vector2d(51, 11);
+    static private final Vector2d midShootingPos = new Vector2d(-15, 13.2);
+    static private final Vector2d nearShootingPos = new Vector2d(-30.0, 21.7);
 
     // This is defaulted to the red team. Y position should be inverted for blue team
-    static private final Pose2d firstLinePos = new Pose2d(36 - 5, -33, Math.toRadians(-90));
-    static private final Pose2d secondLinePos = new Pose2d(12 - 5, -33, Math.toRadians(-90));
-    static private final Pose2d thirdLinePos = new Pose2d(-12 + 5, -33, Math.toRadians(-90));
+    static private final Pose2d firstLinePos = new Pose2d(36 - 5, 33, Math.toRadians(-90));
+    static private final Pose2d secondLinePos = new Pose2d(12 - 5, 33, Math.toRadians(-90));
+    static private final Pose2d thirdLinePos = new Pose2d(-12 + 5, 33, Math.toRadians(-90));
 
     // Human player loading zone, changes based on team color
     static private Pose2d loadingPos = null; // position based on team color
