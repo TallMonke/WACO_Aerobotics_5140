@@ -268,7 +268,7 @@ public class TeleOP_Decode extends LinearOpMode {
      * @param target Target to steer the robot to center the camera
      */
     private void aim(@NonNull AprilTagDetection target) {
-        final double bearingWeighting = 1.0;
+        final double bearingWeighting = 0.0;
 
         driveTrain.rotate(target.ftcPose.bearing + bearingWeighting);
     }

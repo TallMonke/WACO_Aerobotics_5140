@@ -23,7 +23,7 @@ public class RotationalMath {
         double angleInDegrees = 45.0; //launch angle in degrees
         double angleInRadians = Math.toRadians(angleInDegrees);
         double height = 29.0;  //height the ball needs to be off the ground to make basket based from the launcher of robot. 41-13.75
-        double tuneCorrection = 200; //Value you set to eliminate discreptincies.
+        double tuneCorrection = 220; //Value you set to eliminate discreptincies.
         double minimalLaunchDistance = 58; //Derivative of equation set to 0. Gives us the closest we can get to the basket without the need of changing the Launch angle.
         double RPM_at_minimalDiatance = 810.45; //plug the minimalLaunchDistance into the formula and this is that RPM
         //parts of equation.
