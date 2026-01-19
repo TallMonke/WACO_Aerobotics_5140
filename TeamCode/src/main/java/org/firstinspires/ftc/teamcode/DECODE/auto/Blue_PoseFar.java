@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.DECODE;
+package org.firstinspires.ftc.teamcode.DECODE.auto;
 
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.getRPM;
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.x_Distance;
@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.DECODE.Constants;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTagColors;
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTagWebcam;
@@ -26,26 +27,9 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 
-@Autonomous(name = "RED Auto 1", group = "auto", preselectTeleOp = "DECODE_2025_RED")
-public final class Red_PoseFar extends LinearOpMode {
+@Autonomous(name = "Blue Auto 1", group = "auto", preselectTeleOp = "DECODE_2025_BLUE")
+public final class Blue_PoseFar extends LinearOpMode {
     ElapsedTime timer = null;
-
-    static private int HOME_X = 62;
-    static private int HOME_Y = -11;
-    static private double HOME_ANGLE = 0;
-
-    // Set field positions
-    static private final Vector2d farShootingPos = new Vector2d(51, 11);
-    static private final Vector2d midShootingPos = new Vector2d(-15, 13.2);
-    static private final Vector2d nearShootingPos = new Vector2d(-30.0, 21.7);
-
-    // This is defaulted to the red team. Y position should be inverted for blue team
-    static private final Pose2d firstLinePos = new Pose2d(36 - 5, 33, Math.toRadians(-90));
-    static private final Pose2d secondLinePos = new Pose2d(12 - 5, 33, Math.toRadians(-90));
-    static private final Pose2d thirdLinePos = new Pose2d(-12 + 5, 33, Math.toRadians(-90));
-
-    // Human player loading zone, changes based on team color
-    static private Pose2d loadingPos = null; // position based on team color
 
     // Hardware objects
     FtcDashboard dashboard = null;
@@ -57,7 +41,7 @@ public final class Red_PoseFar extends LinearOpMode {
 
     // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
     // we should aim for when shooting
-    final Integer teamColorID = aprilTagColors.getRedTeamID();
+    final Integer teamColorID = aprilTagColors.getBlueTeamID();
     AprilTagWebcam webcam = null;
     Revolver revolver = null;
     Sweeper sweeper = null;
@@ -68,7 +52,7 @@ public final class Red_PoseFar extends LinearOpMode {
         dashboard = FtcDashboard.getInstance();
 
         // Initialize at SPECIFIC coordinates, touching the wall and scoring zone
-        drive = new MecanumDrive(hardwareMap, new Pose2d(HOME_X, HOME_Y, Math.toRadians(HOME_ANGLE)));
+        drive = new MecanumDrive(hardwareMap, new Pose2d(Constants.BLUE_HOME_X, Constants.BLUE_HOME_Y, Math.toRadians(Constants.BLUE_HOME_ANGLE)));
 
         // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
         // we should aim for when shooting
@@ -78,12 +62,8 @@ public final class Red_PoseFar extends LinearOpMode {
         launcher = new Launcher(hardwareMap, telemetry);
 
         if (teamColorID == aprilTagColors.getRedTeamID()) {
-            loadingPos = new Pose2d( 52, -52, Math.toRadians(45));
-
             sendTelemetryPacket("RED Team Ready!");
         } else if (teamColorID == aprilTagColors.getBlueTeamID()) {
-            loadingPos = new Pose2d( 52, 52, Math.toRadians(45));
-
             sendTelemetryPacket("BLUE Team Ready!");
         }
 
@@ -94,7 +74,7 @@ public final class Red_PoseFar extends LinearOpMode {
         // Drive "backward" away from wall, but touching far shooting zone
         Actions.runBlocking( new SequentialAction(
                 drive.actionBuilder(drive.localizer.getPose())
-                        .lineToX(farShootingPos.x)
+                        .lineToX(Constants.blue_farShootingPos.x)
                         .turn(Math.toRadians(-45)) // Turn camera towards tower
                         .build())
         );
@@ -121,8 +101,8 @@ public final class Red_PoseFar extends LinearOpMode {
         Actions.runBlocking(
                 new SequentialAction(
                         drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
-                                .strafeToSplineHeading(farShootingPos, Math.toRadians(-35))
-                                .turn(Math.toRadians(60))
+                                .strafeToLinearHeading(Constants.blue_farShootingPos, Math.toRadians(-35))
+                                .turn(Math.toRadians(-60))
                                 .build()
                 )
         );
@@ -150,8 +130,8 @@ public final class Red_PoseFar extends LinearOpMode {
             Actions.runBlocking(
                     new SequentialAction(
                             drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
-                                    .strafeToLinearHeading(midShootingPos, Math.toRadians(-45))
-                                    .turn(Math.toRadians(30.0))
+                                    .strafeToLinearHeading(Constants.blue_midShootingPos, Math.toRadians(-45))
+                                    .turn(Math.toRadians(-30.0))
                                     .build()
                     )
             );
@@ -181,8 +161,8 @@ public final class Red_PoseFar extends LinearOpMode {
             Actions.runBlocking(
                     new SequentialAction(
                             drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
-                                    .strafeToLinearHeading(nearShootingPos, Math.toRadians(-90))
-                                    .turn(Math.toRadians(20.0))
+                                    .strafeToLinearHeading(Constants.blue_nearShootingPos, Math.toRadians(-90))
+                                    .turn(Math.toRadians(-20.0))
                                     .build()
                     )
             );
@@ -203,7 +183,7 @@ public final class Red_PoseFar extends LinearOpMode {
         Actions.runBlocking(
                 new SequentialAction(
                         drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
-                                .splineTo(loadingPos.position, loadingPos.heading.real)
+                                .strafeToLinearHeading(new Vector2d(0, -23 ), Math.toRadians(-45))
                                 .build()
                 )
         );
@@ -310,13 +290,13 @@ public final class Red_PoseFar extends LinearOpMode {
 
         switch (row) {
             case 1:
-                ballLinePos = firstLinePos;
+                ballLinePos = Constants.blue_firstLinePos;
                 break;
             case 2:
-                ballLinePos = secondLinePos;
+                ballLinePos = Constants.blue_secondLinePos;
                 break;
             case 3:
-                ballLinePos = thirdLinePos;
+                ballLinePos = Constants.blue_thirdLinePos;
                 break;
             default:
                 sendTelemetryPacket("Invalid ball line position");
@@ -325,15 +305,10 @@ public final class Red_PoseFar extends LinearOpMode {
 
         double posOffset = 5.0;
 
-        if(teamColorID == aprilTagColors.getBlueTeamID()) {
-            posOffset = -5.0;
-        }
-
-
         Actions.runBlocking(
                 new ParallelAction(
                         drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
-                                .splineTo(new Vector2d(ballLinePos.component1().x, ballLinePos.component1().y), Math.toRadians(-90))
+                                .strafeToLinearHeading(new Vector2d(ballLinePos.component1().x, ballLinePos.component1().y), Math.toRadians(-90))
                                 .build(),
 
                         revolver.stepToLoadAction() // Select next ball in loading slot
@@ -347,17 +322,17 @@ public final class Red_PoseFar extends LinearOpMode {
                         sweeper.enableAction(),
                         new SequentialAction(
                                 drive.actionBuilder(drive.localizer.getPose()) // Suck up first ball
-                                        .lineToY(ballLinePos.component1().y + posOffset)
+                                        .lineToY(ballLinePos.component1().y - posOffset)
                                         .build(),
                                 new SleepAction(0.25),
                                 revolver.stepToLoadAction(), // Select next ball in loading slot
                                 drive.actionBuilder(drive.localizer.getPose()) // Suck up second ball
-                                        .lineToY(ballLinePos.component1().y + (posOffset * 2.0))
+                                        .lineToY(ballLinePos.component1().y - (posOffset * 2.0))
                                         .build(),
                                 new SleepAction(0.25),
                                 revolver.stepToLoadAction(), // Select next ball in loading slot
                                 drive.actionBuilder(drive.localizer.getPose()) // Suck up third ball
-                                        .lineToY(ballLinePos.component1().y + (posOffset * 3.0))
+                                        .lineToY(ballLinePos.component1().y - (posOffset * 3.0))
                                         .build(),
                                 sweeper.disableAction()
                         )
@@ -366,7 +341,6 @@ public final class Red_PoseFar extends LinearOpMode {
 
         return true;
     }
-
 
     private void sendTelemetryPacket(String key, Object value) {
         TelemetryPacket packet = new TelemetryPacket();

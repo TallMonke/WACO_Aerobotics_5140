@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.DECODE;
+package org.firstinspires.ftc.teamcode.DECODE.auto;
 
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.getRPM;
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.x_Distance;
@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.DECODE.Constants;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTagColors;
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTagWebcam;
@@ -26,26 +27,9 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 
-@Autonomous(name = "Red On Goal", group = "auto", preselectTeleOp = "DECODE_2025_RED")
-public final class Red_OnGoal extends LinearOpMode {
+@Autonomous(name = "RED Auto 1", group = "auto", preselectTeleOp = "DECODE_2025_RED")
+public final class Red_PoseFar extends LinearOpMode {
     ElapsedTime timer = null;
-
-    static private int HOME_X = 62;
-    static private int HOME_Y = 11;
-    static private double HOME_ANGLE = 0;
-
-    // Set field positions
-    static private final Vector2d farShootingPos = new Vector2d(51, -11);
-    static private final Vector2d midShootingPos = new Vector2d(-15, -13.2);
-    static private final Vector2d nearShootingPos = new Vector2d(-30.0, -21.7);
-
-    // This is defaulted to the red team. Y position should be inverted for blue team
-    static private final Pose2d firstLinePos = new Pose2d(36 - 5, -30, Math.toRadians(-90));
-    static private final Pose2d secondLinePos = new Pose2d(12 - 5, -30, Math.toRadians(-90));
-    static private final Pose2d thirdLinePos = new Pose2d(-12 + 5, -30, Math.toRadians(-90));
-
-    // Human player loading zone, changes based on team color
-    static private Pose2d loadingPos = null; // position based on team color
 
     // Hardware objects
     FtcDashboard dashboard = null;
@@ -57,7 +41,7 @@ public final class Red_OnGoal extends LinearOpMode {
 
     // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
     // we should aim for when shooting
-    final Integer teamColorID = aprilTagColors.getBlueTeamID();
+    final Integer teamColorID = aprilTagColors.getRedTeamID();
     AprilTagWebcam webcam = null;
     Revolver revolver = null;
     Sweeper sweeper = null;
@@ -68,7 +52,7 @@ public final class Red_OnGoal extends LinearOpMode {
         dashboard = FtcDashboard.getInstance();
 
         // Initialize at SPECIFIC coordinates, touching the wall and scoring zone
-        drive = new MecanumDrive(hardwareMap, new Pose2d(-49, 49, Math.toRadians(-50)));
+        drive = new MecanumDrive(hardwareMap, new Pose2d(Constants.RED_HOME_X, Constants.RED_HOME_Y, Math.toRadians(Constants.RED_HOME_ANGLE)));
 
         // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
         // we should aim for when shooting
@@ -78,11 +62,9 @@ public final class Red_OnGoal extends LinearOpMode {
         launcher = new Launcher(hardwareMap, telemetry);
 
         if (teamColorID == aprilTagColors.getRedTeamID()) {
-            loadingPos = new Pose2d( -49, 49, Math.toRadians(-50));
 
             sendTelemetryPacket("RED Team Ready!");
         } else if (teamColorID == aprilTagColors.getBlueTeamID()) {
-            loadingPos = new Pose2d( -49, -49, Math.toRadians(50));
 
             sendTelemetryPacket("BLUE Team Ready!");
         }
@@ -94,10 +76,11 @@ public final class Red_OnGoal extends LinearOpMode {
         // Drive "backward" away from wall, but touching far shooting zone
         Actions.runBlocking( new SequentialAction(
                 drive.actionBuilder(drive.localizer.getPose())
-                        .strafeToLinearHeading(new Vector2d(-25, 25 ), Math.toRadians(-50) )
+                        .lineToX(Constants.red_farShootingPos.x)
+                        .lineToX(Constants.red_farShootingPos.x)
+                        .turn(Math.toRadians(-45)) // Turn camera towards tower
                         .build())
         );
-
         dashboard.getTelemetry().update();
 
         double rpm = aimBot();
@@ -111,12 +94,98 @@ public final class Red_OnGoal extends LinearOpMode {
         }
         dashboard.getTelemetry().update();
 
-        // Return to loading zone to start TeleOp
+        // ***First Line of Balls***
+        if(!intakeBallLine(1)) {
+            sendTelemetryPacket("Error running intake sequence");
+            stop();
+        }
+        dashboard.getTelemetry().update();
+
+        // Drive to far shooting position
+        Actions.runBlocking(
+                new SequentialAction(
+                        drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
+                                .strafeToLinearHeading(Constants.red_farShootingPos, Math.toRadians(-35))
+                                .turn(Math.toRadians(60))
+                                .build()
+                )
+        );
+        dashboard.getTelemetry().update();
+
+        rpm = aimBot();
+
+        if (rpm > 0.0) {
+            // Fire the ball
+            if (!tripleFireSequence(rpm)) {
+                sendTelemetryPacket("Firing sequence failed");
+                stop();
+            }
+        }
+        dashboard.getTelemetry().update();
+
+        // ***Second Line of Balls***
+        // Ensure we have plenty of time to get back to human player
+        if(timer.seconds() <= 20) {
+            if (!intakeBallLine(2)) {
+                sendTelemetryPacket("Error running intake sequence");
+                stop();
+            }
+
+            Actions.runBlocking(
+                    new SequentialAction(
+                            drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
+                                    .strafeToLinearHeading(Constants.red_midShootingPos, Math.toRadians(-45))
+                                    .build()
+                    )
+            );
+            dashboard.getTelemetry().update();
+
+            rpm = aimBot();
+
+            if (rpm > 0.0) {
+                // Fire the ball
+                if (!tripleFireSequence(rpm)) {
+                    sendTelemetryPacket("Firing sequence failed");
+                    stop();
+                }
+            }
+
+            dashboard.getTelemetry().update();
+        }
+
+        // ***Third Line of Balls***
+        // Ensure we have plenty of time to get back to human player
+        if(timer.seconds() <= 20) {
+            if (!intakeBallLine(3)) {
+                sendTelemetryPacket("Error running intake sequence");
+                stop();
+            }
+
+            Actions.runBlocking(
+                    new SequentialAction(
+                            drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
+                                    .strafeToLinearHeading(Constants.red_nearShootingPos, Math.toRadians(-95))
+                                    .build()
+                    )
+            );
+            dashboard.getTelemetry().update();
+
+            rpm = aimBot();
+
+            if (rpm > 0.0) {
+                // Fire the ball
+                if (!tripleFireSequence(rpm)) {
+                    sendTelemetryPacket("Firing sequence failed");
+                    stop();
+                }
+            }
+        }
+
         // Return to loading zone to start TeleOp
         Actions.runBlocking(
                 new SequentialAction(
-                        drive.actionBuilder(drive.localizer.getPose())
-                                .strafeToSplineHeading(new Vector2d(0, 23 ), Math.toRadians(-45))
+                        drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
+                                .strafeToLinearHeading(new Vector2d(0, 23 ), Math.toRadians(-45))
                                 .build()
                 )
         );
@@ -223,13 +292,13 @@ public final class Red_OnGoal extends LinearOpMode {
 
         switch (row) {
             case 1:
-                ballLinePos = firstLinePos;
+                ballLinePos = Constants.red_firstLinePos;
                 break;
             case 2:
-                ballLinePos = secondLinePos;
+                ballLinePos = Constants.red_secondLinePos;
                 break;
             case 3:
-                ballLinePos = thirdLinePos;
+                ballLinePos = Constants.red_thirdLinePos;
                 break;
             default:
                 sendTelemetryPacket("Invalid ball line position");
@@ -245,8 +314,9 @@ public final class Red_OnGoal extends LinearOpMode {
 
         Actions.runBlocking(
                 new ParallelAction(
+                        sweeper.enableAction(),
                         drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
-                                .splineTo(new Vector2d(ballLinePos.component1().x, ballLinePos.component1().y), Math.toRadians(-90))
+                                .strafeToLinearHeading(new Vector2d(ballLinePos.component1().x, ballLinePos.component1().y), Math.toRadians(90))
                                 .build(),
 
                         revolver.stepToLoadAction() // Select next ball in loading slot
@@ -279,6 +349,7 @@ public final class Red_OnGoal extends LinearOpMode {
 
         return true;
     }
+
 
     private void sendTelemetryPacket(String key, Object value) {
         TelemetryPacket packet = new TelemetryPacket();

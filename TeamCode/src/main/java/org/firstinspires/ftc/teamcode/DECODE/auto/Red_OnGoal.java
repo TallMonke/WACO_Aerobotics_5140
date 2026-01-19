@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.DECODE;
+package org.firstinspires.ftc.teamcode.DECODE.auto;
 
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.getRPM;
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.x_Distance;
@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.DECODE.Constants;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTagColors;
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTagWebcam;
@@ -26,26 +27,9 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 
-@Autonomous(name = "Blue On Goal", group = "auto", preselectTeleOp = "DECODE_2025_BLUE")
-public final class Blue_OnGoal extends LinearOpMode {
+@Autonomous(name = "Red On Goal", group = "auto", preselectTeleOp = "DECODE_2025_RED")
+public final class Red_OnGoal extends LinearOpMode {
     ElapsedTime timer = null;
-
-    static private int HOME_X = 62;
-    static private int HOME_Y = 11;
-    static private double HOME_ANGLE = 0;
-
-    // Set field positions
-    static private final Vector2d farShootingPos = new Vector2d(51, -11);
-    static private final Vector2d midShootingPos = new Vector2d(-15, -13.2);
-    static private final Vector2d nearShootingPos = new Vector2d(-30.0, -21.7);
-
-    // This is defaulted to the red team. Y position should be inverted for blue team
-    static private final Pose2d firstLinePos = new Pose2d(36 - 5, -30, Math.toRadians(-90));
-    static private final Pose2d secondLinePos = new Pose2d(12 - 5, -30, Math.toRadians(-90));
-    static private final Pose2d thirdLinePos = new Pose2d(-12 + 5, -30, Math.toRadians(-90));
-
-    // Human player loading zone, changes based on team color
-    static private Pose2d loadingPos = null; // position based on team color
 
     // Hardware objects
     FtcDashboard dashboard = null;
@@ -68,7 +52,7 @@ public final class Blue_OnGoal extends LinearOpMode {
         dashboard = FtcDashboard.getInstance();
 
         // Initialize at SPECIFIC coordinates, touching the wall and scoring zone
-        drive = new MecanumDrive(hardwareMap, new Pose2d(-49, -49, Math.toRadians(50)));
+        drive = new MecanumDrive(hardwareMap, new Pose2d(-49, 49, Math.toRadians(-50)));
 
         // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
         // we should aim for when shooting
@@ -78,12 +62,8 @@ public final class Blue_OnGoal extends LinearOpMode {
         launcher = new Launcher(hardwareMap, telemetry);
 
         if (teamColorID == aprilTagColors.getRedTeamID()) {
-            loadingPos = new Pose2d( 52, -52, Math.toRadians(45));
-
             sendTelemetryPacket("RED Team Ready!");
         } else if (teamColorID == aprilTagColors.getBlueTeamID()) {
-            loadingPos = new Pose2d( 52, 52, Math.toRadians(45));
-
             sendTelemetryPacket("BLUE Team Ready!");
         }
 
@@ -94,7 +74,7 @@ public final class Blue_OnGoal extends LinearOpMode {
         // Drive "backward" away from wall, but touching far shooting zone
         Actions.runBlocking( new SequentialAction(
                 drive.actionBuilder(drive.localizer.getPose())
-                        .strafeToLinearHeading(new Vector2d(-25, -25 ), Math.toRadians(50) )
+                        .strafeToLinearHeading(new Vector2d(-25, 25 ), Math.toRadians(-50) )
                         .build())
         );
 
@@ -112,11 +92,12 @@ public final class Blue_OnGoal extends LinearOpMode {
         dashboard.getTelemetry().update();
 
         // Return to loading zone to start TeleOp
+        // Return to loading zone to start TeleOp
         Actions.runBlocking(
                 new SequentialAction(
                         drive.actionBuilder(drive.localizer.getPose())
-                            .strafeToSplineHeading(new Vector2d(0, -23 ), Math.toRadians(45))
-                            .build()
+                                .strafeToSplineHeading(new Vector2d(0, 23 ), Math.toRadians(-45))
+                                .build()
                 )
         );
 
@@ -222,13 +203,13 @@ public final class Blue_OnGoal extends LinearOpMode {
 
         switch (row) {
             case 1:
-                ballLinePos = firstLinePos;
+                ballLinePos = Constants.red_firstLinePos;
                 break;
             case 2:
-                ballLinePos = secondLinePos;
+                ballLinePos = Constants.red_secondLinePos;
                 break;
             case 3:
-                ballLinePos = thirdLinePos;
+                ballLinePos = Constants.red_thirdLinePos;
                 break;
             default:
                 sendTelemetryPacket("Invalid ball line position");
