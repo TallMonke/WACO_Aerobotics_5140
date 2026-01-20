@@ -70,8 +70,21 @@ public class Launcher {
      *
      * @param velocity The RPM value to set the wheel velocity
      */
+
     public void setWheelVelocity(double velocity){
         wheelVelocity = velocity;
+    }
+
+    public Action setWheelVelocityAction(double velocity){
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                setWheelVelocity(velocity);
+                leftShoot.setVelocity(velocity);
+                rightShoot.setVelocity(velocity);
+                return false;
+            }
+        };
     }
 
     /**

@@ -92,10 +92,12 @@ public final class Blue_OnGoal extends LinearOpMode {
         timer = new ElapsedTime();
 
         // Drive "backward" away from wall, but touching far shooting zone
-        Actions.runBlocking( new SequentialAction(
+        Actions.runBlocking( new ParallelAction(
+                launcher.setWheelVelocityAction(850.0),
                 drive.actionBuilder(drive.localizer.getPose())
                         .strafeToLinearHeading(new Vector2d(-25, -25 ), Math.toRadians(50) )
-                        .build())
+                        .build()
+        )
         );
 
         dashboard.getTelemetry().update();
