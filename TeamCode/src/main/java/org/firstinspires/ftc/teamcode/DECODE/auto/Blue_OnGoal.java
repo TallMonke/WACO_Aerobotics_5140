@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.DECODE;
+package org.firstinspires.ftc.teamcode.DECODE.auto;
 
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.getRPM;
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.x_Distance;
@@ -26,8 +26,8 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 
-@Autonomous(name = "Red On Goal", group = "auto", preselectTeleOp = "DECODE_2025_RED")
-public final class Red_OnGoal extends LinearOpMode {
+@Autonomous(name = "Blue On Goal", group = "auto", preselectTeleOp = "DECODE_2025_BLUE")
+public final class Blue_OnGoal extends LinearOpMode {
     ElapsedTime timer = null;
 
     static private int HOME_X = 62;
@@ -57,7 +57,7 @@ public final class Red_OnGoal extends LinearOpMode {
 
     // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
     // we should aim for when shooting
-    final Integer teamColorID = aprilTagColors.getRedTeamID();
+    final Integer teamColorID = aprilTagColors.getBlueTeamID();
     AprilTagWebcam webcam = null;
     Revolver revolver = null;
     Sweeper sweeper = null;
@@ -68,7 +68,7 @@ public final class Red_OnGoal extends LinearOpMode {
         dashboard = FtcDashboard.getInstance();
 
         // Initialize at SPECIFIC coordinates, touching the wall and scoring zone
-        drive = new MecanumDrive(hardwareMap, new Pose2d(-49, 49, Math.toRadians(-50)));
+        drive = new MecanumDrive(hardwareMap, new Pose2d(-49, -49, Math.toRadians(50)));
 
         // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
         // we should aim for when shooting
@@ -78,11 +78,11 @@ public final class Red_OnGoal extends LinearOpMode {
         launcher = new Launcher(hardwareMap, telemetry);
 
         if (teamColorID == aprilTagColors.getRedTeamID()) {
-            loadingPos = new Pose2d( -49, 49, Math.toRadians(-50));
+            loadingPos = new Pose2d( 52, -52, Math.toRadians(45));
 
             sendTelemetryPacket("RED Team Ready!");
         } else if (teamColorID == aprilTagColors.getBlueTeamID()) {
-            loadingPos = new Pose2d( -49, -49, Math.toRadians(50));
+            loadingPos = new Pose2d( 52, 52, Math.toRadians(45));
 
             sendTelemetryPacket("BLUE Team Ready!");
         }
@@ -94,7 +94,7 @@ public final class Red_OnGoal extends LinearOpMode {
         // Drive "backward" away from wall, but touching far shooting zone
         Actions.runBlocking( new SequentialAction(
                 drive.actionBuilder(drive.localizer.getPose())
-                        .strafeToLinearHeading(new Vector2d(-25, 25 ), Math.toRadians(-50) )
+                        .strafeToLinearHeading(new Vector2d(-25, -25 ), Math.toRadians(50) )
                         .build())
         );
 
@@ -112,12 +112,11 @@ public final class Red_OnGoal extends LinearOpMode {
         dashboard.getTelemetry().update();
 
         // Return to loading zone to start TeleOp
-        // Return to loading zone to start TeleOp
         Actions.runBlocking(
                 new SequentialAction(
                         drive.actionBuilder(drive.localizer.getPose())
-                                .strafeToSplineHeading(new Vector2d(0, 23 ), Math.toRadians(-45))
-                                .build()
+                            .strafeToSplineHeading(new Vector2d(0, -23 ), Math.toRadians(45))
+                            .build()
                 )
         );
 

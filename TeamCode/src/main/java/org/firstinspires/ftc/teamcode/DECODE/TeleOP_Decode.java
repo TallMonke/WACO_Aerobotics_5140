@@ -55,7 +55,6 @@ public class TeleOP_Decode extends LinearOpMode {
         boolean init = false;
 
         // Initialize the hardware mechanisms
-        // TODO: Select which team color we are, use the AprilTagColors to get red/blue team ID values
         webcam = new AprilTagWebcam(hardwareMap, telemetry);
         driveTrain = new DriveTrain(hardwareMap, telemetry);
         revolver = new Revolver(hardwareMap, telemetry);
