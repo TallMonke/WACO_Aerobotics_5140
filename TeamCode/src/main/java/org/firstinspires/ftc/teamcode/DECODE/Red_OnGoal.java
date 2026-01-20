@@ -57,7 +57,7 @@ public final class Red_OnGoal extends LinearOpMode {
 
     // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
     // we should aim for when shooting
-    final Integer teamColorID = aprilTagColors.getBlueTeamID();
+    final Integer teamColorID = aprilTagColors.getRedTeamID();
     AprilTagWebcam webcam = null;
     Revolver revolver = null;
     Sweeper sweeper = null;

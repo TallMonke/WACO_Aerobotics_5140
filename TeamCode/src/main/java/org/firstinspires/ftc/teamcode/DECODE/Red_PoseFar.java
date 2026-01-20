@@ -240,7 +240,7 @@ public final class Red_PoseFar extends LinearOpMode {
             // Aim robot towards team tower
             Actions.runBlocking(new SequentialAction(
                     drive.actionBuilder(drive.localizer.getPose())
-                            .turn(Math.toRadians(towerDetection.ftcPose.bearing))
+                            .turn(Math.toRadians(towerDetection.ftcPose.bearing-2))
                             .build())
             );
 
