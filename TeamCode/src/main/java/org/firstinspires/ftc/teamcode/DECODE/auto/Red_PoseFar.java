@@ -74,11 +74,12 @@ public final class Red_PoseFar extends LinearOpMode {
         timer = new ElapsedTime();
 
         // Drive "backward" away from wall, but touching far shooting zone
-        Actions.runBlocking( new SequentialAction(
+        Actions.runBlocking( new ParallelAction(
+                launcher.setWheelVelocityAction(850.0),
                 drive.actionBuilder(drive.localizer.getPose())
                         .lineToX(Constants.red_farShootingPos.x)
                         .lineToX(Constants.red_farShootingPos.x)
-                        .turn(Math.toRadians(-45)) // Turn camera towards tower
+                        .turn(Math.toRadians(-35)) // Turn camera towards tower
                         .build())
         );
         dashboard.getTelemetry().update();
@@ -103,7 +104,8 @@ public final class Red_PoseFar extends LinearOpMode {
 
         // Drive to far shooting position
         Actions.runBlocking(
-                new SequentialAction(
+                new ParallelAction(
+                        revolver.setIndexAction(1),
                         drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
                                 .strafeToLinearHeading(Constants.red_farShootingPos, Math.toRadians(-35))
                                 .turn(Math.toRadians(60))
@@ -332,12 +334,12 @@ public final class Red_PoseFar extends LinearOpMode {
                                 drive.actionBuilder(drive.localizer.getPose()) // Suck up first ball
                                         .lineToY(ballLinePos.component1().y + posOffset)
                                         .build(),
-                                new SleepAction(0.25),
+                                new SleepAction(0.35),
                                 revolver.stepToLoadAction(), // Select next ball in loading slot
                                 drive.actionBuilder(drive.localizer.getPose()) // Suck up second ball
                                         .lineToY(ballLinePos.component1().y + (posOffset * 2.0))
                                         .build(),
-                                new SleepAction(0.25),
+                                new SleepAction(0.35),
                                 revolver.stepToLoadAction(), // Select next ball in loading slot
                                 drive.actionBuilder(drive.localizer.getPose()) // Suck up third ball
                                         .lineToY(ballLinePos.component1().y + (posOffset * 3.0))

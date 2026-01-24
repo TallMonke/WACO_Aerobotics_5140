@@ -143,7 +143,7 @@ public class Launcher {
                     telemetryPacket.addLine("Feed Released");
                 }
 
-                return timer.seconds() < 0.5;
+                return timer.seconds() < 0.25;
             }
         };
     }

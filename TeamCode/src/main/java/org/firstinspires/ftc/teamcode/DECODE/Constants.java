@@ -21,10 +21,10 @@ public class Constants {
     static public final Vector2d blue_nearShootingPos = new Vector2d(-30.0, -21.7);
 
     // This is defaulted to the red team. Y position should be inverted for blue team
-    static public final Pose2d red_firstLinePos = new Pose2d(36, 30, Math.toRadians(-90));
+    static public final Pose2d red_firstLinePos = new Pose2d(34, 30, Math.toRadians(-90));
     static public final Pose2d red_secondLinePos = new Pose2d(11, 30, Math.toRadians(-90));
     static public final Pose2d red_thirdLinePos = new Pose2d(-12, 30, Math.toRadians(-90));
-    static public final Pose2d blue_firstLinePos = new Pose2d(36, -30, Math.toRadians(-90));
+    static public final Pose2d blue_firstLinePos = new Pose2d(33, -30, Math.toRadians(-90));
     static public final Pose2d blue_secondLinePos = new Pose2d(11, -30, Math.toRadians(-90));
     static public final Pose2d blue_thirdLinePos = new Pose2d(-12, -30, Math.toRadians(-90));
 

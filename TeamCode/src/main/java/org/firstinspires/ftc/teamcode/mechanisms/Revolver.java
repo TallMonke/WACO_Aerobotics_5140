@@ -95,6 +95,15 @@ public class Revolver {
             revolverDrive.setPosition(revolverPositions.get(currentIndex));
         }
     }
+    public Action setIndexAction(int Index){
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                setIndex(Index);
+                return false;
+            }
+        };
+    }
 
     /**
      * Increases the revolver to the next position. Sleeps for 500ms to allow time for the revolver

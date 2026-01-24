@@ -52,7 +52,7 @@ public final class Red_OnGoal extends LinearOpMode {
         dashboard = FtcDashboard.getInstance();
 
         // Initialize at SPECIFIC coordinates, touching the wall and scoring zone
-        drive = new MecanumDrive(hardwareMap, new Pose2d(-49, 49, Math.toRadians(-50)));
+        drive = new MecanumDrive(hardwareMap, new Pose2d(-52, 49, Math.toRadians(-50)));
 
         // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
         // we should aim for when shooting
@@ -72,7 +72,8 @@ public final class Red_OnGoal extends LinearOpMode {
         timer = new ElapsedTime();
 
         // Drive "backward" away from wall, but touching far shooting zone
-        Actions.runBlocking( new SequentialAction(
+        Actions.runBlocking( new ParallelAction(
+                launcher.setWheelVelocityAction(850.0),
                 drive.actionBuilder(drive.localizer.getPose())
                         .strafeToLinearHeading(new Vector2d(-25, 25 ), Math.toRadians(-50) )
                         .build())
@@ -92,11 +93,10 @@ public final class Red_OnGoal extends LinearOpMode {
         dashboard.getTelemetry().update();
 
         // Return to loading zone to start TeleOp
-        // Return to loading zone to start TeleOp
         Actions.runBlocking(
                 new SequentialAction(
                         drive.actionBuilder(drive.localizer.getPose())
-                                .strafeToSplineHeading(new Vector2d(0, 23 ), Math.toRadians(-45))
+                                .strafeToSplineHeading(new Vector2d(-24, 54 ), Math.toRadians(0))
                                 .build()
                 )
         );
