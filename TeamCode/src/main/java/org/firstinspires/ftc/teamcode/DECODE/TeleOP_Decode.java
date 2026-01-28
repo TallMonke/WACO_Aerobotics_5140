@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.DECODE;
 
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.getRPM;
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.x_Distance;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import android.annotation.SuppressLint;
 
@@ -16,6 +17,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.DECODE.Constants.*;
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTagColors;
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTagWebcam;
 import org.firstinspires.ftc.teamcode.mechanisms.DetectedColor;
@@ -23,9 +25,9 @@ import org.firstinspires.ftc.teamcode.mechanisms.DriveTrain;
 import org.firstinspires.ftc.teamcode.mechanisms.Launcher;
 import org.firstinspires.ftc.teamcode.mechanisms.Revolver;
 import org.firstinspires.ftc.teamcode.mechanisms.Sweeper;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
+
 
 @TeleOp(name = "DECODE_2025_RED", group = "teleop")
 public class TeleOP_Decode extends LinearOpMode {
@@ -38,6 +40,7 @@ public class TeleOP_Decode extends LinearOpMode {
     // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
     // we should aim for when shooting
     private Integer teamColorID = aprilTagColors.getRedTeamID();
+
     private AprilTagWebcam  webcam = null;
     private boolean autoFireInit = false;
 
@@ -61,6 +64,11 @@ public class TeleOP_Decode extends LinearOpMode {
         sweeper = new Sweeper(hardwareMap, telemetry);
         launcher = new Launcher(hardwareMap, telemetry);
 
+        // Bases the team color set from autonomous mode
+        if( Constants.TEAM_COLOR_ID != -1 ) {
+            teamColorID = Constants.TEAM_COLOR_ID;
+        }
+
         // Wait for the game to start (driver presses START)
         if (teamColorID == aprilTagColors.getRedTeamID()) {
             telemetry.addData("Status", "RED Team Ready!");
@@ -82,13 +90,13 @@ public class TeleOP_Decode extends LinearOpMode {
                 telemetry.addData("Blue Team", runtime.toString());
             }
 
-//            if (currentObeliskColors == null) {
-//                if (detectObelisk()) {
-//                    telemetry.addData("Obelisk", "Detected");
-//                    telemetry.update();
-//                    break;
-//                }
-//            }
+            if (currentObeliskColors == null) {
+                if (detectObelisk()) {
+                    telemetry.addData("Obelisk", "Detected");
+                    telemetry.update();
+                    break;
+                }
+            }
 
             // Get the launcher spun up
             if (!init) {
@@ -112,6 +120,9 @@ public class TeleOP_Decode extends LinearOpMode {
                 aimBot();
             }
 
+            // Perform color detection for the current state of the revolver
+            revolver.run();
+
             // Revolver Controls
             // D-Pad Up - step to next position
             // D-Pad Down - Step to previous position
@@ -121,8 +132,6 @@ public class TeleOP_Decode extends LinearOpMode {
             revolver.stepDown(gamepad2.dpad_down);
             revolver.stepToLoad(gamepad2.a);
             revolver.stepToFire(gamepad2.b);
-
-            revolver.run();
 
             //sweep in with right bumper and reverse with both bumpers at same time.
             sweeper.enable(gamepad2.right_bumper);
@@ -141,7 +150,7 @@ public class TeleOP_Decode extends LinearOpMode {
 
     @NonNull
     private String printCurrentObelisk() {
-        String currentColors = "Unknown";
+        String currentColors = "";
 
         if( currentObeliskColors == null){
             return "Not Set";
@@ -149,11 +158,11 @@ public class TeleOP_Decode extends LinearOpMode {
 
         for (DetectedColor color : currentObeliskColors) {
             if (color == DetectedColor.PURPLE) {
-                currentColors.concat("P");
+                currentColors = currentColors.concat("P");
             } else if (color == DetectedColor.GREEN) {
-                currentColors.concat("G");
+                currentColors = currentColors.concat("G");
             } else {
-                currentColors.concat("U");
+                currentColors = currentColors.concat("U");
             }
         }
 

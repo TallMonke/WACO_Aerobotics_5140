@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 
 public class Constants {
+    public static Integer TEAM_COLOR_ID = -1;
 
     static public final int RED_HOME_X = 62;
     static public final int RED_HOME_Y = 10;

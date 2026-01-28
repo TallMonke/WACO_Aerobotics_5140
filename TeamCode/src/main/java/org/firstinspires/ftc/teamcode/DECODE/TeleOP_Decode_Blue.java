@@ -12,6 +12,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -28,6 +29,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import java.util.ArrayList;
 
 @TeleOp(name = "DECODE_2025_BLUE", group = "teleop")
+@Disabled // Do not need this class if the Constants.TEAM_COLOR_ID works
 public class TeleOP_Decode_Blue extends LinearOpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
 

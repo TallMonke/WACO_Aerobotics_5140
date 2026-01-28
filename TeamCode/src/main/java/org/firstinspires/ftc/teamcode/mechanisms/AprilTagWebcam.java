@@ -5,6 +5,7 @@ import android.util.Size;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -43,7 +44,9 @@ public class AprilTagWebcam {
     /**
      * ControlHub hardware configuration name for the camera.
      */
-    final private String WEBCAM_NAME = "Webcam 1";
+    final String WEBCAM_NAME = "Webcam 1";
+    final int RESOLUTION_WIDTH = 640;
+    final int RESOLUTION_HEIGHT = 480;
 
     /**
         Initializes the hardware and starts the camera for AprilTag processing. DriverHub
@@ -64,7 +67,7 @@ public class AprilTagWebcam {
         // Initialize the VisionPortal
         VisionPortal.Builder builder = new VisionPortal.Builder();
         builder.setCamera(hardwareMap.get(WebcamName.class, WEBCAM_NAME));
-        builder.setCameraResolution(new Size(640, 480));
+        builder.setCameraResolution(new Size(RESOLUTION_WIDTH, RESOLUTION_HEIGHT));
         builder.addProcessor(aprilTagProcessor);
 
         visionPortal = builder.build();
@@ -74,6 +77,7 @@ public class AprilTagWebcam {
      * Updates the list of detected tags.
      */
     public void update() {
+        detectedTags.clear();
         detectedTags = aprilTagProcessor.getDetections();
     }
 

@@ -389,12 +389,30 @@ public class Revolver {
      */
     public void run(){
         int currentIndex = getIndex();
+        int setIndex = -1;
 
         // colorSensor only reports a color based on the distance to the object
         DetectedColor detectedColor = colorSensor.getColor();
 
-        currentLoad.set(currentIndex, detectedColor);
-        tm.addLine( String.format("%d) Color: %s", currentIndex, detectedColor.toString() ) );
+        // The "currentIndex" is the position at the top of the revolver
+        // while color detection is at the bottom, need opposite index to place the color into
+        //  \ 3 /
+        //  1 | 5
+        // Even values are loading positions, odd are firing positions
+        if( currentIndex == 2) {
+            setIndex = 5;
+        }
+        else if( currentIndex == 4) {
+            setIndex = 1;
+        }
+        else if( currentIndex == 6) {
+            setIndex = 3;
+        }
+
+        if( setIndex != -1 ) {
+            currentLoad.set(setIndex, detectedColor);
+            tm.addLine(String.format("%d) Color: %s", setIndex, detectedColor.toString()));
+        }
 
         displayTelemetry();
     }
