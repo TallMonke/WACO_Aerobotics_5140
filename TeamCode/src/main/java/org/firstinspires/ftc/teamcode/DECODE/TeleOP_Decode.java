@@ -69,6 +69,15 @@ public class TeleOP_Decode extends LinearOpMode {
             teamColorID = Constants.TEAM_COLOR_ID;
         }
 
+        if (Constants.OBELISK_ID != -1) {
+            if (aprilTagColors.isObeliskID(Constants.OBELISK_ID)) {
+                currentObeliskColors = aprilTagColors.getColor(Constants.OBELISK_ID);
+
+                sendTelemetryPacket("obelisk_id", Constants.OBELISK_ID);
+                printCurrentObelisk();
+            }
+        }
+
         // Wait for the game to start (driver presses START)
         if (teamColorID == aprilTagColors.getRedTeamID()) {
             telemetry.addData("Status", "RED Team Ready!");
@@ -96,6 +105,8 @@ public class TeleOP_Decode extends LinearOpMode {
                     telemetry.update();
                     break;
                 }
+            } else {
+                printCurrentObelisk();
             }
 
             // Get the launcher spun up
