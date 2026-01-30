@@ -49,6 +49,7 @@ public final class Red_OnGoal extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        Constants.TEAM_COLOR_ID = teamColorID;
         dashboard = FtcDashboard.getInstance();
 
         // Initialize at SPECIFIC coordinates, touching the wall and scoring zone

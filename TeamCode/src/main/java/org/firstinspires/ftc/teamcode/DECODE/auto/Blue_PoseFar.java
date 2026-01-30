@@ -49,6 +49,7 @@ public final class Blue_PoseFar extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        Constants.TEAM_COLOR_ID = teamColorID;
         dashboard = FtcDashboard.getInstance();
 
         // Initialize at SPECIFIC coordinates, touching the wall and scoring zone
@@ -68,6 +69,16 @@ public final class Blue_PoseFar extends LinearOpMode {
         }
 
         waitForStart();
+
+        if (currentObeliskColors == null) {
+            currentObeliskColors = webcam.detectObelisk();
+
+            if (currentObeliskColors != null) {
+                Constants.OBELISK_ID = webcam.getCurrentObeliskID();
+                telemetry.addData("Obelisk", "Detected");
+                telemetry.update();
+            }
+        }
 
         timer = new ElapsedTime();
 

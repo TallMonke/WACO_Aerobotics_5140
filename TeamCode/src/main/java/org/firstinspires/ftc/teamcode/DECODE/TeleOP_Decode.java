@@ -69,6 +69,7 @@ public class TeleOP_Decode extends LinearOpMode {
             teamColorID = Constants.TEAM_COLOR_ID;
         }
 
+        // Attempt pulling obelisk motif from the Autonomous
         if (Constants.OBELISK_ID != -1) {
             if (aprilTagColors.isObeliskID(Constants.OBELISK_ID)) {
                 currentObeliskColors = aprilTagColors.getColor(Constants.OBELISK_ID);
@@ -99,13 +100,12 @@ public class TeleOP_Decode extends LinearOpMode {
                 telemetry.addData("Blue Team", runtime.toString());
             }
 
+            // Attempt to detect the obelisk
             if (currentObeliskColors == null) {
-                if (detectObelisk()) {
-                    telemetry.addData("Obelisk", "Detected");
-                    telemetry.update();
-                    break;
-                }
-            } else {
+                currentObeliskColors = webcam.detectObelisk();
+            }
+
+            if (currentObeliskColors != null) {
                 printCurrentObelisk();
             }
 
@@ -290,33 +290,6 @@ public class TeleOP_Decode extends LinearOpMode {
         final double bearingWeighting = 0.0;
 
         driveTrain.rotate(target.ftcPose.bearing + bearingWeighting);
-    }
-
-    @NonNull
-    private Boolean detectObelisk() {
-        if(webcam == null){
-            telemetry.addData("Error", "Webcam is null");
-            return false;
-        }
-
-        webcam.update();
-        ArrayList<Integer> obelisksIDs = aprilTagColors.getObeliskIDs();
-
-        for (AprilTagDetection detection: webcam.getDetectedTags()){
-            if(detection != null) {
-                if(aprilTagColors.isObeliskID(detection.id)){
-                    currentObeliskColors = aprilTagColors.getColor(detection.id);
-
-                    sendTelemetryPacket("obelisk_id", detection.id);
-                    telemetry.addLine(String.format("Obelisk ID: %d", detection.id));
-                    telemetry.update();
-
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
     private void sendTelemetryPacket(String key, Object value) {

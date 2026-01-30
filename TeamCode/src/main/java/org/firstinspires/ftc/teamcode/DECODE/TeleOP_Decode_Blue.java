@@ -64,6 +64,21 @@ public class TeleOP_Decode_Blue extends LinearOpMode {
         sweeper = new Sweeper(hardwareMap, telemetry);
         launcher = new Launcher(hardwareMap, telemetry);
 
+        // Bases the team color set from autonomous mode
+        if (Constants.TEAM_COLOR_ID != -1) {
+            teamColorID = Constants.TEAM_COLOR_ID;
+        }
+
+        // Attempt pulling obelisk motif from the Autonomous
+        if (Constants.OBELISK_ID != -1) {
+            if (aprilTagColors.isObeliskID(Constants.OBELISK_ID)) {
+                currentObeliskColors = aprilTagColors.getColor(Constants.OBELISK_ID);
+
+                sendTelemetryPacket("obelisk_id", Constants.OBELISK_ID);
+                printCurrentObelisk();
+            }
+        }
+
         // Wait for the game to start (driver presses START)
         if (teamColorID == aprilTagColors.getRedTeamID()) {
             telemetry.addData("Status", "RED Team Ready!");
@@ -85,13 +100,14 @@ public class TeleOP_Decode_Blue extends LinearOpMode {
                 telemetry.addData("Blue Team", runtime.toString());
             }
 
-//            if (currentObeliskColors == null) {
-//                if (detectObelisk()) {
-//                    telemetry.addData("Obelisk", "Detected");
-//                    telemetry.update();
-//                    break;
-//                }
-//            }
+            // Attempt to detect the obelisk
+            if (currentObeliskColors == null) {
+                currentObeliskColors = webcam.detectObelisk();
+            }
+
+            if (currentObeliskColors != null) {
+                printCurrentObelisk();
+            }
 
             // Get the launcher spun up
             if (!init) {
@@ -273,33 +289,6 @@ public class TeleOP_Decode_Blue extends LinearOpMode {
         final double bearingWeighting = 1.0;
 
         driveTrain.rotate(target.ftcPose.bearing + bearingWeighting);
-    }
-
-    @NonNull
-    private Boolean detectObelisk() {
-        if(webcam == null){
-            telemetry.addData("Error", "Webcam is null");
-            return false;
-        }
-
-        webcam.update();
-        ArrayList<Integer> obelisksIDs = aprilTagColors.getObeliskIDs();
-
-        for (AprilTagDetection detection: webcam.getDetectedTags()){
-            if(detection != null) {
-                if(aprilTagColors.isObeliskID(detection.id)){
-                    currentObeliskColors = aprilTagColors.getColor(detection.id);
-
-                    sendTelemetryPacket("obelisk_id", detection.id);
-                    telemetry.addLine(String.format("Obelisk ID: %d", detection.id));
-                    telemetry.update();
-
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
     private void sendTelemetryPacket(String key, Object value) {

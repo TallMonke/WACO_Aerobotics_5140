@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.mechanisms;
 
 import android.util.Size;
 
+import androidx.annotation.NonNull;
+
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -47,6 +49,8 @@ public class AprilTagWebcam {
     final String WEBCAM_NAME = "Webcam 1";
     final int RESOLUTION_WIDTH = 640;
     final int RESOLUTION_HEIGHT = 480;
+
+    private int currentObeliskID = -1;
 
     /**
         Initializes the hardware and starts the camera for AprilTag processing. DriverHub
@@ -124,11 +128,51 @@ public class AprilTagWebcam {
     }
 
     /**
-     * Stops the camera and releases all resources.
+     * Stops the camera and releases all resources. Once this is called the camera processor MUST
+     * be recreated through the constructor
      */
     public void stop() {
         if(visionPortal != null) {
             visionPortal.close();
         }
+    }
+
+    /**
+     * Retrieves the current ID of the detected obelisks
+     *
+     * @return Integer ID of the detected obelisks or -1 if not set
+     */
+    public int getCurrentObeliskID() {
+        return currentObeliskID;
+    }
+
+    /**
+     * Retrieves the current image from the webcam in attempt to detect obelisk motif pattern
+     * Sets the current motif ID if detected valid AprilTag
+     *
+     * @return Array of detected colors or null if camera did not detect.
+     */
+    public ArrayList<DetectedColor> detectObelisk() {
+        AprilTagColors aprilTagColors = new AprilTagColors();
+        ArrayList<DetectedColor> currentObeliskColors = null;
+
+        update();
+        ArrayList<Integer> obelisksIDs = aprilTagColors.getObeliskIDs();
+
+        for (AprilTagDetection detection : getDetectedTags()) {
+            if (detection != null) {
+                if (aprilTagColors.isObeliskID(detection.id)) {
+                    currentObeliskColors = aprilTagColors.getColor(detection.id);
+                    currentObeliskID = detection.id;
+
+                    tm.addLine(String.format("Obelisk ID: %d", currentObeliskID));
+                    tm.update();
+
+                    return currentObeliskColors;
+                }
+            }
+        }
+
+        return null;
     }
 }

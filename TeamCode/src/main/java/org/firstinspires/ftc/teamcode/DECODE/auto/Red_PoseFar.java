@@ -72,6 +72,16 @@ public final class Red_PoseFar extends LinearOpMode {
 
         waitForStart();
 
+        if (currentObeliskColors == null) {
+            currentObeliskColors = webcam.detectObelisk();
+
+            if (currentObeliskColors != null) {
+                Constants.OBELISK_ID = webcam.getCurrentObeliskID();
+                telemetry.addData("Obelisk", "Detected");
+                telemetry.update();
+            }
+        }
+
         timer = new ElapsedTime();
 
         // Drive "backward" away from wall, but touching far shooting zone
