@@ -87,12 +87,16 @@ public final class Blue_PoseFar extends LinearOpMode {
                 launcher.setWheelVelocityAction(850.0),
                 drive.actionBuilder(drive.localizer.getPose())
                         .lineToX(Constants.blue_farShootingPos.x)
-                        .turn(Math.toRadians(35)) // Turn camera towards tower
+                        .turn(Math.toRadians(5)) // Turn camera towards tower
                         .build())
         );
         dashboard.getTelemetry().update();
 
         double rpm = aimBot();
+
+        if(rpm < 0.0){    //if we didn't sense a april tag use pre set velocity.
+            rpm = getRPM(x_Distance(120.0));
+        }
 
         if (rpm > 0.0) {
             // Fire the ball
@@ -112,16 +116,19 @@ public final class Blue_PoseFar extends LinearOpMode {
 
         Actions.runBlocking(
                 new ParallelAction(
-                        revolver.setIndexAction(1),
+                        revolver.stepToFireAction(),
                         drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
-                                .strafeToLinearHeading(Constants.blue_farShootingPos, Math.toRadians(35))
-                                .turn(Math.toRadians(40))
+                                .strafeToLinearHeading(Constants.blue_farShootingPos, Math.toRadians(5))
                                 .build()
                 )
         );
         dashboard.getTelemetry().update();
 
         rpm = aimBot();
+
+        if(rpm < 0.0){    //if we didn't sense a april tag use pre set velocity.
+            rpm = getRPM(x_Distance(120.0));
+        }
 
         if (rpm > 0.0) {
             // Fire the ball
@@ -134,23 +141,27 @@ public final class Blue_PoseFar extends LinearOpMode {
 
         // ***Second Line of Balls***
         // Ensure we have plenty of time to get back to human player
-        if(timer.seconds() <= 20) {
+        //if(timer.seconds() <= 20) {
+        if(true) {
             if (!intakeBallLine(2)) {
                 sendTelemetryPacket("Error running intake sequence");
                 stop();
             }
 
             Actions.runBlocking(
-                    new SequentialAction(
-                            drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
-                                    .strafeToLinearHeading(Constants.blue_midShootingPos, Math.toRadians(-45))
-                                    .turn(Math.toRadians(-30.0))
+                    new ParallelAction(
+                            revolver.stepToFireAction(),
+                            drive.actionBuilder(drive.localizer.getPose()) // Drive to mid shooting position
+                                    .strafeToLinearHeading(Constants.blue_midShootingPos, Math.toRadians(25))
                                     .build()
                     )
             );
             dashboard.getTelemetry().update();
 
             rpm = aimBot();
+            if(rpm < 0.0){    //if we didn't sense a april tag use pre set velocity.
+                rpm = getRPM(x_Distance(37.0));
+            }
 
             if (rpm > 0.0) {
                 // Fire the ball
@@ -165,31 +176,35 @@ public final class Blue_PoseFar extends LinearOpMode {
 
         // ***Third Line of Balls***
         // Ensure we have plenty of time to get back to human player
-        if(timer.seconds() <= 20) {
-            if (!intakeBallLine(3)) {
-                sendTelemetryPacket("Error running intake sequence");
-                stop();
-            }
-
-            Actions.runBlocking(
-                    new SequentialAction(
-                            drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
-                                    .strafeToLinearHeading(Constants.blue_nearShootingPos, Math.toRadians(-90))
-                                    .turn(Math.toRadians(-20.0))
-                                    .build()
-                    )
-            );
-            dashboard.getTelemetry().update();
-
-            rpm = aimBot();
-
-            if (rpm > 0.0) {
-                // Fire the ball
-                if (!tripleFireSequence(rpm)) {
-                    sendTelemetryPacket("Firing sequence failed");
+        //if(timer.seconds() <= 20) {
+        if(true) {
+                if (!intakeBallLine(3)) {
+                    sendTelemetryPacket("Error running intake sequence");
                     stop();
                 }
-            }
+
+                Actions.runBlocking(
+                        new ParallelAction(
+                                revolver.stepToFireAction(),
+                                drive.actionBuilder(drive.localizer.getPose()) // Drive to mid shooting position
+                                        .strafeToLinearHeading(Constants.blue_nearShootingPos, Math.toRadians(25))
+                                        .build()
+                        )
+                );
+                dashboard.getTelemetry().update();
+
+                rpm = aimBot();
+                if(rpm < 0.0){    //if we didn't sense a april tag use pre set velocity.
+                rpm = getRPM(x_Distance(37.0));
+                }
+
+                if (rpm > 0.0) {
+                    // Fire the ball
+                    if (!tripleFireSequence(rpm)) {
+                        sendTelemetryPacket("Firing sequence failed");
+                        stop();
+                    }
+                }
         }
 
         // Return to loading zone to start TeleOp
@@ -213,19 +228,29 @@ public final class Blue_PoseFar extends LinearOpMode {
         webcam.update();
         AprilTagDetection towerDetection = webcam.getTagByID(teamColorID);
 
-        int totalDegrees = 0;
-        final int degreeChange = 45;
+        int degreeBack = 30;
+        final int degreeChange = 15;
 
         // Turn attempting to find target AprilTag
-        while (towerDetection == null && totalDegrees < 360) {
+        if (towerDetection == null)
+        {
             Actions.runBlocking(new SequentialAction(
                     drive.actionBuilder(drive.localizer.getPose())
                             .turn(Math.toRadians(-degreeChange)) // Turn towards tower
                             .build())
             );
-            totalDegrees += degreeChange;
             webcam.update();
             towerDetection = webcam.getTagByID(teamColorID);
+
+            if (towerDetection == null){
+                Actions.runBlocking(new SequentialAction(
+                        drive.actionBuilder(drive.localizer.getPose())
+                                .turn(Math.toRadians(degreeBack)) // Turn back towards the tower
+                                .build())
+                );
+                webcam.update();
+                towerDetection = webcam.getTagByID(teamColorID);
+            }
         }
 
         // Only fire if we detected something

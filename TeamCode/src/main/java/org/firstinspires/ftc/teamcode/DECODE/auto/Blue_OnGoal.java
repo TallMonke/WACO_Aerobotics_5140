@@ -119,7 +119,7 @@ public final class Blue_OnGoal extends LinearOpMode {
         Actions.runBlocking(
                 new SequentialAction(
                         drive.actionBuilder(drive.localizer.getPose())
-                            .strafeToSplineHeading(new Vector2d(0, -23 ), Math.toRadians(45))
+                            .strafeToSplineHeading(new Vector2d(-24, -54 ), Math.toRadians(0))
                             .build()
                 )
         );
