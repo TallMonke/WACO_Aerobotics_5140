@@ -29,7 +29,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Sweeper;
 import java.util.ArrayList;
 
 
-@TeleOp(name = "DECODE_2025_RED", group = "teleop")
+@TeleOp(name = "DECODE_2025", group = "teleop")
 public class TeleOP_Decode extends LinearOpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
 

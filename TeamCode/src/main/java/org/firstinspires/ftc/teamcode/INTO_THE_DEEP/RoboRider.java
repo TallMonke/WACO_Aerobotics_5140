@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-@TeleOp(name="RoboRider", group="Linear OpMode")
+@TeleOp(name="RoboRider", group="teleop")
 
 public class RoboRider extends LinearOpMode
 {
