@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.mechanisms;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class Launcher {
     // Telemetry object for logging in the driver station
     Telemetry tm;
+    FtcDashboard dashboard = FtcDashboard.getInstance();
 
     // Motors for the launcher wheels
     private DcMotorEx leftShoot = null;
@@ -82,6 +84,9 @@ public class Launcher {
                 setWheelVelocity(velocity);
                 leftShoot.setVelocity(velocity);
                 rightShoot.setVelocity(velocity);
+
+                displayTelemetry();
+
                 return false;
             }
         };
@@ -153,6 +158,8 @@ public class Launcher {
             tm.addData("Shooter A=Long / B=Short: ", wheelVelocity);
             tm.addData("Left Shooter (A=600, B=520): ", leftShoot.getVelocity());
             tm.addData("Right Shooter (A=600, B=520): ", rightShoot.getVelocity());
+
+            sendTelemetryPacket("launcher_velocity", leftShoot.getVelocity());
         }
     }
 
@@ -178,7 +185,6 @@ public class Launcher {
                     leftShoot.setVelocity(wheelVelocity);
                     rightShoot.setVelocity(wheelVelocity);
 
-                    telemetryPacket.put("launcher_velocity", wheelVelocity);
                     displayTelemetry();
 
                     init = true;
@@ -193,5 +199,17 @@ public class Launcher {
                         (rightVelocity < wheelVelocity + rangeTweak && rightVelocity > wheelVelocity - rangeTweak));
             }
         };
+    }
+
+    private void sendTelemetryPacket(String key, Object value) {
+        TelemetryPacket packet = new TelemetryPacket();
+        packet.put(key, value);
+        dashboard.sendTelemetryPacket(packet);
+    }
+
+    private void sendTelemetryPacket(String message) {
+        TelemetryPacket packet = new TelemetryPacket();
+        packet.addLine(message);
+        dashboard.sendTelemetryPacket(packet);
     }
 }

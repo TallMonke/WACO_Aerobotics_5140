@@ -39,7 +39,7 @@ public class TeleOP_Decode extends LinearOpMode {
 
     // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
     // we should aim for when shooting
-    private Integer teamColorID = aprilTagColors.getRedTeamID();
+    private Integer teamColorID = -1;
 
     private AprilTagWebcam  webcam = null;
     private boolean autoFireInit = false;
@@ -67,6 +67,28 @@ public class TeleOP_Decode extends LinearOpMode {
         // Bases the team color set from autonomous mode
         if( Constants.TEAM_COLOR_ID != -1 ) {
             teamColorID = Constants.TEAM_COLOR_ID;
+        }
+        else {
+            ElapsedTime colorSelectTimer = new ElapsedTime();
+
+            // prompt Driver Hub for team color selection
+            // X-Blue, B-Red
+            while(teamColorID == -1 || colorSelectTimer.seconds() < 10) {
+                telemetry.addData("Select Team Color", "X-Blue, B-Red");
+                telemetry.update();
+
+                if (gamepad1.x) {
+                    teamColorID = aprilTagColors.getBlueTeamID();
+                } else if (gamepad1.b) {
+                    teamColorID = aprilTagColors.getRedTeamID();
+                }
+            }
+
+            // If we timed out, default to red
+            if( teamColorID == -1 )
+            {
+                teamColorID = aprilTagColors.getRedTeamID();
+            }
         }
 
         // Attempt pulling obelisk motif from the Autonomous
