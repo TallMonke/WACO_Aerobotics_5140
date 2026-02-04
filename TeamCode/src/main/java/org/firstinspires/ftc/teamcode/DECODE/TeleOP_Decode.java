@@ -45,7 +45,7 @@ public class TeleOP_Decode extends LinearOpMode {
     private boolean autoFireInit = false;
 
     // Declare OpMode members for each of the 4 motors.
-    private ElapsedTime runtime = new ElapsedTime();
+    private final ElapsedTime runtime = new ElapsedTime();
 
     private DriveTrain driveTrain = null;
     private Revolver revolver = null;
