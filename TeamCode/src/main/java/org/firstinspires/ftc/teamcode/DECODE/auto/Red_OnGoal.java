@@ -27,7 +27,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 
-@Autonomous(name = "Red On Goal", group = "auto", preselectTeleOp = "DECODE_2025_RED")
+@Autonomous(name = "Red On Goal", group = "auto", preselectTeleOp = "DECODE_2025")
 public final class Red_OnGoal extends LinearOpMode {
     ElapsedTime timer = null;
 

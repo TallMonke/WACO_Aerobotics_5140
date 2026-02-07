@@ -27,7 +27,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 
-@Autonomous(name = "RED Auto 1", group = "auto", preselectTeleOp = "DECODE_2025_RED")
+@Autonomous(name = "RED Auto 1", group = "auto", preselectTeleOp = "DECODE_2025")
 public final class Red_PoseFar extends LinearOpMode {
     ElapsedTime timer = null;
 
