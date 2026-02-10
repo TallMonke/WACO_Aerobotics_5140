@@ -116,7 +116,7 @@ public final class Red_PoseFar extends LinearOpMode {
         // Drive to far shooting position
         Actions.runBlocking(
                 new ParallelAction(
-                        revolver.setIndexAction(1),
+                        revolver.stepToFireAction(),
                         drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
                                 .strafeToLinearHeading(Constants.red_farShootingPos, Math.toRadians(-35))
                                 .turn(Math.toRadians(60))

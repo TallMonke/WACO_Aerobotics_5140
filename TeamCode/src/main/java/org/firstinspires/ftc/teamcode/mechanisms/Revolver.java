@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -28,14 +29,18 @@ public class Revolver {
     List<DetectedColor> currentLoad = new ArrayList<>();
 
     //revolver
-    private ServoImplEx revolverDrive = null;
+    private DcMotorEx revolverDrive = null;
     private int currentIndex = 1;
+    int oneRevolutionTicks = 448;
 
     //variables to eliminate double button presses
     boolean buttonWasPressedUp = false;
     int motorModeUp = 0;
     boolean buttonWasPressedDown = false;
     int motorModeDown = 0;
+
+    //Initilized position
+    int currentPosition = 1;
 
     /**
      * Initializes the Revolver sorting mechanism
@@ -58,12 +63,12 @@ public class Revolver {
         colorSensor = new BallColorSensor(hardwareMap, telemetry);
 
         // Odd indexes are "firing" positions, even are load
-        revolverPositions.add(0.43);  //Index 0  X
-        revolverPositions.add(0.4525);//Index 1  X
-        revolverPositions.add(0.4725);//Index 2  X
-        revolverPositions.add(0.494); //Index 3  X
-        revolverPositions.add(0.515);  //Index 4
-        revolverPositions.add(0.54);  //Index 5
+        revolverPositions.add(0.43);    //Index 0
+        revolverPositions.add(0.4525);  //Index 1
+        revolverPositions.add(0.4725);  //Index 2
+        revolverPositions.add(0.494);   //Index 3
+        revolverPositions.add(0.515);   //Index 4
+        revolverPositions.add(0.54);    //Index 5
 
         // Init each revolver position with an UNKNOWN color
         currentLoad.add(DetectedColor.UNKNOWN);
@@ -75,34 +80,7 @@ public class Revolver {
 
 
         //revolver servo
-        revolverDrive = hardwareMap.get(ServoImplEx.class, "revolverServo");
-        revolverDrive.setDirection(Servo.Direction.FORWARD);
-        setIndex(3);
-    }
-
-    public int getIndex(){
-        return currentIndex;
-    }
-
-    /**
-     * Moves the revolver to position
-     *
-     * @param index Position of the revolver
-     */
-    public void setIndex(int index ) {
-        if (index >= 0 && index <= 5){
-            currentIndex = index;
-            revolverDrive.setPosition(revolverPositions.get(currentIndex));
-        }
-    }
-    public Action setIndexAction(int Index){
-        return new Action() {
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                setIndex(Index);
-                return false;
-            }
-        };
+        revolverDrive = hardwareMap.get(DcMotorEx.class, "revolverDrive");
     }
 
     /**
@@ -121,15 +99,9 @@ public class Revolver {
                 motorModeUp = 0;
             }
 
-            // cycle revolver index up
-            if (currentIndex == 5) {
-                currentIndex = 0;
-            } else {
-                currentIndex++;
-            }
-
             // Move the servo to the new position
-            revolverDrive.setPosition(revolverPositions.get(currentIndex));
+            currentPosition = revolverDrive.getCurrentPosition();
+            revolverDrive.setTargetPosition(currentPosition + oneRevolutionTicks);
             sleep(500);
         }
 
@@ -141,31 +113,6 @@ public class Revolver {
      * Turns the ball revolver to the next position.
      * @return RoadRunner Action to be used in the Autonomous OpModes
      */
-    public Action stepUpAction(){
-        return new Action() {
-            ElapsedTime timer = null;
-
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                if (timer == null) {
-                    timer = new ElapsedTime();
-
-                    // cycle revolver index up
-                    if (currentIndex == 5) {
-                        currentIndex = 0;
-                    } else {
-                        currentIndex++;
-                    }
-
-                    // Move the servo to the new position
-                    revolverDrive.setPosition(revolverPositions.get(currentIndex));
-                    packet.put("revolver_position", revolverPositions.get(currentIndex));
-                }
-
-                return (timer.seconds() < 2.5);
-            }
-        };
-    }
 
     /**
      * Turns the ball revolver to the next loading position. Even indexes are "loading" positions.
@@ -187,7 +134,7 @@ public class Revolver {
             currentIndex = selectNextOddIndex();
 
             // Move the servo to the new position
-            revolverDrive.setPosition(revolverPositions.get(currentIndex));
+           // revolverDrive.setPosition(revolverPositions.get(currentIndex));
 
             sleep(500);
         }
@@ -213,7 +160,7 @@ public class Revolver {
                     currentIndex = selectNextOddIndex();
 
                     // Move the servo to the new position
-                    revolverDrive.setPosition(revolverPositions.get(currentIndex));
+          //          revolverDrive.setPosition(revolverPositions.get(currentIndex));
                     packet.put("revolver_position", revolverPositions.get(currentIndex));
                 }
 
@@ -246,7 +193,7 @@ public class Revolver {
             }
 
             // Move the servo to the new position
-            revolverDrive.setPosition(revolverPositions.get(currentIndex));
+       //     revolverDrive.setPosition(revolverPositions.get(currentIndex));
             sleep(500);
         }
 
@@ -275,7 +222,7 @@ public class Revolver {
                     }
 
                     // Move the servo to the new position
-                    revolverDrive.setPosition(revolverPositions.get(currentIndex));
+         //           revolverDrive.setPosition(revolverPositions.get(currentIndex));
                     packet.put("revolver_position", revolverPositions.get(currentIndex));
                 }
 
@@ -298,7 +245,7 @@ public class Revolver {
             currentIndex = selectNextEvenIndex();
 
             // Move the servo to the new position
-            revolverDrive.setPosition(revolverPositions.get(currentIndex));
+    //        revolverDrive.setPosition(revolverPositions.get(currentIndex));
 
             sleep(500);
         }
@@ -322,7 +269,7 @@ public class Revolver {
                     currentIndex = selectNextEvenIndex();
 
                     // Move the servo to the new position
-                    revolverDrive.setPosition(revolverPositions.get(currentIndex));
+      //              revolverDrive.setPosition(revolverPositions.get(currentIndex));
                     packet.put("revolver_position", revolverPositions.get(currentIndex));
                 }
 
@@ -333,7 +280,7 @@ public class Revolver {
 
     public void displayTelemetry(){
         if(tm != null){
-            tm.addData("Sorter (D-Up/D-Down): ", String.format("%d(%.6f)", getIndex(), revolverDrive.getPosition()));
+  //          tm.addData("Sorter (D-Up/D-Down): ", String.format("%d(%.6f)", getIndex(), revolverDrive.getPosition()));
         }
     }
 
@@ -346,7 +293,7 @@ public class Revolver {
     public void seekToColor(DetectedColor color){
         for(int i = 0; i < currentLoad.size(); i++) {
             if (currentLoad.get(i) == color) {
-                revolverDrive.setPosition(revolverPositions.get(currentIndex));
+  //              revolverDrive.setPosition(revolverPositions.get(currentIndex));
             }
         }
     }
@@ -388,7 +335,7 @@ public class Revolver {
      * Performs the actions for Revolver sorting mechanism
      */
     public void run(){
-        int currentIndex = getIndex();
+        int currentIndex = 1;
         int setIndex = -1;
 
         // colorSensor only reports a color based on the distance to the object
