@@ -73,14 +73,21 @@ public class TeleOP_Decode extends LinearOpMode {
 
             // prompt Driver Hub for team color selection
             // X-Blue, B-Red
-            while(teamColorID == -1 || colorSelectTimer.seconds() < 10) {
+            while(teamColorID == -1) {
                 telemetry.addData("Select Team Color", "X-Blue, B-Red");
                 telemetry.update();
 
                 if (gamepad1.x) {
                     teamColorID = aprilTagColors.getBlueTeamID();
+                    break;
                 } else if (gamepad1.b) {
                     teamColorID = aprilTagColors.getRedTeamID();
+                    break;
+                }
+
+                if( colorSelectTimer.seconds() > 10 )
+                {
+                    break;
                 }
             }
 
