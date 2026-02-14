@@ -24,6 +24,7 @@ public class Power_A_DC_Motor extends LinearOpMode {
 
                                                     // Wait for the game to start (driver presses START)
         telemetry.addData("Check if motor is in 'sweeper' named port ", "Initialized :");
+        telemetry.addData("Motor Port: ", sweeperMotor.getPortNumber());
         telemetry.update();
 
         waitForStart();
@@ -49,10 +50,10 @@ public class Power_A_DC_Motor extends LinearOpMode {
             }
 
 
-            if(gamepad1.a && sweeperPower < 1.0){
+            if(gamepad1.a && sweeperPower < 0.99){
                 sweeperPower += sweeperPowerStep;
             }                                       // if a-button pressed, increases power / if b-button pressed decreases power
-            if(gamepad1.b && sweeperPower > 0.0){
+            if(gamepad1.b && sweeperPower > 0.1){
                 sweeperPower -= sweeperPowerStep;
             }
 
@@ -62,9 +63,8 @@ public class Power_A_DC_Motor extends LinearOpMode {
             telemetry.addData("Right Bumper", "Spin Reverse");
             telemetry.addData("A Button", "Increase Power");
             telemetry.addData("B Button", "Decrease Power");
-            telemetry.addData("Motor Port: ", sweeperMotor.getPortNumber());
             telemetry.addData("Motor Power: ", sweeperMotor.getPower());
-            telemetry.addData("SweeperPower", sweeperPower);
+            telemetry.addData("SetPower", sweeperPower);
             telemetry.update();
         }
     }
