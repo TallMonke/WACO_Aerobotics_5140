@@ -1,16 +1,12 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
-import static android.os.SystemClock.sleep;
-
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.ServoImplEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -31,7 +27,9 @@ public class Revolver {
     //revolver
     private DcMotorEx revolverDrive = null;
     private int currentIndex = 1;
-    int oneRevolutionTicks = 448;
+    private final int oneRevolutionTicks = 448;
+    private final double MAX_POWER = 1.0;
+
 
     //variables to eliminate double button presses
     boolean buttonWasPressedUp = false;
@@ -39,7 +37,7 @@ public class Revolver {
     boolean buttonWasPressedDown = false;
     int motorModeDown = 0;
 
-    //Initilized position
+    //Initialized position
     int currentPosition = 1;
 
     /**
@@ -81,6 +79,22 @@ public class Revolver {
 
         //revolver servo
         revolverDrive = hardwareMap.get(DcMotorEx.class, "revolverDrive");
+        revolverDrive.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE); // Resists motion when no power applied
+        revolverDrive.setDirection(DcMotorSimple.Direction.FORWARD);
+
+    }
+
+    /**
+     * Spins the revolver the given number of revolutions. One rotation = one section of the
+     * revolver
+     *
+     * @param rotations Number of times the revolver should spin
+     */
+    private void spin(int rotations){
+        currentPosition = revolverDrive.getCurrentPosition();
+        revolverDrive.setTargetPosition(currentPosition + (oneRevolutionTicks * rotations));
+        revolverDrive.setPower(MAX_POWER);
+        revolverDrive.setPower(0.0);
     }
 
     /**
@@ -99,10 +113,14 @@ public class Revolver {
                 motorModeUp = 0;
             }
 
-            // Move the servo to the new position
-            currentPosition = revolverDrive.getCurrentPosition();
-            revolverDrive.setTargetPosition(currentPosition + oneRevolutionTicks);
-            sleep(500);
+            // cycle revolver index up
+            if (currentIndex == 5) {
+                currentIndex = 0;
+            } else {
+                currentIndex++;
+            }
+
+            spin(1);
         }
 
         // Update debounce tracker
@@ -132,11 +150,6 @@ public class Revolver {
 
             // Move the servo to the new position
             currentIndex = selectNextOddIndex();
-
-            // Move the servo to the new position
-           // revolverDrive.setPosition(revolverPositions.get(currentIndex));
-
-            sleep(500);
         }
 
         // Update debounce tracker
@@ -150,21 +163,20 @@ public class Revolver {
     public Action stepToLoadAction(){
 
         return new Action() {
-            ElapsedTime timer = null;
+            //ElapsedTime timer = null;
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                if (timer == null) {
-                    timer = new ElapsedTime();
+                //if (timer == null) {
+                //    timer = new ElapsedTime();
 
                     currentIndex = selectNextOddIndex();
 
-                    // Move the servo to the new position
-          //          revolverDrive.setPosition(revolverPositions.get(currentIndex));
                     packet.put("revolver_position", revolverPositions.get(currentIndex));
-                }
+                //}
 
-                return (timer.seconds() < 2.5);
+                //return (timer.seconds() < 2.5);
+                return false;
             }
         };
     }
@@ -192,9 +204,11 @@ public class Revolver {
                 currentIndex--;
             }
 
-            // Move the servo to the new position
-       //     revolverDrive.setPosition(revolverPositions.get(currentIndex));
-            sleep(500);
+            revolverDrive.setDirection(DcMotorSimple.Direction.REVERSE);
+
+            spin(1);
+
+            revolverDrive.setDirection(DcMotorSimple.Direction.FORWARD);
         }
 
         // Update debounce tracker
@@ -207,12 +221,12 @@ public class Revolver {
      */
     public Action stepDownAction(){
         return new Action() {
-            ElapsedTime timer = null;
+            //ElapsedTime timer = null;
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                if (timer == null) {
-                    timer = new ElapsedTime();
+                //if (timer == null) {
+                //    timer = new ElapsedTime();
 
                     // cycle revolver index down
                     if (currentIndex == 0) {
@@ -221,12 +235,12 @@ public class Revolver {
                         currentIndex--;
                     }
 
-                    // Move the servo to the new position
-         //           revolverDrive.setPosition(revolverPositions.get(currentIndex));
+                    stepDown(true);
                     packet.put("revolver_position", revolverPositions.get(currentIndex));
-                }
+                //}
 
-                return (timer.seconds() < 2.5);
+                //return (timer.seconds() < 2.5);
+                return false;
             }
         };
     }
@@ -243,11 +257,6 @@ public class Revolver {
             }
 
             currentIndex = selectNextEvenIndex();
-
-            // Move the servo to the new position
-    //        revolverDrive.setPosition(revolverPositions.get(currentIndex));
-
-            sleep(500);
         }
 
         // Update debounce tracker
@@ -259,28 +268,29 @@ public class Revolver {
      */
     public Action stepToFireAction(){
         return new Action() {
-            ElapsedTime timer = null;
+            //ElapsedTime timer = null;
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                if (timer == null) {
-                    timer = new ElapsedTime();
+                //if (timer == null) {
+                //   timer = new ElapsedTime();
 
                     currentIndex = selectNextEvenIndex();
 
                     // Move the servo to the new position
       //              revolverDrive.setPosition(revolverPositions.get(currentIndex));
                     packet.put("revolver_position", revolverPositions.get(currentIndex));
-                }
+                //}
 
-                return (timer.seconds() < 2.5);
+                //return (timer.seconds() < 2.5);
+                return false;
             }
         };
     }
 
     public void displayTelemetry(){
         if(tm != null){
-  //          tm.addData("Sorter (D-Up/D-Down): ", String.format("%d(%.6f)", getIndex(), revolverDrive.getPosition()));
+            tm.addData("Sorter (D-Up/D-Down): ", String.format("%.6f", revolverDrive.getCurrentPosition()));
         }
     }
 
