@@ -17,9 +17,9 @@ public class Geneva_Drive extends LinearOpMode {
     private DcMotorEx genevaDrive = null;       //initialization of the motor we are moving
     private int ticksPerRev = 448;              //how many ticks of the motor it takes to go one revolution *motor ticks multiplied by gearbox*
     private double maxMotorPower = 1.0;         //The power the motor runs at.
-    private double proportionalGain = 0.0025;    //rate motor will accelerate and decelerate to reach a more accurate revolution. * Overshoot: decrease / Undershoot: increase *
+    private double proportionalGain = 0.0016;    //rate motor will accelerate and decelerate to reach a more accurate revolution. * Overshoot: decrease / Undershoot: increase *
     private int tolerance = 1;                  //how far from exact target pos is acceptable to say "we made it"
-    private int startDecel = 112;           //when to start the deceleration *value is a percent of the way though the total distance: start pos - target pos (smaller = closer to start : bigger = closer to target)
+    private int startDecel = 130;           //when to start the deceleration *value is a percent of the way though the total distance: start pos - target pos (smaller = closer to start : bigger = closer to target)
     private boolean moving = false;
     private int targetPosition;
     private int startPosition;
@@ -30,7 +30,6 @@ this number will need to be passed into the while loop for the target Position
  */
     private int revolutions = 1;                                  //How many revolution you want the motor to do. *can be fraction like 1.25 or 4.5* (needs to be float because converting double to int is to hard for the computer. float to int is much easier.
     private boolean isPressed = false;
-    private int position = Math.round(ticksPerRev * revolutions);   //Rounding the amount of revolution:(float) into ticks:(int)
 
 
     public void runOpMode(){
@@ -98,14 +97,24 @@ this number will need to be passed into the while loop for the target Position
         if (moving) {                                                                       //if a trigger was pushed
             int currentPosition = genevaDrive.getCurrentPosition();                         //the current motor pos
             int targetDistance = targetPosition - currentPosition;                          //how far is left to go till target pos
-            int slowZone = Math.abs(targetPosition) - startDecel;                           //when to start the deceleration based of the target position *value is a set tick amount back from total distance
-            double power = maxMotorPower;                                                   //set the power to max when current position is less than the slowZone
+
+            int totalDistance = Math.abs(targetPosition - startPosition);
+            int distanceTraveled = Math.abs(currentPosition - startPosition);
+            int slowZone = totalDistance - startDecel;                           //when to start the deceleration based of the target position *value is a set tick amount back from total distance
+
+            double power;                                                   //set the power to max when current position is less than the slowZone
 
 
-            if (Math.abs(currentPosition) >= slowZone) {                            // DECELERATION ZONE           *if we are not at Max Power Zone we are in deceleration zone
-                power = targetDistance * proportionalGain;                                       //apply gain to how far we have to go
-                power = Range.clip(power, -maxMotorPower, maxMotorPower);               //make sure power does not exceed max set power
+            if (distanceTraveled < slowZone) {                            // DECELERATION ZONE           *if we are not at Max Power Zone we are in deceleration zone
+                power = maxMotorPower * Math.signum(targetDistance);                                       //apply gain to how far we have to go
             }
+            else {
+                double powerMag = Math.abs(targetDistance) * proportionalGain;
+                powerMag = Range.clip(powerMag, 0, maxMotorPower);               //make sure power does not exceed max set power
+                power = powerMag * Math.signum(targetDistance);
+                telemetry.update();
+            }
+
 
             genevaDrive.setPower(power);                                            //set power each part calculates to motor
 
