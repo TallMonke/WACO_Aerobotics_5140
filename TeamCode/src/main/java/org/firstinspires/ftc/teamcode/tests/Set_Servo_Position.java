@@ -59,10 +59,9 @@ public class Set_Servo_Position extends LinearOpMode {
             }
 
             // Print out the elapsed game time, controles, Servo port, and Servo position.
-            telemetry.addData("Servo Controlled for", "Run Time: " + runtime.toString());
             telemetry.addData("Left Bumper", "Spin to position");
-            telemetry.addData("A Button", "Increase target position");
-            telemetry.addData("B Button", "Decrease target position");
+            telemetry.addData("A Button", "Clockwise");
+            telemetry.addData("B Button", "Counterclockwise");
             telemetry.addData("X Button", "Max position");
             telemetry.addData("Y Button", "Min position");
             telemetry.addData("Servo position: ", posServo.getPosition());

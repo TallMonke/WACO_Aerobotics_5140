@@ -67,6 +67,8 @@ this number will need to be passed into the while loop for the target Position
                 telemetry.addData("Left Trigger to","Clockwise Rotation");
                 telemetry.addData("Right Trigger to","Counterclockwise Rotation");
                 telemetry.addData("Revolution away from initialisation", getMotorRevs());
+                telemetry.addData("A button to ","Increase Revolutions");
+                telemetry.addData("B button to ","Decrease Revolutions");
                 telemetry.addData("Revolution", revolutions);
                 telemetry.update();
             }
@@ -77,13 +79,13 @@ this number will need to be passed into the while loop for the target Position
             if (gamepad1.a && revolutions >= 1 && !isPressed){
                 revolutions += 1;
                 isPressed = true;
-                sleep(500);
+                sleep(250);
                 isPressed = false;
             }
             if (gamepad1.b && revolutions > 1){
                 revolutions -= 1;
                 isPressed = true;
-                sleep(500);
+                sleep(250);
                 isPressed = false;
             }
         }
@@ -112,7 +114,6 @@ this number will need to be passed into the while loop for the target Position
                 double powerMag = Math.abs(targetDistance) * proportionalGain;
                 powerMag = Range.clip(powerMag, 0, maxMotorPower);               //make sure power does not exceed max set power
                 power = powerMag * Math.signum(targetDistance);
-                telemetry.update();
             }
 
 

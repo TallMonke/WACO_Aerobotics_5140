@@ -58,9 +58,8 @@ public class Power_A_DC_Motor extends LinearOpMode {
             }
 
             // Print out the elapsed game time, controles, motor port, and motor power.
-            telemetry.addData("DC_Motor Controlling for", "Run Time: " + runtime.toString());
-            telemetry.addData("Left Bumper", "Spin Forward");
-            telemetry.addData("Right Bumper", "Spin Reverse");
+            telemetry.addData("Left Bumper Hold", "Spin Forward");
+            telemetry.addData("Right Bumper Hold", "Spin Reverse");
             telemetry.addData("A Button", "Increase Power");
             telemetry.addData("B Button", "Decrease Power");
             telemetry.addData("Motor Power: ", sweeperMotor.getPower());

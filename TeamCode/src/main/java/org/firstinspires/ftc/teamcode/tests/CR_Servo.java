@@ -37,11 +37,6 @@ public class CR_Servo extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-
-            if(gamepad1.left_bumper) {                   //if Pressing Left Bumper button turns Servo
-                posServo.setPower(servoPower);
-            }
-
             if(gamepad1.right_bumper) {                  //if Pressing Left Bumper button turns Servo other way
                 servoPower = 0.0;
                 posServo.setPower(0.0);
@@ -55,23 +50,22 @@ public class CR_Servo extends LinearOpMode {
                 servoPower -= servoPowerStep;
                 posServo.setPower(servoPower);
             }
-            if(gamepad1.x){
+            if(gamepad1.right_trigger > 0.85){
                 servoPower = mimPower;
                 posServo.setPower(mimPower);
             }
-            if(gamepad1.y){
+            if(gamepad1.left_trigger > 0.85){
                 servoPower = maxPower;
                 posServo.setPower(maxPower);
             }
 
             // Print out the elapsed game time, controles, Servo port, and Servo Power.
             telemetry.addData("Servo Controlled for", "Run Time: " + runtime.toString());
-            telemetry.addData("Left Bumper", "Spin at Power");
             telemetry.addData("Right Bumper", "Stop Power");
             telemetry.addData("A Button", "Increase Power");
             telemetry.addData("B Button", "Decrease Power");
-            telemetry.addData("X Button", "Set Max Power");
-            telemetry.addData("Y Button", "Set Min Power");
+            telemetry.addData("Right Trigger", "Set Max Power");
+            telemetry.addData("Left Trigger", "Set Min Power");
             telemetry.addData("Servo power: ", posServo.getPower());
             telemetry.addData("Target Power", servoPower);
             telemetry.update();
