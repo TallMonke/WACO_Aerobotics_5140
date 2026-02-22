@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name= "Geneva_Drive", group = "tests")
@@ -17,10 +18,11 @@ public class Geneva_Drive extends LinearOpMode {
     private DcMotorEx genevaDrive = null;       //initialization of the motor we are moving
     private int ticksPerRev = 448;              //how many ticks of the motor it takes to go one revolution *motor ticks multiplied by gearbox*
     private double maxMotorPower = 1.0;         //The power the motor runs at.
-    private double proportionalGain = 0.0016;    //rate motor will accelerate and decelerate to reach a more accurate revolution. * Overshoot: decrease / Undershoot: increase *
+    private double proportionalGain = 0.0013;    //rate motor will accelerate and decelerate to reach a more accurate revolution. * Overshoot: decrease / Undershoot: increase *
     private int tolerance = 1;                  //how far from exact target pos is acceptable to say "we made it"
-    private int startDecel = 130;           //when to start the deceleration *value is a percent of the way though the total distance: start pos - target pos (smaller = closer to start : bigger = closer to target)
+    private int startDecel = 165;               //when to start the deceleration *value is a percent of the way though the total distance: start pos - target pos (smaller = closer to start : bigger = closer to target)
     private boolean moving = false;
+    private ElapsedTime timer;
     private int targetPosition;
     private int startPosition;
 
@@ -33,7 +35,7 @@ this number will need to be passed into the while loop for the target Position
 
 
     public void runOpMode(){
-        genevaDrive = hardwareMap.get(DcMotorEx.class, "rightBack");
+        genevaDrive = hardwareMap.get(DcMotorEx.class, "genevaDrive");
         genevaDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);            //reset the encoder values upon initialization
         genevaDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);                 //runs the motor using the encoder wire
         genevaDrive.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);    //When the motor stops it will use a break so is does not drift
@@ -47,6 +49,7 @@ this number will need to be passed into the while loop for the target Position
 
         while (opModeIsActive()) {
             if (gamepad1.left_trigger > 0.85 && !moving) {                      ///Left Trigger - clockwise rotation
+                timer = new ElapsedTime();
                 startPosition = genevaDrive.getCurrentPosition();
                 targetPosition = startPosition + (ticksPerRev * revolutions);                            //Need changed so we can do things like half rev and 2 rev
                 telemetry.addData("Left Trigger","Active");
@@ -55,6 +58,7 @@ this number will need to be passed into the while loop for the target Position
             }
 
             if (gamepad1.right_trigger > 0.85 && !moving) {                     ///Right Trigger - counterclockwise rotation
+                timer = new ElapsedTime();
                 startPosition = genevaDrive.getCurrentPosition();
                 targetPosition = startPosition - (ticksPerRev * revolutions);                                           //Need changed so we can do things like half rev and 2 rev
                 telemetry.addData("Right Trigger","Active");
@@ -116,12 +120,19 @@ this number will need to be passed into the while loop for the target Position
                 power = powerMag * Math.signum(targetDistance);
             }
 
+            if (timer.seconds() > 2.0){
+                telemetry.addData("Im Stuck", timer.milliseconds());
+                telemetry.update();
+                genevaDrive.setPower(power * -1.0);
+                sleep(150);
+                timer.reset();
+            }
 
             genevaDrive.setPower(power);                                            //set power each part calculates to motor
 
             if (Math.abs(targetDistance) <= tolerance) {                                              //how far from exact target pos is acceptable to say "we made it"
                 genevaDrive.setPower(0);
-                moving = false;                                                             //set moving back to false so we can do it again
+                moving = false;                                               //set moving back to false so we can do it again
             }
 
             telemetry.addData("Rotation","Active");                     //telemetry saying we are in this part

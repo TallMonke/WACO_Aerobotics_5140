@@ -116,7 +116,7 @@ public final class Red_PoseFar extends LinearOpMode {
         // Drive to far shooting position
         Actions.runBlocking(
                 new ParallelAction(
-                        revolver.stepToFireAction(),
+//                        revolver.stepToFireAction(),
                         drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
                                 .strafeToLinearHeading(Constants.red_farShootingPos, Math.toRadians(-35))
                                 .turn(Math.toRadians(60))
@@ -283,10 +283,10 @@ public final class Red_PoseFar extends LinearOpMode {
                         new SleepAction(0.5),
                         launcher.fireAction(), // Fire loaded ball
                         launcher.releaseAction(),
-                        revolver.stepToFireAction(), // Select next ball in firing slot
+//                        revolver.stepToFireAction(), // Select next ball in firing slot
                         launcher.fireAction(), // Fire second ball
                         launcher.releaseAction(),
-                        revolver.stepToFireAction(), // Select next ball in the firing slot
+//                        revolver.stepToFireAction(), // Select next ball in the firing slot
                         launcher.fireAction(), // Fire third ball
                         launcher.releaseAction()
                 )
@@ -330,9 +330,9 @@ public final class Red_PoseFar extends LinearOpMode {
                         sweeper.enableAction(),
                         drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
                                 .strafeToLinearHeading(new Vector2d(ballLinePos.component1().x, ballLinePos.component1().y), Math.toRadians(90))
-                                .build(),
+                                .build()
 
-                        revolver.stepToLoadAction() // Select next ball in loading slot
+//                        revolver.stepToLoadAction() // Select next ball in loading slot
                 )
         );
 
@@ -346,12 +346,12 @@ public final class Red_PoseFar extends LinearOpMode {
                                         .lineToY(ballLinePos.component1().y + posOffset)
                                         .build(),
                                 new SleepAction(0.35),
-                                revolver.stepToLoadAction(), // Select next ball in loading slot
+//                                revolver.stepToLoadAction(), // Select next ball in loading slot
                                 drive.actionBuilder(drive.localizer.getPose()) // Suck up second ball
                                         .lineToY(ballLinePos.component1().y + (posOffset * 2.0))
                                         .build(),
                                 new SleepAction(0.35),
-                                revolver.stepToLoadAction(), // Select next ball in loading slot
+//                                revolver.stepToLoadAction(), // Select next ball in loading slot
                                 drive.actionBuilder(drive.localizer.getPose()) // Suck up third ball
                                         .lineToY(ballLinePos.component1().y + (posOffset * 3.0))
                                         .build(),

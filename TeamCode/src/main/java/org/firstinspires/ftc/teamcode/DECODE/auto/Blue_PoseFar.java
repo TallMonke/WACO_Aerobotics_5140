@@ -116,7 +116,7 @@ public final class Blue_PoseFar extends LinearOpMode {
 
         Actions.runBlocking(
                 new ParallelAction(
-                        revolver.stepToFireAction(),
+//                        revolver.stepToFireAction(),
                         drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
                                 .strafeToLinearHeading(Constants.blue_farShootingPos, Math.toRadians(5))
                                 .build()
@@ -150,7 +150,7 @@ public final class Blue_PoseFar extends LinearOpMode {
 
             Actions.runBlocking(
                     new ParallelAction(
-                            revolver.stepToFireAction(),
+//                            revolver.stepToFireAction(),
                             drive.actionBuilder(drive.localizer.getPose()) // Drive to mid shooting position
                                     .strafeToLinearHeading(Constants.blue_midShootingPos, Math.toRadians(25))
                                     .build()
@@ -185,7 +185,7 @@ public final class Blue_PoseFar extends LinearOpMode {
 
                 Actions.runBlocking(
                         new ParallelAction(
-                                revolver.stepToFireAction(),
+//                                revolver.stepToFireAction(),
                                 drive.actionBuilder(drive.localizer.getPose()) // Drive to mid shooting position
                                         .strafeToLinearHeading(Constants.blue_nearShootingPos, Math.toRadians(25))
                                         .build()
@@ -306,10 +306,10 @@ public final class Blue_PoseFar extends LinearOpMode {
                         new SleepAction(0.5),
                         launcher.fireAction(), // Fire loaded ball
                         launcher.releaseAction(),
-                        revolver.stepToFireAction(), // Select next ball in firing slot
+//                        revolver.stepToFireAction(), // Select next ball in firing slot
                         launcher.fireAction(), // Fire second ball
                         launcher.releaseAction(),
-                        revolver.stepToFireAction(), // Select next ball in the firing slot
+//                        revolver.stepToFireAction(), // Select next ball in the firing slot
                         launcher.fireAction(), // Fire third ball
                         launcher.releaseAction()
                 )
@@ -347,9 +347,9 @@ public final class Blue_PoseFar extends LinearOpMode {
                 new ParallelAction(
                         drive.actionBuilder(drive.localizer.getPose()) // Drive to far shooting position
                                 .strafeToLinearHeading(new Vector2d(ballLinePos.component1().x, ballLinePos.component1().y), Math.toRadians(-90))
-                                .build(),
+                                .build()
 
-                        revolver.stepToLoadAction() // Select next ball in loading slot
+//                        revolver.stepToLoadAction() // Select next ball in loading slot
                 )
         );
 
@@ -363,12 +363,12 @@ public final class Blue_PoseFar extends LinearOpMode {
                                         .lineToY(ballLinePos.component1().y - posOffset)
                                         .build(),
                                 new SleepAction(0.35),
-                                revolver.stepToLoadAction(), // Select next ball in loading slot
+//                                revolver.stepToLoadAction(), // Select next ball in loading slot
                                 drive.actionBuilder(drive.localizer.getPose()) // Suck up second ball
                                         .lineToY(ballLinePos.component1().y - (posOffset * 2.0))
                                         .build(),
                                 new SleepAction(0.35),
-                                revolver.stepToLoadAction(), // Select next ball in loading slot
+//                                revolver.stepToLoadAction(), // Select next ball in loading slot
                                 drive.actionBuilder(drive.localizer.getPose()) // Suck up third ball
                                         .lineToY(ballLinePos.component1().y - (posOffset * 3.0))
                                         .build(),

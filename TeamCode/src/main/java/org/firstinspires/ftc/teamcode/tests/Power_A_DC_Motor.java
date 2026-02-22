@@ -20,7 +20,7 @@ public class Power_A_DC_Motor extends LinearOpMode {
 
     @Override
     public void runOpMode() {                       //the Motor name in hardware on the controle hub
-        sweeperMotor = hardwareMap.get(DcMotorEx.class, "rightBack");
+        sweeperMotor = hardwareMap.get(DcMotorEx.class, "genevaDrive");
 
                                                     // Wait for the game to start (driver presses START)
         telemetry.addData("Check if motor is in 'sweeper' named port ", "Initialized :");

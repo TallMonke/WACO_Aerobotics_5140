@@ -52,6 +52,10 @@ public class TeleOP_Decode extends LinearOpMode {
     private Sweeper sweeper = null;
     private Launcher launcher = null;
 
+    //revolver
+    private boolean moving = false;
+
+
     @SuppressLint("DefaultLocale")
     @Override
     public void runOpMode() {
@@ -161,17 +165,19 @@ public class TeleOP_Decode extends LinearOpMode {
             }
 
             // Perform color detection for the current state of the revolver
-            revolver.run();
+//            revolver.run();
 
             // Revolver Controls
             // D-Pad Up - step to next position
             // D-Pad Down - Step to previous position
             // A-Button - jump to next load position
             // B-Button - Jump to next firing position
-            revolver.stepUp(gamepad2.dpad_up);
-            revolver.stepDown(gamepad2.dpad_down);
-            revolver.stepToLoad(gamepad2.a);
-            revolver.stepToFire(gamepad2.b);
+            revolver.spin(1,moving);
+
+//            revolver.stepUp(gamepad2.dpad_up);
+//            revolver.stepDown(gamepad2.dpad_down);
+//            revolver.stepToLoad(gamepad2.a);
+//            revolver.stepToFire(gamepad2.b);
 
             //sweep in with right bumper and reverse with both bumpers at same time.
             sweeper.enable(gamepad2.right_bumper);

@@ -52,17 +52,17 @@ public final class Auto_SweeperPickup extends LinearOpMode {
                         sweeper.enableAction(),
                         new SequentialAction(
                                 sweeper.enableAction(),
-                                revolver.stepToLoadAction(), // Select next ball in loading slot
+//                                revolver.stepToLoadAction(), // Select next ball in loading slot
                                 drive.actionBuilder(drive.localizer.getPose()) // Suck up first ball
                                         .lineToY(ballLinePos.component1().y - 5)
                                         .build(),
                                 new SleepAction(0.25),
-                                revolver.stepToLoadAction(), // Select next ball in loading slot
+//                                revolver.stepToLoadAction(), // Select next ball in loading slot
                                 drive.actionBuilder(drive.localizer.getPose()) // Suck up second ball
                                         .lineToY(ballLinePos.component1().y - 10)
                                         .build(),
                                 new SleepAction(0.25),
-                                revolver.stepToLoadAction(), // Select next ball in loading slot
+//                                revolver.stepToLoadAction(), // Select next ball in loading slot
                                 drive.actionBuilder(drive.localizer.getPose()) // Suck up third ball
                                         .lineToY(ballLinePos.component1().y - 15)
                                         .build(),

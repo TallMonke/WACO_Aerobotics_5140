@@ -72,10 +72,10 @@ public final class Auto_TripleFireTest extends LinearOpMode {
                         launcher.spinUp(rpm),
                         launcher.fireAction(), // Fire loaded ball
                         launcher.releaseAction(),
-                        revolver.stepToFireAction(), // Select next ball in firing slot
+//                        revolver.stepToFireAction(), // Select next ball in firing slot
                         launcher.fireAction(), // Fire second ball
                         launcher.releaseAction(),
-                        revolver.stepToFireAction(), // Select next ball in the firing slot
+//                        revolver.stepToFireAction(), // Select next ball in the firing slot
                         launcher.fireAction(), // Fire third ball
                         launcher.releaseAction()
                 )
