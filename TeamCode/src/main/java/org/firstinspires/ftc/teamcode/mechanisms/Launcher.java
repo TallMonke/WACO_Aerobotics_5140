@@ -26,7 +26,7 @@ public class Launcher {
 
     // Servo controlling the push mechanism
     private Servo ballFeedServo = null;
-    private final double INIT_FEED_POSITION = 0.6;
+    private final double INIT_FEED_POSITION = 0.0;
     private final double PUSH_FEED_POSITION = 1.0;
 
     /**

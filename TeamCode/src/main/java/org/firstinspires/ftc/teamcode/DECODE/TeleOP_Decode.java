@@ -17,7 +17,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.DECODE.Constants.*;
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTagColors;
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTagWebcam;
 import org.firstinspires.ftc.teamcode.mechanisms.DetectedColor;
@@ -52,9 +51,6 @@ public class TeleOP_Decode extends LinearOpMode {
     private Sweeper sweeper = null;
     private Launcher launcher = null;
 
-    //revolver
-    private boolean moving = false;
-
 
     @SuppressLint("DefaultLocale")
     @Override
@@ -73,28 +69,6 @@ public class TeleOP_Decode extends LinearOpMode {
             teamColorID = Constants.TEAM_COLOR_ID;
         }
         else {
-            ElapsedTime colorSelectTimer = new ElapsedTime();
-
-            // prompt Driver Hub for team color selection
-            // X-Blue, B-Red
-            while(teamColorID == -1) {
-                telemetry.addData("Select Team Color", "X-Blue, B-Red");
-                telemetry.update();
-
-                if (gamepad1.x) {
-                    teamColorID = aprilTagColors.getBlueTeamID();
-                    break;
-                } else if (gamepad1.b) {
-                    teamColorID = aprilTagColors.getRedTeamID();
-                    break;
-                }
-
-                if( colorSelectTimer.seconds() > 10 )
-                {
-                    break;
-                }
-            }
-
             // If we timed out, default to red
             if( teamColorID == -1 )
             {
@@ -172,10 +146,8 @@ public class TeleOP_Decode extends LinearOpMode {
             // D-Pad Down - Step to previous position
             // A-Button - jump to next load position
             // B-Button - Jump to next firing position
-            revolver.spin(1,moving);
-
-//            revolver.stepUp(gamepad2.dpad_up);
-//            revolver.stepDown(gamepad2.dpad_down);
+            revolver.stepUp(gamepad2.dpad_up);
+            revolver.stepDown(gamepad2.dpad_down);
 //            revolver.stepToLoad(gamepad2.a);
 //            revolver.stepToFire(gamepad2.b);
 

@@ -36,7 +36,10 @@ public class Revolver {
     private int revolutions = 1;                                  //How many revolution you want the motor to do. *can be fraction like 1.25 or 4.5* (needs to be float because converting double to int is to hard for the computer. float to int is much easier.
     private boolean isPressed = false;
 
-    boolean buttonWasPressedUp = false;
+    private boolean moving = false;
+
+    private boolean buttonWasPressedUp = false;
+    private boolean buttonWasPressedDown = false;
 
     /**
      * Initializes the Revolver sorting mechanism
@@ -85,12 +88,10 @@ public class Revolver {
     }
 
     /**
-     * Spins the revolver the given number of revolutions. One rotation = one section of the
-     * revolver
-     *
-     * @param rotations Number of times the revolver should spin
+     * Spins the revolver one segment of the drive. Passing true starts the motion and only returns false
+     * one the operation is complete.
      */
-    public void spin(int rotations, boolean moving){
+    private void spin() {
         if (moving) {                                                                       //if a trigger was pushed
             int currentPosition = genevaDrive.getCurrentPosition();                         //the current motor pos
             int targetDistance = targetPosition - currentPosition;                          //how far is left to go till target pos
@@ -121,6 +122,9 @@ public class Revolver {
                 timer.reset();
             }
 
+            tm.addData("Revolver Power", power);
+            tm.update();
+
             genevaDrive.setPower(power);                                                    //set power each part calculates to motor
 
             if (Math.abs(targetDistance) <= tolerance) {                                    //how far from exact target pos is acceptable to say "we made it"
@@ -135,37 +139,25 @@ public class Revolver {
     }
 
 
-//    /**
-//     * Increases the revolver to the next position. Sleeps for 500ms to allow time for the revolver
-//     * to actually complete the operation
-//     */
-//    public void stepUp(boolean buttonIsPressed){
-//        /*
-//        if (buttonIsPressed && !buttonWasPressedUp) {
-//
-//            // Cycle through 0 → 1 → 2 → 0
-//            if (motorModeUp == 0) {
-//                motorModeUp = 1;
-//            } else if (motorModeUp == 1) {
-//                motorModeUp = 2;
-//            } else {
-//                motorModeUp = 0;
-//            }
-//
-//            // cycle revolver index up
-//            if (currentIndex == 5) {
-//                currentIndex = 0;
-//            } else {
-//                currentIndex++;
-//            }
-//
-//            spin(1);
-//        }
-//
-//        // Update debounce tracker
-//        buttonWasPressedUp = buttonIsPressed;
-//         */
-//    }
+    /**
+     * Increases the revolver to the next position. Sleeps for 500ms to allow time for the revolver
+     * to actually complete the operation
+     */
+    public void stepUp(boolean buttonIsPressed) {
+        if (buttonIsPressed && !buttonWasPressedUp) {
+            timer = new ElapsedTime();
+            moving = true;
+            targetPosition = genevaDrive.getCurrentPosition() + ticksPerRev;
+
+            tm.addData("Revolver Step Up", "Pressed");
+            tm.update();
+        }
+
+        spin();
+
+        // Update debounce tracker
+        buttonWasPressedUp = buttonIsPressed;
+    }
 //
 //    /**
 //     * Turns the ball revolver to the next position.
@@ -223,43 +215,27 @@ public class Revolver {
 //        };
 //         */
 //    }
-//
-//    /**
-//     * Reverses the revolver to the previous position. This will sleep for 500ms to allow time
-//     * for the revolver to actually complete the operation
-//     */
-//    public void stepDown(boolean buttonIsPressed){
-//        /*
-//        if (buttonIsPressed && !buttonWasPressedDown) {
-//
-//            // Cycle through 0 → 1 → 2 → 0
-//            if (motorModeDown == 0) {
-//                motorModeDown = 1;
-//            } else if (motorModeDown == 1) {
-//                motorModeDown = 2;
-//            } else {
-//                motorModeDown = 0;
-//            }
-//
-//            // cycle revolver index down
-//            if (currentIndex == 0) {
-//                currentIndex = 5;
-//            } else {
-//                currentIndex--;
-//            }
-//
-//            genevaDrive.setDirection(DcMotorSimple.Direction.REVERSE);
-//
-//            spin(1);
-//
-//            genevaDrive.setDirection(DcMotorSimple.Direction.FORWARD);
-//        }
-//
-//        // Update debounce tracker
-//        buttonWasPressedDown = buttonIsPressed;
-//         */
-//    }
-//
+
+    /**
+     * Reverses the revolver to the previous position. This will sleep for 500ms to allow time
+     * for the revolver to actually complete the operation
+     */
+    public void stepDown(boolean buttonIsPressed) {
+        if (buttonIsPressed && !buttonWasPressedDown) {
+            timer = new ElapsedTime();
+            moving = true;
+            targetPosition = genevaDrive.getCurrentPosition() - ticksPerRev;
+
+            tm.addData("Revolver Step Down", "Pressed");
+            tm.update();
+        }
+
+        spin();
+
+        // Update debounce tracker
+        buttonWasPressedDown = buttonIsPressed;
+    }
+
 //    /**
 //     * Turns the ball revolver to the next position.
 //     * @return RoadRunner Action to be used in the Autonomous OpModes
