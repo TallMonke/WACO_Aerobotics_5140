@@ -91,7 +91,7 @@ public class Revolver {
      * Spins the revolver one segment of the drive. Passing true starts the motion and only returns false
      * one the operation is complete.
      */
-    private void spin() {
+    public void spin() {
         if (moving) {                                                                       //if a trigger was pushed
             int currentPosition = genevaDrive.getCurrentPosition();                         //the current motor pos
             int targetDistance = targetPosition - currentPosition;                          //how far is left to go till target pos
@@ -127,7 +127,7 @@ public class Revolver {
 
             genevaDrive.setPower(power);                                                    //set power each part calculates to motor
 
-            if (Math.abs(targetDistance) <= tolerance) {                                    //how far from exact target pos is acceptable to say "we made it"
+            if (Math.abs(targetDistance) <= tolerance && power < 0.01) {                                    //how far from exact target pos is acceptable to say "we made it"
                 genevaDrive.setPower(0);
                 moving = false;                                                             //set moving back to false so we can do it again
             }
@@ -144,19 +144,14 @@ public class Revolver {
      * to actually complete the operation
      */
     public void stepUp(boolean buttonIsPressed) {
-        if (buttonIsPressed && !buttonWasPressedUp) {
+        if (buttonIsPressed && !moving) {
             timer = new ElapsedTime();
             moving = true;
-            targetPosition = genevaDrive.getCurrentPosition() + ticksPerRev;
+            targetPosition = calculateTargetPos(1);
 
             tm.addData("Revolver Step Up", "Pressed");
             tm.update();
         }
-
-        spin();
-
-        // Update debounce tracker
-        buttonWasPressedUp = buttonIsPressed;
     }
 //
 //    /**
@@ -164,31 +159,24 @@ public class Revolver {
 //     * @return RoadRunner Action to be used in the Autonomous OpModes
 //     */
 //
-//    /**
-//     * Turns the ball revolver to the next loading position. Even indexes are "loading" positions.
-//     * @return RoadRunner Action to be used in the Autonomous OpModes
-//     */
-//    public void stepToLoad(boolean buttonIsPressed){
-//        /*
-//        if (buttonIsPressed && !buttonWasPressedUp) {
-//
-//            // Cycle through 0 → 1 → 2 → 0
-//            if (motorModeUp == 0) {
-//                motorModeUp = 1;
-//            } else if (motorModeUp == 1) {
-//                motorModeUp = 2;
-//            } else {
-//                motorModeUp = 0;
-//            }
-//
-//            // Move the servo to the new position
-//            currentIndex = selectNextOddIndex();
-//        }
-//
-//        // Update debounce tracker
-//        buttonWasPressedUp = buttonIsPressed;
-//         */
-//    }
+    /**
+     * Turns the ball revolver to the next loading position. Even indexes are "loading" positions.
+     * @return RoadRunner Action to be used in the Autonomous OpModes
+     */
+    public void stepToLoad(boolean buttonIsPressed){
+        if (buttonIsPressed && !moving){
+            if (getMotorRevs() % 2 == 0){
+                timer = new ElapsedTime();
+                moving = true;
+                targetPosition = calculateTargetPos(-1);
+            }
+            else if (getMotorRevs() % 2 != 0){
+                timer = new ElapsedTime();
+                moving = true;
+                targetPosition = calculateTargetPos(-2);
+            }
+        }
+    }
 //
 //    /**
 //     * Turns the ball revolver to the next loading position. Even indexes are "loading" positions.
@@ -221,19 +209,14 @@ public class Revolver {
      * for the revolver to actually complete the operation
      */
     public void stepDown(boolean buttonIsPressed) {
-        if (buttonIsPressed && !buttonWasPressedDown) {
+        if (buttonIsPressed && !moving) {
             timer = new ElapsedTime();
             moving = true;
-            targetPosition = genevaDrive.getCurrentPosition() - ticksPerRev;
+            targetPosition = calculateTargetPos(-1);
 
             tm.addData("Revolver Step Down", "Pressed");
             tm.update();
         }
-
-        spin();
-
-        // Update debounce tracker
-        buttonWasPressedDown = buttonIsPressed;
     }
 
 //    /**
@@ -315,6 +298,21 @@ public class Revolver {
 //         */
 //    }
 //
+    public void stepToFire(boolean buttonIsPressed){
+        if (buttonIsPressed && !moving){
+            if (getMotorRevs() % 2 == 0){
+                timer = new ElapsedTime();
+                moving = true;
+                targetPosition = calculateTargetPos(-2);
+            }
+            else if (getMotorRevs() % 2 != 0){
+                timer = new ElapsedTime();
+                moving = true;
+                targetPosition = calculateTargetPos(-1);
+            }
+        }
+    }
+
 //    public void displayTelemetry(){
 //        if(tm != null){
 //            tm.addData("Sorter (D-Up/D-Down): ", String.format("%.6f", genevaDrive.getCurrentPosition()));
@@ -408,6 +406,9 @@ public class Revolver {
 //        displayTelemetry();
 //         */
 //    }
-
+    private int calculateTargetPos(int revolutions){
+        int position = genevaDrive.getCurrentPosition() + (ticksPerRev * revolutions);
+        return position;
+    }
 }
 

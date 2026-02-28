@@ -148,8 +148,10 @@ public class TeleOP_Decode extends LinearOpMode {
             // B-Button - Jump to next firing position
             revolver.stepUp(gamepad2.dpad_up);
             revolver.stepDown(gamepad2.dpad_down);
-//            revolver.stepToLoad(gamepad2.a);
-//            revolver.stepToFire(gamepad2.b);
+            revolver.stepToLoad(gamepad2.a);
+            revolver.stepToFire(gamepad2.b);
+
+            revolver.spin();
 
             //sweep in with right bumper and reverse with both bumpers at same time.
             sweeper.enable(gamepad2.right_bumper);
