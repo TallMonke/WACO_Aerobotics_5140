@@ -177,32 +177,24 @@ public class Revolver {
             }
         }
     }
-//
-//    /**
-//     * Turns the ball revolver to the next loading position. Even indexes are "loading" positions.
-//     * @return RoadRunner Action to be used in the Autonomous OpModes
-//     */
-//    public Action stepToLoadAction(){
-//        /*
-//        return new Action() {
-//            //ElapsedTime timer = null;
-//
-//            @Override
-//            public boolean run(@NonNull TelemetryPacket packet) {
-//                //if (timer == null) {
-//                //    timer = new ElapsedTime();
-//
-//                    currentIndex = selectNextOddIndex();
-//
-//                    packet.put("revolver_position", revolverPositions.get(currentIndex));
-//                //}
-//
-//                //return (timer.seconds() < 2.5);
-//                return false;
-//            }
-//        };
-//         */
-//    }
+
+    /**
+     * Turns the ball revolver to the next loading position. Even indexes are "loading" positions.
+     * @return RoadRunner Action to be used in the Autonomous OpModes
+     */
+    public Action stepToLoadAction(){
+        return new Action() {
+            ElapsedTime elapsedTime = null;
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (timer == null) {
+                    timer = new ElapsedTime();
+                    stepToLoad(true);
+                }
+                return (elapsedTime.seconds() < 2.5);
+            }
+        };
+    }
 
     /**
      * Reverses the revolver to the previous position. This will sleep for 500ms to allow time
@@ -313,11 +305,13 @@ public class Revolver {
         }
     }
 
-//    public void displayTelemetry(){
-//        if(tm != null){
-//            tm.addData("Sorter (D-Up/D-Down): ", String.format("%.6f", genevaDrive.getCurrentPosition()));
-//        }
-//    }
+    public void displayTelemetry(){
+        if(tm != null){
+            tm.addData("Sorter (D-pad): ", "Up / Down");
+            tm.addData("Sorter (A / B)","Fire / Load");
+            tm.addData("Indexer Revolution", getMotorRevs());
+        }
+    }
 //
 //    /**
 //     * Searches the revolver for the given color and move the current position of the revolver to
