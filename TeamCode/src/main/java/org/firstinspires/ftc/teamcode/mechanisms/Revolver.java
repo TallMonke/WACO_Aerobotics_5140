@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -25,6 +26,7 @@ public class Revolver {
 
     //revolver
     private DcMotorEx genevaDrive = null;       //initialization of the motor we are moving
+    private ColorSensor genevaColor = null;
     private int ticksPerRev = 448;              //how many ticks of the motor it takes to go one revolution *motor ticks multiplied by gearbox*
     private double maxMotorPower = 1.0;         //The power the motor runs at.
     private double proportionalGain = 0.0013;    //rate motor will accelerate and decelerate to reach a more accurate revolution. * Overshoot: decrease / Undershoot: increase *
@@ -85,6 +87,7 @@ public class Revolver {
         genevaDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);                 //runs the motor using the encoder wire
         genevaDrive.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);    //When the motor stops it will use a break so is does not drift
 
+        genevaColor = hardwareMap.get(ColorSensor.class,"genevaColor");
     }
 
     /**
@@ -123,6 +126,7 @@ public class Revolver {
             }
 
             tm.addData("Revolver Power", power);
+            tm.addData("Geneva Color", genevaColor);
             tm.update();
 
             genevaDrive.setPower(power);                                                    //set power each part calculates to motor
@@ -153,12 +157,26 @@ public class Revolver {
             tm.update();
         }
     }
-//
-//    /**
-//     * Turns the ball revolver to the next position.
-//     * @return RoadRunner Action to be used in the Autonomous OpModes
-//     */
-//
+
+    /**
+     * Turns the ball revolver to the next position.
+     * @return RoadRunner Action to be used in the Autonomous OpModes
+     */
+    public Action stepUpAction(){
+        return new Action() {
+            ElapsedTime elapsedTime = null;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (elapsedTime == null) {
+                    elapsedTime = new ElapsedTime();
+                    stepUp(true);
+                }
+                return (elapsedTime.seconds() < 2.5);
+            }
+        };
+    }
+
     /**
      * Turns the ball revolver to the next loading position. Even indexes are "loading" positions.
      * @return RoadRunner Action to be used in the Autonomous OpModes
@@ -187,8 +205,8 @@ public class Revolver {
             ElapsedTime elapsedTime = null;
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                if (timer == null) {
-                    timer = new ElapsedTime();
+                if (elapsedTime == null) {
+                    elapsedTime = new ElapsedTime();
                     stepToLoad(true);
                 }
                 return (elapsedTime.seconds() < 2.5);
@@ -211,85 +229,25 @@ public class Revolver {
         }
     }
 
-//    /**
-//     * Turns the ball revolver to the next position.
-//     * @return RoadRunner Action to be used in the Autonomous OpModes
-//     */
-//    public Action stepDownAction(){
-//        /*
-//        return new Action() {
-//            //ElapsedTime timer = null;
-//
-//            @Override
-//            public boolean run(@NonNull TelemetryPacket packet) {
-//                //if (timer == null) {
-//                //    timer = new ElapsedTime();
-//
-//                    // cycle revolver index down
-//                    if (currentIndex == 0) {
-//                        currentIndex = 5;
-//                    } else {
-//                        currentIndex--;
-//                    }
-//
-//                    stepDown(true);
-//                    packet.put("revolver_position", revolverPositions.get(currentIndex));
-//                //}
-//
-//                //return (timer.seconds() < 2.5);
-//                return false;
-//            }
-//        };
-//         */
-//    }
-//    public void stepToFire(boolean buttonIsPressed){
-//        /*
-//        if (buttonIsPressed && !buttonWasPressedDown) {
-//
-//            // Cycle through 0 → 1 → 2 → 0
-//            if (motorModeDown == 0) {
-//                motorModeDown = 1;
-//            } else if (motorModeDown == 1) {
-//                motorModeDown = 2;
-//            } else {
-//                motorModeDown = 0;
-//            }
-//
-//            currentIndex = selectNextEvenIndex();
-//        }
-//
-//        // Update debounce tracker
-//        buttonWasPressedDown = buttonIsPressed;
-//         */
-//    }
-//    /**
-//     * Turns the ball revolver to the next firing position. Odd indexes are "firing" positions.
-//     * @return RoadRunner Action to be used in the Autonomous OpModes
-//     */
-//    public Action stepToFireAction(){
-//        /*
-//        return new Action() {
-//            //ElapsedTime timer = null;
-//
-//            @Override
-//            public boolean run(@NonNull TelemetryPacket packet) {
-//                //if (timer == null) {
-//                //   timer = new ElapsedTime();
-//
-//                    currentIndex = selectNextEvenIndex();
-//
-//                    // Move the servo to the new position
-//      //              genevaDrive.setPosition(revolverPositions.get(currentIndex));
-//                    packet.put("revolver_position", revolverPositions.get(currentIndex));
-//                //}
-//
-//                //return (timer.seconds() < 2.5);
-//                return false;
-//            }
-//        };
-//         */
-//    }
-//
+    /**
+     * Turns the ball revolver to the next position.
+     * @return RoadRunner Action to be used in the Autonomous OpModes
+     */
+    public Action stepDownAction(){
+        return new Action() {
+            ElapsedTime elapsedTime = null;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (elapsedTime == null) {
+                    elapsedTime = new ElapsedTime();
+                    stepDown(true);
+                }
+                return (elapsedTime.seconds() < 2.5);
+            }
+        };
+    }
+
     public void stepToFire(boolean buttonIsPressed){
         if (buttonIsPressed && !moving){
             if (getMotorRevs() % 2 == 0){
@@ -303,6 +261,24 @@ public class Revolver {
                 targetPosition = calculateTargetPos(-1);
             }
         }
+    }
+     /**
+     * Turns the ball revolver to the next firing position. Odd indexes are "firing" positions.
+     * @return RoadRunner Action to be used in the Autonomous OpModes
+     */
+    public Action stepToFireAction(){
+        return new Action() {
+            ElapsedTime elapsedTime = null;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (elapsedTime == null) {
+                    elapsedTime = new ElapsedTime();
+                    stepToFire(true);
+                }
+                return (elapsedTime.seconds() < 2.5);
+            }
+        };
     }
 
     public void displayTelemetry(){

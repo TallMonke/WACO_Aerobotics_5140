@@ -54,9 +54,9 @@ public class DriveTrain {
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
-        leftFront = hardwareMap.get(DcMotor.class, "perp");
-        leftBack = hardwareMap.get(DcMotor.class, "par0");
-        rightFront = hardwareMap.get(DcMotor.class, "par1");
+        leftFront = hardwareMap.get(DcMotor.class, "leftFront");
+        leftBack = hardwareMap.get(DcMotor.class, "leftBack");
+        rightFront = hardwareMap.get(DcMotor.class, "rightFront");
         rightBack = hardwareMap.get(DcMotor.class, "rightBack");
 
         // set wheel motor direction.
