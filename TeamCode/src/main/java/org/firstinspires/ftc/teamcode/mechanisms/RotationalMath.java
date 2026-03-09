@@ -5,14 +5,17 @@ public class RotationalMath {
      * @param distance of shooter to april tag into x-component distance robot to basket.
      */
     public static double x_Distance(double distance){
-        double launchHeight = 14.0; //distance of point of launch of the robot from the ground, y-component
-        double x_DistanceCamera = 7.0; //distance (x-component) the camera is away from launch point.
-        double y_DistanceCamera = 1.5; //distance (y-component) the camera is away from launch point.
-        double aprilFromTop = 9.25; //distance from center of april tag to top of the basket front wall.
-        double aprilTagWallHeight = 38.75; //total height of the basket front wall with the location april tags on it.
-        double Y = aprilTagWallHeight-y_DistanceCamera-launchHeight-aprilFromTop; //Y-component distance from the camera to the center of the april tag. ( = 14)
-        double X = (Math.sqrt(Math.pow(distance,2)-(Math.pow(Y,2)))-x_DistanceCamera);
-        return X;
+    /// --- IMU Based Trialgulation ---
+
+    /// --- CAMERA BASSES TRIALGALTION ---
+        double launchHeight = 14.0;                                                       //distance of point of launch of the robot from the ground, y-component
+        double x_DistanceCamera = 7.0;                                                    //distance (x-component) the camera is away from launch point.
+        double y_DistanceCamera = 1.5;                                                    //distance (y-component) the camera is away from launch point.
+        double aprilFromTop = 9.25;                                                       //distance from center of april tag to top of the basket front wall.
+        double aprilTagWallHeight = 38.75;                                                //total height of the basket front wall with the location april tags on it.
+        double Y = aprilTagWallHeight-y_DistanceCamera-launchHeight-aprilFromTop;         //Y-component distance from the camera to the center of the april tag. ( = 14)
+        double X = (Math.sqrt(Math.pow(distance,2)-(Math.pow(Y,2)))-x_DistanceCamera);    // Put it all together
+        return X;                                                                         // return x-component
     }
 
     /**

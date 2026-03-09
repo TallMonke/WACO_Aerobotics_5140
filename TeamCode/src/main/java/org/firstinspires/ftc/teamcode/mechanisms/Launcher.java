@@ -119,7 +119,7 @@ public class Launcher {
                     telemetryPacket.addLine("Feed Pushed");
                 }
 
-                return timer.seconds() < 0.5;
+                return timer.seconds() < 0.25;
             }
         };
     }
@@ -148,7 +148,7 @@ public class Launcher {
                     telemetryPacket.addLine("Feed Released");
                 }
 
-                return timer.seconds() < 0.25;
+                return timer.seconds() < 2.0;
             }
         };
     }

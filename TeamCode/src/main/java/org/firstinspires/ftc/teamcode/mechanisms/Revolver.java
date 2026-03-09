@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
+import static java.lang.Thread.activeCount;
 import static java.lang.Thread.sleep;
 
 import androidx.annotation.NonNull;
@@ -268,15 +269,70 @@ public class Revolver {
      */
     public Action stepToFireAction(){
         return new Action() {
-            ElapsedTime elapsedTime = null;
+            boolean init = false;
+            int targetPosition;
+            int startPosition;
+            double power;
+            ElapsedTime timer = new ElapsedTime();
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                if (elapsedTime == null) {
-                    elapsedTime = new ElapsedTime();
-                    stepToFire(true);
+
+                /// --- INITIALIZATION ---
+                if (!init) {
+                    startPosition = genevaDrive.getCurrentPosition();
+                    if (getMotorRevs() % 2 == 0) {
+                        targetPosition = calculateTargetPos(-2);
+                    } else if (getMotorRevs() % 2 != 0) {
+                        targetPosition = calculateTargetPos(-1);
+                    }
+                    timer.reset();
+                    init = true;
                 }
-                return (elapsedTime.seconds() < 2.5);
+
+                /// --- CONTROL LOOP ---
+                int currentPosition = genevaDrive.getCurrentPosition();                         //the current motor pos
+                int targetDistance = targetPosition - currentPosition;                          //how far is left to go till target pos
+
+                int totalDistance = Math.abs(targetPosition - startPosition);
+                int distanceTraveled = Math.abs(currentPosition - startPosition);
+                int slowZone = totalDistance - startDecel;                                      //when to start the deceleration based of the target position *value is a set tick amount back from total distance
+
+                /// Compute power
+                if (distanceTraveled < slowZone) {                                              // DECELERATION ZONE           *if we are not at Max Power Zone we are in deceleration zone
+                    power = maxMotorPower * Math.signum(targetDistance);                        //apply gain to how far we have to go
+                } else {
+                    double powerMag = Math.abs(targetDistance) * proportionalGain;
+                    powerMag = Range.clip(powerMag, 0, maxMotorPower);                     //make sure power does not exceed max set power
+                    power = powerMag * Math.signum(targetDistance);
+                }
+
+                /// Safety pulse every 2 seconds
+                if (timer.seconds() > 2.0) {
+                    genevaDrive.setPower(power * -1.0);
+                    try {
+                        sleep(300);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    timer.reset();
+                }
+
+                genevaDrive.setPower(power);                                                    //set power each part calculates to motor
+
+                // Telemetry
+                tm.addData("Target Position", targetPosition);
+                tm.addData("Revolver Power", genevaDrive.getPower());
+                tm.addData("Target Distance", Math.abs(targetDistance));
+                tm.addData("Tolerence", tolerance);
+                tm.update();
+
+            /// --- Exit Condition
+                boolean done = Math.abs(targetDistance) <= tolerance && power < 0.01;    //how far from exact target pos is acceptable to say "we made it"
+                if (done) {
+                    genevaDrive.setPower(0);
+                }
+                    return !done;
             }
         };
     }

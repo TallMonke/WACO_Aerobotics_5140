@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -70,13 +71,14 @@ public final class Auto_TripleFireTest extends LinearOpMode {
         Actions.runBlocking(
                 new SequentialAction(
                         launcher.spinUp(rpm),
-                        launcher.fireAction(), // Fire loaded ball
+                        new SleepAction(0.5),
+                        launcher.fireAction(),          // Fire loaded ball
                         launcher.releaseAction(),
-//                        revolver.stepToFireAction(), // Select next ball in firing slot
-                        launcher.fireAction(), // Fire second ball
+                        revolver.stepToFireAction(),    // Select next ball in firing slot
+                        launcher.fireAction(),          // Fire second ball
                         launcher.releaseAction(),
-//                        revolver.stepToFireAction(), // Select next ball in the firing slot
-                        launcher.fireAction(), // Fire third ball
+                        revolver.stepToFireAction(),    // Select next ball in the firing slot
+                        launcher.fireAction(),          // Fire third ball
                         launcher.releaseAction()
                 )
         );
