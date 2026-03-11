@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.DECODE.auto;
 
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.getRPM;
-import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.x_Distance;
+import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.x_DistanceCamera;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -65,9 +65,9 @@ public final class Blue_PoseFar extends LinearOpMode {
         launcher = new Launcher(hardwareMap, telemetry);
 
         if (teamColorID == aprilTagColors.getRedTeamID()) {
-            sendTelemetryPacket("RED Team Ready!");
+            sendTelemetryPacket("RED Team FAR Ready!");
         } else if (teamColorID == aprilTagColors.getBlueTeamID()) {
-            sendTelemetryPacket("BLUE Team Ready!");
+            sendTelemetryPacket("BLUE Team FAR Ready!");
         }
 
         waitForStart();
@@ -88,7 +88,7 @@ public final class Blue_PoseFar extends LinearOpMode {
         Actions.runBlocking( new ParallelAction(
                 launcher.setWheelVelocityAction(850.0),
                 drive.actionBuilder(drive.localizer.getPose())
-                        .lineToX(Constants.blue_farShootingPos.x)
+                        .strafeTo(Constants.blue_farShootingPos)
                         .turn(Math.toRadians(5)) // Turn camera towards tower
                         .build())
         );
@@ -97,7 +97,7 @@ public final class Blue_PoseFar extends LinearOpMode {
         double rpm = aimBot();
 
         if(rpm < 0.0){    //if we didn't sense a april tag use pre set velocity.
-            rpm = getRPM(x_Distance(120.0));
+            rpm = getRPM(x_DistanceCamera(120.0));
         }
 
         if (rpm > 0.0) {
@@ -129,7 +129,7 @@ public final class Blue_PoseFar extends LinearOpMode {
         rpm = aimBot();
 
         if(rpm < 0.0){    //if we didn't sense a april tag use pre set velocity.
-            rpm = getRPM(x_Distance(120.0));
+            rpm = getRPM(x_DistanceCamera(120.0));
         }
 
         if (rpm > 0.0) {
@@ -162,7 +162,7 @@ public final class Blue_PoseFar extends LinearOpMode {
 
             rpm = aimBot();
             if(rpm < 0.0){    //if we didn't sense a april tag use pre set velocity.
-                rpm = getRPM(x_Distance(37.0));
+                rpm = getRPM(x_DistanceCamera(37.0));
             }
 
             if (rpm > 0.0) {
@@ -197,7 +197,7 @@ public final class Blue_PoseFar extends LinearOpMode {
 
                 rpm = aimBot();
                 if(rpm < 0.0){    //if we didn't sense a april tag use pre set velocity.
-                rpm = getRPM(x_Distance(37.0));
+                rpm = getRPM(x_DistanceCamera(37.0));
                 }
 
                 if (rpm > 0.0) {
@@ -265,7 +265,7 @@ public final class Blue_PoseFar extends LinearOpMode {
             );
 
             // Calculate the velocity needed to shoot the ball at the correct distance
-            double rpm = getRPM(x_Distance(towerDetection.ftcPose.range));
+            double rpm = getRPM(x_DistanceCamera(towerDetection.ftcPose.range));
 
             sendTelemetryPacket("calc_rpm", rpm);
 

@@ -1,7 +1,13 @@
 package org.firstinspires.ftc.teamcode.DECODE;
 
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.getRPM;
-import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.x_Distance;
+import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.get_XYH_FromAprilTag;
+import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.x_DistanceCamera;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import android.annotation.SuppressLint;
@@ -11,8 +17,11 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.ParallelAction;
+import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -51,6 +60,8 @@ public class TeleOP_Decode extends LinearOpMode {
     private Sweeper sweeper = null;
     private Launcher launcher = null;
 
+    GoBildaPinpointDriver odo;
+
 
     @SuppressLint("DefaultLocale")
     @Override
@@ -63,6 +74,10 @@ public class TeleOP_Decode extends LinearOpMode {
         revolver = new Revolver(hardwareMap, telemetry);
         sweeper = new Sweeper(hardwareMap, telemetry);
         launcher = new Launcher(hardwareMap, telemetry);
+
+        //IMU
+        odo = hardwareMap.get(GoBildaPinpointDriver.class,"pinpoint");
+
 
         // Bases the team color set from autonomous mode
         if( Constants.TEAM_COLOR_ID != -1 ) {
@@ -132,10 +147,21 @@ public class TeleOP_Decode extends LinearOpMode {
                 driveTrain.setSpeedReduction(0.5);
             }
 
+            //the
+            if(gamepad1.a && gamepad1.dpad_down){
+                odo.resetPosAndIMU();
+                if(teamColorID == aprilTagColors.getBlueTeamID()) {
+                    odo.setPosition(pose2dToPose2D(Constants.blue_loadingPos));
+                }
+                else if(teamColorID == aprilTagColors.getRedTeamID()) {
+                    odo.setPosition(pose2dToPose2D(Constants.red_loadingPos));
+                }
+            }
+
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
             driveTrain.run(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
             if(gamepad1.y) {
-                aimBot();
+                aimBot_IMU();
             }
 
             // Perform color detection for the current state of the revolver
@@ -149,7 +175,18 @@ public class TeleOP_Decode extends LinearOpMode {
             revolver.stepUp(gamepad2.dpad_up);
             revolver.stepDown(gamepad2.dpad_down);
             revolver.stepToLoad(gamepad2.a);
+//            if (gamepad2.a ){
+//
+//                new ParallelAction(revolver.stepToLoadAction()).run(new TelemetryPacket());
+//            }
             revolver.stepToFire(gamepad2.b);
+//            if (gamepad2.b ){
+//
+//                Actions.runBlocking(new ParallelAction(
+//                                revolver.stepToFireAction()
+//                        )
+//                );
+//            }
 
             revolver.spin();
 
@@ -164,8 +201,19 @@ public class TeleOP_Decode extends LinearOpMode {
             // Just push the ball out the launcher
             if(gamepad2.x) { manualFire(); }
 
+            telemetry.addData("ODO: ", "%f, %f, %f", odo.getPosX(DistanceUnit.INCH),odo.getPosY(DistanceUnit.INCH), odo.getHeading(AngleUnit.DEGREES));
+
             telemetry.update();
+            odo.update();
         }
+    }
+
+    private Pose2D pose2dToPose2D(Pose2d pos){
+        return new Pose2D(DistanceUnit.INCH, pos.position.x, pos.position.y, AngleUnit.RADIANS, pos.heading.toDouble());
+    }
+
+    private Pose2d pose2DToPose2d(Pose2D pos) {
+        return new Pose2d(pos.getX(DistanceUnit.INCH), pos.getY(DistanceUnit.INCH), pos.getHeading(AngleUnit.RADIANS));
     }
 
     @NonNull
@@ -209,7 +257,7 @@ public class TeleOP_Decode extends LinearOpMode {
             // Set the wheel velocity to achieve distance
             if (towerDetection != null && towerDetection.ftcPose != null) {
                 // Calculate the velocity needed to shoot the ball at the correct distance
-                rpm = getRPM(x_Distance(towerDetection.ftcPose.range));
+                rpm = getRPM(x_DistanceCamera(towerDetection.ftcPose.range));
             }
         }
 
@@ -250,6 +298,30 @@ public class TeleOP_Decode extends LinearOpMode {
         return towerDetection;
     }
 
+    private void aimBot_IMU(){
+        final double bearingWeight = 0.0;
+
+        //Pose2d is getting the current location of the robot
+        //Vector2d is the position of the 'target' (april tag on the tower)
+        Pose2d robotPose = pose2DToPose2d(odo.getPosition());
+
+        Vector2d AprilTagPos = null;
+
+        if(teamColorID == aprilTagColors.getBlueTeamID()) {
+            AprilTagPos = new Vector2d(Constants.blue_tower_pos.x, Constants.blue_tower_pos.y);
+        }
+        else if(teamColorID == aprilTagColors.getRedTeamID())
+        {
+            AprilTagPos = new Vector2d(Constants.red_tower_pos.x, Constants.red_tower_pos.y);
+        }
+
+        // get the distance of robot to april tag and the degrees away from pointing tords it
+        Pose2d degrees = get_XYH_FromAprilTag(robotPose,AprilTagPos);
+
+        //steer the robot towards the tower
+        driveTrain.rotate(degrees.heading.toDouble() + bearingWeight);
+    }
+
     /**
      * Attempt to auto-aim (move robot) and fire ball at the team tower
      */
@@ -267,7 +339,7 @@ public class TeleOP_Decode extends LinearOpMode {
         // Set the wheel velocity to achieve distance
         if (towerDetection != null && towerDetection.ftcPose != null) {
             // Calculate the velocity needed to shoot the ball at the correct distance
-            double rpm = getRPM(x_Distance(towerDetection.ftcPose.range));
+            double rpm = getRPM(x_DistanceCamera(towerDetection.ftcPose.range));
             telemetry.addData("Detection", "SPEED");
             telemetry.update();
 

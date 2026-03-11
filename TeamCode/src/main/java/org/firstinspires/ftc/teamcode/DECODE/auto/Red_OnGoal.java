@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.DECODE.auto;
 
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.getRPM;
-import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.x_Distance;
+import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.x_DistanceCamera;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -63,9 +63,9 @@ public final class Red_OnGoal extends LinearOpMode {
         launcher = new Launcher(hardwareMap, telemetry);
 
         if (teamColorID == aprilTagColors.getRedTeamID()) {
-            sendTelemetryPacket("RED Team Ready!");
+            sendTelemetryPacket("RED Team CLOSE Ready!");
         } else if (teamColorID == aprilTagColors.getBlueTeamID()) {
-            sendTelemetryPacket("BLUE Team Ready!");
+            sendTelemetryPacket("BLUE Team CLOSE Ready!");
         }
 
         waitForStart();
@@ -139,7 +139,7 @@ public final class Red_OnGoal extends LinearOpMode {
             );
 
             // Calculate the velocity needed to shoot the ball at the correct distance
-            double rpm = getRPM(x_Distance(towerDetection.ftcPose.range));
+            double rpm = getRPM(x_DistanceCamera(towerDetection.ftcPose.range));
 
             sendTelemetryPacket("calc_rpm", rpm);
 

@@ -18,7 +18,7 @@ public class Constants {
     static public final Vector2d red_farShootingPos = new Vector2d(51, 9);
     static public final Vector2d red_midShootingPos = new Vector2d(-15, 13.2);
     static public final Vector2d red_nearShootingPos = new Vector2d(-30.0, 21.7);
-    static public final Vector2d blue_farShootingPos = new Vector2d(51, -9);
+    static public final Vector2d blue_farShootingPos = new Vector2d(55, -11);
     static public final Vector2d blue_midShootingPos = new Vector2d(-15, -13.2);
     static public final Vector2d blue_nearShootingPos = new Vector2d(-30.0, -21.7);
 
@@ -31,6 +31,10 @@ public class Constants {
     static public final Pose2d blue_thirdLinePos = new Pose2d(-11, -28, Math.toRadians(-90));
 
     // Human player loading zone, changes based on team color
-    static public final Pose2d red_loadingPos = new Pose2d( 52, -52, Math.toRadians(45));
-    static public final Pose2d blue_loadingPos = new Pose2d( 52, 52, Math.toRadians(45));
+    static public final Pose2d red_loadingPos = new Pose2d( 66, -65.75, Math.toRadians(180));
+    static public final Pose2d blue_loadingPos = new Pose2d( 66, 65.75, Math.toRadians(0));
+
+    // Location of the basket april tags
+    static public final Vector2d blue_tower_pos = new Vector2d(-58,-54);
+    static public final Vector2d red_tower_pos = new Vector2d(-58,54);
 }

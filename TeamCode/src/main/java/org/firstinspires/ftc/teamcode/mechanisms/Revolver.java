@@ -29,7 +29,7 @@ public class Revolver {
     private DcMotorEx genevaDrive = null;       //initialization of the motor we are moving
     private ColorSensor genevaColor = null;
     private int ticksPerRev = 448;              //how many ticks of the motor it takes to go one revolution *motor ticks multiplied by gearbox*
-    private double maxMotorPower = 1.0;         //The power the motor runs at.
+    private double maxMotorPower = 0.75;         //The power the motor runs at.
     private double proportionalGain = 0.0013;    //rate motor will accelerate and decelerate to reach a more accurate revolution. * Overshoot: decrease / Undershoot: increase *
     private int tolerance = 1;                  //how far from exact target pos is acceptable to say "we made it"
     private int startDecel = 165;               //when to start the deceleration *value is a percent of the way though the total distance: start pos - target pos (smaller = closer to start : bigger = closer to target)
@@ -145,8 +145,7 @@ public class Revolver {
 
 
     /**
-     * Increases the revolver to the next position. Sleeps for 500ms to allow time for the revolver
-     * to actually complete the operation
+     * Move the revolver 1 position forwards.
      */
     public void stepUp(boolean buttonIsPressed) {
         if (buttonIsPressed && !moving) {
@@ -198,19 +197,75 @@ public class Revolver {
     }
 
     /**
-     * Turns the ball revolver to the next loading position. Even indexes are "loading" positions.
+     * Turns the ball revolver to the next loading position.
      * @return RoadRunner Action to be used in the Autonomous OpModes
      */
     public Action stepToLoadAction(){
         return new Action() {
-            ElapsedTime elapsedTime = null;
+            boolean init = false;
+            int targetPosition;
+            int startPosition;
+            double power;
+            ElapsedTime timer = new ElapsedTime();
+
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                if (elapsedTime == null) {
-                    elapsedTime = new ElapsedTime();
-                    stepToLoad(true);
+
+                /// --- INITIALIZATION ---
+                if (!init) {
+                    startPosition = genevaDrive.getCurrentPosition();
+                    if (getMotorRevs() % 2 == 0) {
+                        targetPosition = calculateTargetPos(-1);
+                    } else if (getMotorRevs() % 2 != 0) {
+                        targetPosition = calculateTargetPos(-2);
+                    }
+                    timer.reset();
+                    init = true;
                 }
-                return (elapsedTime.seconds() < 2.5);
+
+                /// --- CONTROL LOOP ---
+                int currentPosition = genevaDrive.getCurrentPosition();                         //the current motor pos
+                int targetDistance = targetPosition - currentPosition;                          //how far is left to go till target pos
+
+                int totalDistance = Math.abs(targetPosition - startPosition);
+                int distanceTraveled = Math.abs(currentPosition - startPosition);
+                int slowZone = totalDistance - startDecel;                                      //when to start the deceleration based of the target position *value is a set tick amount back from total distance
+
+                /// Compute power
+                if (distanceTraveled < slowZone) {                                              // DECELERATION ZONE           *if we are not at Max Power Zone we are in deceleration zone
+                    power = maxMotorPower * Math.signum(targetDistance);                        //apply gain to how far we have to go
+                } else {
+                    double powerMag = Math.abs(targetDistance) * proportionalGain;
+                    powerMag = Range.clip(powerMag, 0, maxMotorPower);                     //make sure power does not exceed max set power
+                    power = powerMag * Math.signum(targetDistance);
+                }
+
+                /// Safety pulse every 2 seconds
+                if (timer.seconds() > 2.0) {
+                    genevaDrive.setPower(power * -1.0);
+                    try {
+                        sleep(300);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    timer.reset();
+                }
+
+                genevaDrive.setPower(power);                                                    //set power each part calculates to motor
+
+                // Telemetry
+                tm.addData("Target Position", targetPosition);
+                tm.addData("Revolver Power", genevaDrive.getPower());
+                tm.addData("Target Distance", Math.abs(targetDistance));
+                tm.addData("Tolerence", tolerance);
+                tm.update();
+
+                /// --- Exit Condition
+                boolean done = Math.abs(targetDistance) <= tolerance && power < 0.01;    //how far from exact target pos is acceptable to say "we made it"
+                if (done) {
+                    genevaDrive.setPower(0);
+                }
+                return !done;
             }
         };
     }
