@@ -7,6 +7,8 @@ public class Constants {
     public static Integer TEAM_COLOR_ID = -1;
     public static Integer OBELISK_ID = -1;
 
+    public static Pose2d POSE_TRANSFER = null;
+
     static public final int RED_HOME_X = 62;
     static public final int RED_HOME_Y = 10;
     static public final double RED_HOME_ANGLE = 0;

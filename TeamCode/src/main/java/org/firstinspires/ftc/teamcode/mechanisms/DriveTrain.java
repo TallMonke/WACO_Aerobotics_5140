@@ -7,6 +7,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.DECODE.Constants;
 
 /**
  * Object to define and run the drive motors for a mechanum wheeled robot base.
@@ -49,8 +52,13 @@ public class DriveTrain {
         }
 
         tm = telemetry;
+        Pose2d startingPose = new Pose2d(0, 0, Math.toRadians(0));
 
-        drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, Math.toRadians(0)));
+        if (Constants.POSE_TRANSFER != null) {
+            startingPose = Constants.POSE_TRANSFER;
+        }
+
+        drive = new MecanumDrive(hardwareMap, startingPose);
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
@@ -144,4 +152,17 @@ public class DriveTrain {
         leftBack.setPower(0.0);
         rightBack.setPower(0.0);
     }
+
+    public void setPose(Pose2d pose) {
+        drive.localizer.setPose(pose);
+    }
+
+    public Pose2d getPose() {
+        return drive.localizer.getPose();
+    }
+
+    public void odometryPrint() {
+        tm.addData("IMU: ", getPose().toString());
+    }
+
 }

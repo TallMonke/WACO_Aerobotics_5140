@@ -11,10 +11,14 @@ import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.DECODE.Constants;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTagColors;
@@ -54,6 +58,7 @@ public final class Red_OnGoal extends LinearOpMode {
 
         // Initialize at SPECIFIC coordinates, touching the wall and scoring zone
         drive = new MecanumDrive(hardwareMap, new Pose2d(-52, 49, Math.toRadians(-50)));
+        odometryUpdateAndPrint();
 
         // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
         // we should aim for when shooting
@@ -81,8 +86,10 @@ public final class Red_OnGoal extends LinearOpMode {
         );
 
         dashboard.getTelemetry().update();
+        odometryUpdateAndPrint();
 
         double rpm = aimBot();
+        odometryUpdateAndPrint();
 
         if (rpm > 0.0) {
             // Fire the ball
@@ -91,6 +98,7 @@ public final class Red_OnGoal extends LinearOpMode {
                 stop();
             }
         }
+        odometryUpdateAndPrint();
         dashboard.getTelemetry().update();
 
         // Return to loading zone to start TeleOp
@@ -102,6 +110,7 @@ public final class Red_OnGoal extends LinearOpMode {
                 )
         );
 
+        odometryUpdateAndPrint();
         dashboard.getTelemetry().update();
     }
 
@@ -271,5 +280,12 @@ public final class Red_OnGoal extends LinearOpMode {
         TelemetryPacket packet = new TelemetryPacket();
         packet.addLine(message);
         dashboard.sendTelemetryPacket(packet);
+    }
+
+    private void odometryUpdateAndPrint() {
+        Pose2d currPos = Constants.POSE_TRANSFER = drive.localizer.getPose();
+
+        telemetry.addData("IMU: ", currPos.toString());
+        sendTelemetryPacket(currPos.toString());
     }
 }

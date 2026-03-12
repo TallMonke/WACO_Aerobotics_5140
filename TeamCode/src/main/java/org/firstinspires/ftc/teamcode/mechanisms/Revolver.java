@@ -243,11 +243,6 @@ public class Revolver {
                 /// Safety pulse every 2 seconds
                 if (timer.seconds() > 2.0) {
                     genevaDrive.setPower(power * -1.0);
-                    try {
-                        sleep(300);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
                     timer.reset();
                 }
 

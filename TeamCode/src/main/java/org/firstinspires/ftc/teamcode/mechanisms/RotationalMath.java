@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.DECODE.Constants;
 
 public class RotationalMath {
@@ -86,5 +87,13 @@ public class RotationalMath {
         else {
             return RPM;
         }
+    }
+
+    public static Pose2D pose2dToPose2D(Pose2d pos) {
+        return new Pose2D(DistanceUnit.INCH, pos.position.x, pos.position.y, AngleUnit.RADIANS, pos.heading.toDouble());
+    }
+
+    public static Pose2d pose2DToPose2d(Pose2D pos) {
+        return new Pose2d(pos.getX(DistanceUnit.INCH), pos.getY(DistanceUnit.INCH), pos.getHeading(AngleUnit.RADIANS));
     }
 }

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.DECODE.auto;
 
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.getRPM;
+import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.pose2DToPose2d;
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.x_DistanceCamera;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -11,10 +12,14 @@ import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.DECODE.Constants;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.AprilTagColors;
@@ -22,6 +27,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.AprilTagWebcam;
 import org.firstinspires.ftc.teamcode.mechanisms.DetectedColor;
 import org.firstinspires.ftc.teamcode.mechanisms.Launcher;
 import org.firstinspires.ftc.teamcode.mechanisms.Revolver;
+import org.firstinspires.ftc.teamcode.mechanisms.RotationalMath;
 import org.firstinspires.ftc.teamcode.mechanisms.Sweeper;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
@@ -93,9 +99,11 @@ public final class Red_PoseFar extends LinearOpMode {
                         .turn(Math.toRadians(-35)) // Turn camera towards tower
                         .build())
         );
+        odometryUpdateAndPrint();
         dashboard.getTelemetry().update();
 
         double rpm = aimBot();
+        odometryUpdateAndPrint();
 
         if (rpm > 0.0) {
             // Fire the ball
@@ -104,6 +112,7 @@ public final class Red_PoseFar extends LinearOpMode {
                 stop();
             }
         }
+        odometryUpdateAndPrint();
         dashboard.getTelemetry().update();
 
         // ***First Line of Balls***
@@ -111,6 +120,7 @@ public final class Red_PoseFar extends LinearOpMode {
             sendTelemetryPacket("Error running intake sequence");
             stop();
         }
+        odometryUpdateAndPrint();
         dashboard.getTelemetry().update();
 
         // Drive to far shooting position
@@ -123,9 +133,11 @@ public final class Red_PoseFar extends LinearOpMode {
                                 .build()
                 )
         );
+        odometryUpdateAndPrint();
         dashboard.getTelemetry().update();
 
         rpm = aimBot();
+        odometryUpdateAndPrint();
 
         if (rpm > 0.0) {
             // Fire the ball
@@ -134,6 +146,7 @@ public final class Red_PoseFar extends LinearOpMode {
                 stop();
             }
         }
+        odometryUpdateAndPrint();
         dashboard.getTelemetry().update();
 
         // ***Second Line of Balls***
@@ -203,6 +216,7 @@ public final class Red_PoseFar extends LinearOpMode {
                 )
         );
 
+        odometryUpdateAndPrint();
         dashboard.getTelemetry().update();
     }
 
@@ -374,5 +388,12 @@ public final class Red_PoseFar extends LinearOpMode {
         TelemetryPacket packet = new TelemetryPacket();
         packet.addLine(message);
         dashboard.sendTelemetryPacket(packet);
+    }
+
+    private void odometryUpdateAndPrint() {
+        Pose2d currPos = Constants.POSE_TRANSFER = drive.localizer.getPose();
+
+        telemetry.addData("IMU: ", currPos.toString());
+        sendTelemetryPacket(currPos.toString());
     }
 }

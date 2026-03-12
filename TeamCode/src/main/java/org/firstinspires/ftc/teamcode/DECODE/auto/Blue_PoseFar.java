@@ -11,11 +11,14 @@ import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.DECODE.Constants;
 //import org.firstinspires.ftc.teamcode.mechanisms.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
@@ -48,6 +51,7 @@ public final class Blue_PoseFar extends LinearOpMode {
     Revolver revolver = null;
     Sweeper sweeper = null;
     Launcher launcher = null;
+    GoBildaPinpointDriver odo;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -56,6 +60,19 @@ public final class Blue_PoseFar extends LinearOpMode {
 
         // Initialize at SPECIFIC coordinates, touching the wall and scoring zone
         drive = new MecanumDrive(hardwareMap, new Pose2d(Constants.BLUE_HOME_X, Constants.BLUE_HOME_Y, Math.toRadians(Constants.BLUE_HOME_ANGLE)));
+
+        odo = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+
+        odo.resetPosAndIMU();
+        odo.setPosition(
+                new Pose2D(DistanceUnit.INCH,
+                        Constants.BLUE_HOME_X,
+                        Constants.BLUE_HOME_Y,
+                        AngleUnit.RADIANS,
+                        Math.toRadians(Constants.BLUE_HOME_ANGLE)
+                )
+        );
+        odo.update();
 
         // Select before match to set which team Red\Blue we use. This ID corresponds to the AprilTag ID
         // we should aim for when shooting
@@ -92,9 +109,11 @@ public final class Blue_PoseFar extends LinearOpMode {
                         .turn(Math.toRadians(5)) // Turn camera towards tower
                         .build())
         );
+        odo.update();
         dashboard.getTelemetry().update();
 
         double rpm = aimBot();
+        odo.update();
 
         if(rpm < 0.0){    //if we didn't sense a april tag use pre set velocity.
             rpm = getRPM(x_DistanceCamera(120.0));
@@ -107,6 +126,7 @@ public final class Blue_PoseFar extends LinearOpMode {
                 stop();
             }
         }
+        odo.update();
         dashboard.getTelemetry().update();
 
         // ***First Line of Balls***
@@ -114,6 +134,7 @@ public final class Blue_PoseFar extends LinearOpMode {
             sendTelemetryPacket("Error running intake sequence");
             stop();
         }
+        odo.update();
         dashboard.getTelemetry().update();
 
         Actions.runBlocking(
@@ -124,9 +145,11 @@ public final class Blue_PoseFar extends LinearOpMode {
                                 .build()
                 )
         );
+        odo.update();
         dashboard.getTelemetry().update();
 
         rpm = aimBot();
+        odo.update();
 
         if(rpm < 0.0){    //if we didn't sense a april tag use pre set velocity.
             rpm = getRPM(x_DistanceCamera(120.0));
@@ -139,6 +162,7 @@ public final class Blue_PoseFar extends LinearOpMode {
                 stop();
             }
         }
+        odo.update();
         dashboard.getTelemetry().update();
 
         // ***Second Line of Balls***
@@ -158,6 +182,7 @@ public final class Blue_PoseFar extends LinearOpMode {
                                     .build()
                     )
             );
+            odo.update();
             dashboard.getTelemetry().update();
 
             rpm = aimBot();
@@ -193,6 +218,7 @@ public final class Blue_PoseFar extends LinearOpMode {
                                         .build()
                         )
                 );
+            odo.update();
                 dashboard.getTelemetry().update();
 
                 rpm = aimBot();
@@ -218,6 +244,7 @@ public final class Blue_PoseFar extends LinearOpMode {
                 )
         );
 
+        odo.update();
         dashboard.getTelemetry().update();
     }
 
