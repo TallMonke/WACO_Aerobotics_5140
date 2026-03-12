@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.getRPM;
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.get_XYH_FromPose;
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.x_DistanceCamera;
 
+import org.firstinspires.ftc.teamcode.mechanisms.RotationalMath;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import android.annotation.SuppressLint;
@@ -299,7 +300,7 @@ public class TeleOP_Decode extends LinearOpMode {
         }
 
         // get the distance of robot to april tag and the degrees away from pointing towards it
-        Pose2d degrees = get_XYH_FromPose(robotPose, towerPosition);
+        Pose2d degrees = RotationalMath.get_XYH_FromPose(robotPose, towerPosition);
 
         //steer the robot towards the tower
         driveTrain.rotate(degrees.heading.toDouble() + bearingWeight);
@@ -322,7 +323,7 @@ public class TeleOP_Decode extends LinearOpMode {
         // Set the wheel velocity to achieve distance
         if (towerDetection != null && towerDetection.ftcPose != null) {
             // Calculate the velocity needed to shoot the ball at the correct distance
-            double rpm = getRPM(x_DistanceCamera(towerDetection.ftcPose.range));
+            double rpm = getRPM(RotationalMath.x_DistanceCamera(towerDetection.ftcPose.range));
             telemetry.addData("Detection", "SPEED");
             telemetry.update();
 

@@ -357,9 +357,10 @@ public class Revolver {
 
                 /// Safety pulse every 2 seconds
                 if (timer.seconds() > 2.0) {
+                    tm.addData("Revolver", "Stuck");
                     genevaDrive.setPower(power * -1.0);
                     try {
-                        sleep(300);
+                        sleep(100);
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
@@ -375,12 +376,13 @@ public class Revolver {
                 tm.addData("Tolerence", tolerance);
                 tm.update();
 
-            /// --- Exit Condition
+                /// --- Exit Condition
                 boolean done = Math.abs(targetDistance) <= tolerance && power < 0.01;    //how far from exact target pos is acceptable to say "we made it"
                 if (done) {
                     genevaDrive.setPower(0);
                 }
-                    return !done;
+
+                return !done;
             }
         };
     }
