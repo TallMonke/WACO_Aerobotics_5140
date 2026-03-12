@@ -87,6 +87,10 @@ public class DriveTrain {
             tm.addData("Front L/R: ", "%4.2f, %4.2f", leftFront.getPower(), rightFront.getPower());
             tm.addData("Back L/R: ", "%4.2f, %4.2f", leftBack.getPower(), rightBack.getPower());
         }
+
+        Pose2d currPos = getPose();
+        String text = String.format("%f, %f, %f", currPos.position.x, currPos.position.y, Math.toDegrees(currPos.heading.toDouble()));
+        tm.addData("IMU: ", text);
     }
 
     /**
@@ -153,16 +157,31 @@ public class DriveTrain {
         rightBack.setPower(0.0);
     }
 
+    /**
+     * Sets the IMU to 0, 0, 0
+     */
+    public void resetIMU(){
+        drive.localizer.setPose(new Pose2d(0, 0, 0));
+        drive.localizer.update();
+    }
+
+    /**
+     * Sets the current position and heading of the robot
+     *
+     * @param pose XY position and heading
+     */
     public void setPose(Pose2d pose) {
         drive.localizer.setPose(pose);
+        drive.localizer.update();
     }
 
+    /**
+     * Gets the current position and heading of the robot
+     *
+     * @return XY position and heading
+     */
     public Pose2d getPose() {
         return drive.localizer.getPose();
-    }
-
-    public void odometryPrint() {
-        tm.addData("IMU: ", getPose().toString());
     }
 
 }

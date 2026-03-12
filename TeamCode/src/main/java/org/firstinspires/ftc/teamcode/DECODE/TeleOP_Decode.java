@@ -1,14 +1,9 @@
 package org.firstinspires.ftc.teamcode.DECODE;
 
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.getRPM;
-import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.get_XYH_FromAprilTag;
+import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.get_XYH_FromPose;
 import static org.firstinspires.ftc.teamcode.mechanisms.RotationalMath.x_DistanceCamera;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.teamcode.mechanisms.RotationalMath;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import android.annotation.SuppressLint;
@@ -22,7 +17,6 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -60,7 +54,6 @@ public class TeleOP_Decode extends LinearOpMode {
     private Revolver revolver = null;
     private Sweeper sweeper = null;
     private Launcher launcher = null;
-    GoBildaPinpointDriver odo;
 
 
     @SuppressLint("DefaultLocale")
@@ -74,9 +67,6 @@ public class TeleOP_Decode extends LinearOpMode {
         revolver = new Revolver(hardwareMap, telemetry);
         sweeper = new Sweeper(hardwareMap, telemetry);
         launcher = new Launcher(hardwareMap, telemetry);
-
-        //IMU
-        odo = hardwareMap.get(GoBildaPinpointDriver.class,"pinpoint");
 
         // Bases the team color set from autonomous mode
         if( Constants.TEAM_COLOR_ID != -1 ) {
@@ -148,7 +138,7 @@ public class TeleOP_Decode extends LinearOpMode {
 
             //the
             if(gamepad1.a && gamepad1.dpad_down){
-                odo.resetPosAndIMU();
+                driveTrain.resetIMU();
                 if(teamColorID == aprilTagColors.getBlueTeamID()) {
                     driveTrain.setPose(Constants.blue_loadingPos);
 
@@ -196,7 +186,7 @@ public class TeleOP_Decode extends LinearOpMode {
             sweeper.reverse(gamepad2.left_bumper);
             sweeper.run();
 
-            // Attempt to auto-aim and fire ball at the team tower
+            // Attempt to auto-aim and shoot ball at the team tower
             if (gamepad2.left_trigger > 0.5) {
                 autoFire();
             }
@@ -204,7 +194,7 @@ public class TeleOP_Decode extends LinearOpMode {
             // Just push the ball out the launcher
             if(gamepad2.x) { manualFire(); }
 
-            driveTrain.odometryPrint();
+            driveTrain.displayTelemetry();
             telemetry.update();
         }
     }
@@ -296,27 +286,27 @@ public class TeleOP_Decode extends LinearOpMode {
 
         //Pose2d is getting the current location of the robot
         //Vector2d is the position of the 'target' (april tag on the tower)
-        Pose2d robotPose = RotationalMath.pose2DToPose2d(odo.getPosition());
+        Pose2d robotPose = driveTrain.getPose();
 
-        Vector2d AprilTagPos = null;
+        Vector2d towerPosition = new Vector2d(0,0);
 
         if(teamColorID == aprilTagColors.getBlueTeamID()) {
-            AprilTagPos = new Vector2d(Constants.blue_tower_pos.x, Constants.blue_tower_pos.y);
+            towerPosition = new Vector2d(Constants.blue_tower_pos.x, Constants.blue_tower_pos.y);
         }
         else if(teamColorID == aprilTagColors.getRedTeamID())
         {
-            AprilTagPos = new Vector2d(Constants.red_tower_pos.x, Constants.red_tower_pos.y);
+            towerPosition = new Vector2d(Constants.red_tower_pos.x, Constants.red_tower_pos.y);
         }
 
-        // get the distance of robot to april tag and the degrees away from pointing tords it
-        Pose2d degrees = get_XYH_FromAprilTag(robotPose,AprilTagPos);
+        // get the distance of robot to april tag and the degrees away from pointing towards it
+        Pose2d degrees = get_XYH_FromPose(robotPose, towerPosition);
 
         //steer the robot towards the tower
         driveTrain.rotate(degrees.heading.toDouble() + bearingWeight);
     }
 
     /**
-     * Attempt to auto-aim (move robot) and fire ball at the team tower
+     * Attempt to auto-aim (move robot) and shoot ball at the team tower
      */
     private void autoFire() {
         if(webcam == null || autoFireInit) {

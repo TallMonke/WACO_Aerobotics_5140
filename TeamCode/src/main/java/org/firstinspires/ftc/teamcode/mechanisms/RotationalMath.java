@@ -1,12 +1,10 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.DECODE.Constants;
 
 public class RotationalMath {
 
@@ -21,18 +19,19 @@ public class RotationalMath {
     }
 
     /**
-     * get_XYH_FromAprilTag takes in the position of robot and position of target(AprilTag)
-     * returns the x-component of the shooter to the April Tag as well as the heading the robot needs to move to point tords the April tag
+     * Takes in the position of robot and position of target(AprilTag)
+     *
+     * returns the x-component of the shooter to the position as well as the heading the robot needs to move to point towards the target position
      */
-    public static Pose2d get_XYH_FromAprilTag(Pose2d robotPose, Vector2d AprilTagPos) {
+    public static Pose2d get_XYH_FromPose(Pose2d robotPose, Vector2d pose) {
         double shooterOffsetX = 5.5;    // distance from the center of robot to launcher
 
         double rx = robotPose.position.x;           //robot x_position
         double ry = robotPose.position.y;           //robot y_position
         double rh = robotPose.heading.toDouble();   //robot heading - h (Angle of robot)
 
-        double tx = AprilTagPos.x;                  // target X_position
-        double ty = AprilTagPos.y;                  // target y_position
+        double tx = pose.x;                  // target X_position
+        double ty = pose.y;                  // target y_position
 
         double targetHeading = Math.atan2(ty - ry,tx - rx);
         double headingError = normalize(targetHeading - rh);                              // angle away from meeting target
@@ -46,10 +45,10 @@ public class RotationalMath {
 
 
     /**
-     * @param distance of shooter to april tag into x-component distance robot to basket.
+     * @param distance of shooter to April tag into x-component distance robot to basket.
      */
-    public static double x_DistanceCamera(double distance){                                 //Measurments in inches
-    /// --- CAMERA BASED TRIANGILATION ---
+    public static double x_DistanceCamera(double distance){                                 //Measurements in inches
+        /// --- CAMERA BASED TRIANGULATION ---
         double launchHeight = 14.0;                                                       //distance of point of launch of the robot from the ground, y-component
         double x_DistanceCamera = 6.0;                                                    //distance (x-component) the camera is away from launch point.
         double y_DistanceCamera = 1.5;                                                    //distance (y-component) the camera is away from launch point.
@@ -68,7 +67,7 @@ public class RotationalMath {
         double angleInDegrees = 45.0;                               //launch angle in degrees
         double angleInRadians = Math.toRadians(angleInDegrees);
         double height = 29.0;                                       //height the ball needs to be off the ground to make basket based from the launcher of robot. 41-13.75
-        double tuneCorrection = 215;                                //Value you set to eliminate discreptincies.
+        double tuneCorrection = 215;                                //Value you set to eliminate discrepancies.
         double minimalLaunchDistance = 58;                          //Derivative of equation set to 0. Gives us the closest we can get to the basket without the need of changing the Launch angle.
         double RPM_at_minimalDistance = 810.45;                     //plug the minimalLaunchDistance into the formula and this is that RPM
 

@@ -252,7 +252,7 @@ public class Revolver {
                 tm.addData("Target Position", targetPosition);
                 tm.addData("Revolver Power", genevaDrive.getPower());
                 tm.addData("Target Distance", Math.abs(targetDistance));
-                tm.addData("Tolerence", tolerance);
+                tm.addData("Tolerance", tolerance);
                 tm.update();
 
                 /// --- Exit Condition
