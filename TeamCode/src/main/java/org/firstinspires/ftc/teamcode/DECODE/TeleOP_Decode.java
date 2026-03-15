@@ -153,7 +153,7 @@ public class TeleOP_Decode extends LinearOpMode {
             driveTrain.run(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
             if(gamepad1.y) {
-                aimBot_IMU();
+                aimBot();
             }
 
             // Perform color detection for the current state of the revolver
@@ -166,12 +166,14 @@ public class TeleOP_Decode extends LinearOpMode {
             // B-Button - Jump to next firing position
             revolver.stepUp(gamepad2.dpad_up);
             revolver.stepDown(gamepad2.dpad_down);
-            revolver.stepToLoad(gamepad2.a);
+            //revolver.stepToLoad(gamepad2.a);
+            revolver.genevaDriveReverse(gamepad2.y);
 //            if (gamepad2.a ){
 //
 //                new ParallelAction(revolver.stepToLoadAction()).run(new TelemetryPacket());
 //            }
-            revolver.stepToFire(gamepad2.b);
+            //revolver.stepToFire(gamepad2.b);
+            revolver.genevaDriveForward(gamepad2.b);
 //            if (gamepad2.b ){
 //
 //                Actions.runBlocking(new ParallelAction(

@@ -311,6 +311,28 @@ public class Revolver {
             }
         }
     }
+
+//move the geneva drive fowards
+    public void genevaDriveReverse(boolean buttonIsPressed){
+        if (buttonIsPressed){
+            genevaDrive.setPower(-0.75);
+        }
+        else{
+            genevaDrive.setPower(0);
+        }
+    }
+
+    public void genevaDriveForward(boolean buttonIsPressed){
+        if (buttonIsPressed){
+            genevaDrive.setPower(0.75);
+        }
+        else{
+            genevaDrive.setPower(0);
+        }
+    }
+
+
+
      /**
      * Turns the ball revolver to the next firing position. Odd indexes are "firing" positions.
      * @return RoadRunner Action to be used in the Autonomous OpModes
